@@ -81,7 +81,7 @@ const adminUserSchema = new Schema<IAdminUser>(
   { timestamps: true }
 );
 
-adminUserSchema.index({ email: 1 }, { unique: true });
+// Unique index comes from `email: { unique: true }`; do not duplicate with schema.index().
 adminUserSchema.index({ role: 1 });
 adminUserSchema.index({ status: 1 });
 

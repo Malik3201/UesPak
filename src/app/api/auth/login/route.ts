@@ -77,11 +77,14 @@ export async function POST(req: NextRequest) {
 
     const res = NextResponse.json(jsonBody, { status: 200 });
 
+    const useSecureCookie =
+      process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+
     res.cookies.set({
       name: ADMIN_COOKIE_NAME,
       value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: useSecureCookie,
       sameSite: "lax",
       path: "/",
       maxAge,

@@ -45,6 +45,7 @@ export async function signAdminToken(claims: AdminJwtClaims): Promise<string> {
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
+    .setSubject(claims.userId)
     .setExpirationTime(expiresIn)
     .sign(new TextEncoder().encode(secret));
 }
@@ -56,7 +57,8 @@ export async function verifyAdminToken(
   token: string
 ): Promise<AdminJwtClaims | null> {
   const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error("[UESPAK] JWT_SECRET is not defined.");
+  /** Edge builds may omit secrets at bundle time — treat as unauthenticated, not thrown. */
+  if (!secret) return null;
 
   try {
     const { payload } = await jwtVerify(
