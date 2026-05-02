@@ -5,24 +5,45 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
+  Settings,
+  Home,
+  FileText,
   Briefcase,
+  FolderTree,
   FolderOpen,
   Users,
+  ClipboardList,
   Mail,
-  Settings,
   Image,
+  Search,
   ArrowLeftRight,
+  Shield,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-const navItems = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/services", label: "Services", icon: Briefcase },
-  { href: "/admin/projects", label: "Projects", icon: FolderOpen },
-  { href: "/admin/team", label: "Team", icon: Users },
-  { href: "/admin/enquiries", label: "Enquiries", icon: Mail },
-  { href: "/admin/media", label: "Media", icon: Image },
-  { href: "/admin/redirects", label: "Redirects", icon: ArrowLeftRight },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+type NavItem =
+  | { kind: "link"; href: string; label: string; icon: LucideIcon }
+  | { kind: "placeholder"; label: string; icon: LucideIcon };
+
+const navItems: NavItem[] = [
+  { kind: "link", href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  {
+    kind: "placeholder",
+    label: "Site Settings",
+    icon: Settings,
+  },
+  { kind: "placeholder", label: "Home Page", icon: Home },
+  { kind: "placeholder", label: "Pages", icon: FileText },
+  { kind: "placeholder", label: "Services", icon: Briefcase },
+  { kind: "placeholder", label: "Project Categories", icon: FolderTree },
+  { kind: "placeholder", label: "Projects", icon: FolderOpen },
+  { kind: "placeholder", label: "Team Members", icon: Users },
+  { kind: "placeholder", label: "Jobs", icon: ClipboardList },
+  { kind: "placeholder", label: "Enquiries", icon: Mail },
+  { kind: "placeholder", label: "Media Library", icon: Image },
+  { kind: "placeholder", label: "SEO Manager", icon: Search },
+  { kind: "placeholder", label: "Redirects", icon: ArrowLeftRight },
+  { kind: "placeholder", label: "Admin Users", icon: Shield },
 ];
 
 export default function AdminSidebar() {
@@ -30,43 +51,58 @@ export default function AdminSidebar() {
 
   return (
     <aside className="flex h-full w-60 flex-col border-r border-border bg-card">
-      {/* Logo */}
       <div className="flex h-16 items-center border-b border-border px-6">
         <span className="text-lg font-bold tracking-tight text-primary">
-          UESPAK <span className="text-xs font-normal text-muted-foreground">Admin</span>
+          UESPAK{" "}
+          <span className="text-xs font-normal text-muted-foreground">Admin</span>
         </span>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <ul className="space-y-0.5 list-none p-0 m-0">
-          {navItems.map(({ href, label, icon: Icon }) => {
-            const active =
-              href === "/admin/dashboard"
-                ? pathname === href
-                : pathname.startsWith(href);
+      <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Admin">
+        <ul className="m-0 list-none space-y-0.5 p-0">
+          {navItems.map((item) => {
+            if (item.kind === "link") {
+              const active =
+                item.href === "/admin/dashboard"
+                  ? pathname === item.href
+                  : pathname.startsWith(item.href);
+              const Icon = item.icon;
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150",
+                      active
+                        ? "bg-primary text-primary-foreground"
+                        : "text-foreground/70 hover:bg-accent hover:text-foreground"
+                    )}
+                    aria-current={active ? "page" : undefined}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            }
+
+            const Icon = item.icon;
             return (
-              <li key={href}>
-                <Link
-                  href={href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150",
-                    active
-                      ? "bg-primary text-primary-foreground"
-                      : "text-foreground/70 hover:bg-accent hover:text-foreground"
-                  )}
-                  aria-current={active ? "page" : undefined}
+              <li key={item.label}>
+                <span
+                  className="flex cursor-not-allowed items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground/60"
+                  title="Coming in a future release"
+                  aria-disabled="true"
                 >
-                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  {label}
-                </Link>
+                  <Icon className="h-4 w-4 shrink-0 opacity-60" aria-hidden="true" />
+                  {item.label}
+                </span>
               </li>
             );
           })}
         </ul>
       </nav>
 
-      {/* Footer */}
       <div className="border-t border-border px-4 py-3 text-xs text-muted-foreground">
         © {new Date().getFullYear()} UESPAK
       </div>

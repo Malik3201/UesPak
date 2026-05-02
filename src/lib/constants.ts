@@ -1,6 +1,8 @@
 // ─── Site constants ────────────────────────────────────────────────────────────
 export const SITE_NAME = "UESPAK";
 export const CONTACT_EMAIL = "services@uespak.com";
+
+/** Single httpOnly admin session cookie across login, logout, middleware, helpers. */
 export const ADMIN_COOKIE_NAME = "uespak_admin_token";
 
 // ─── Pagination ────────────────────────────────────────────────────────────────
@@ -16,9 +18,9 @@ export const STATUS = {
 
 export type StatusValue = (typeof STATUS)[keyof typeof STATUS];
 
-// ─── Admin roles ───────────────────────────────────────────────────────────────
+// ─── Admin roles (JWT + AdminUser.role) ────────────────────────────────────────
 export const ROLES = {
-  SUPER_ADMIN: "super_admin",
+  SUPER_ADMIN: "superAdmin",
   ADMIN: "admin",
   EDITOR: "editor",
 } as const;

@@ -1,48 +1,49 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifyJoseJwt, COOKIE_NAME } from "@/lib/auth";
+import { verifyAdminToken } from "@/lib/jwt";
+import { ADMIN_COOKIE_NAME } from "@/lib/constants";
 
-// ─── Routes to protect ────────────────────────────────────────────────────────
-const ADMIN_LOGIN_PATH = "/admin/login";
+const ADMIN_LOGIN_PREFIX = "/admin/login";
 
-function isAdminRoute(pathname: string): boolean {
-  return (
-    pathname.startsWith("/admin") && !pathname.startsWith(ADMIN_LOGIN_PATH)
-  );
+export function isAdminPageProtected(pathname: string): boolean {
+  return pathname.startsWith("/admin") && !pathname.startsWith(ADMIN_LOGIN_PREFIX);
 }
 
-function isAdminApiRoute(pathname: string): boolean {
+export function isAdminApiRoute(pathname: string): boolean {
   return pathname.startsWith("/api/admin");
 }
 
-// ─── Proxy (Next.js 16+ convention, replaces middleware) ──────────────────────
+/**
+ * Next.js 16 convention: middleware logic lives here (Edge-compatible, no Mongoose).
+ * `/admin/login`, `/api/auth/login`, `/api/auth/logout` stay outside matchers.
+ */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isAdmin = isAdminRoute(pathname);
-  const isAdminApi = isAdminApiRoute(pathname);
+  const adminPageProtected = isAdminPageProtected(pathname);
+  const adminApi = isAdminApiRoute(pathname);
 
-  if (!isAdmin && !isAdminApi) {
+  if (!adminPageProtected && !adminApi) {
     return NextResponse.next();
   }
 
-  // Read token from httpOnly cookie
-  const token = request.cookies.get(COOKIE_NAME)?.value;
-
+  const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
   if (!token) {
-    return handleUnauthenticated(request, pathname);
+    return handleUnauthenticated(request, pathname, adminApi);
   }
 
-  // Verify JWT (Edge-compatible via jose)
-  const payload = await verifyJoseJwt(token);
-
+  let payload = null as Awaited<ReturnType<typeof verifyAdminToken>>;
+  try {
+    payload = await verifyAdminToken(token);
+  } catch {
+    payload = null;
+  }
   if (!payload) {
-    return handleUnauthenticated(request, pathname);
+    return handleUnauthenticated(request, pathname, adminApi);
   }
 
-  // Attach user info to headers for downstream route handlers
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-admin-id", payload.id);
+  requestHeaders.set("x-admin-id", payload.userId);
   requestHeaders.set("x-admin-email", payload.email);
   requestHeaders.set("x-admin-role", payload.role);
 
@@ -51,23 +52,21 @@ export async function proxy(request: NextRequest) {
 
 function handleUnauthenticated(
   request: NextRequest,
-  pathname: string
+  pathname: string,
+  isAdminApi: boolean
 ): NextResponse {
-  // API routes → return JSON 401
-  if (isAdminApiRoute(pathname)) {
+  if (isAdminApi) {
     return NextResponse.json(
       { success: false, message: "Unauthorized. Please log in." },
       { status: 401 }
     );
   }
 
-  // Browser routes → redirect to login
-  const loginUrl = new URL(ADMIN_LOGIN_PATH, request.url);
+  const loginUrl = new URL(ADMIN_LOGIN_PREFIX, request.url);
   loginUrl.searchParams.set("redirect", pathname);
   return NextResponse.redirect(loginUrl);
 }
 
-// ─── Matcher ──────────────────────────────────────────────────────────────────
 export const config = {
   matcher: ["/admin/:path*", "/api/admin/:path*"],
 };

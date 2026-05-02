@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { buildMetadata } from "@/lib/seo";
 import Container from "@/components/shared/Container";
 
@@ -22,18 +23,18 @@ export default function HomePage() {
           clients for quality, safety, and performance.
         </p>
         <div className="flex flex-wrap gap-3 justify-center mt-2">
-          <a
+          <Link
             href="/services"
             className="inline-flex h-11 items-center rounded-md bg-primary px-7 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             Our Services
-          </a>
-          <a
+          </Link>
+          <Link
             href="/contact-us"
             className="inline-flex h-11 items-center rounded-md border border-border px-7 text-sm font-semibold text-foreground hover:bg-accent transition-colors"
           >
             Contact Us
-          </a>
+          </Link>
         </div>
       </Container>
     </section>

@@ -1,36 +1,35 @@
 import {
   successResponse,
   unauthorizedResponse,
+  errorResponse,
 } from "@/lib/api-response";
-import { headers } from "next/headers";
+import { getCurrentAdmin } from "@/lib/auth";
 
 /**
  * GET /api/admin/dashboard
- * Returns basic stats for the admin dashboard.
- * Protected by middleware (JWT cookie required).
+ * Requires valid admin JWT + active user record.
  */
 export async function GET() {
   try {
-    // Admin identity is injected by middleware
-    const headersList = await headers();
-    const adminId = headersList.get("x-admin-id");
+    const admin = await getCurrentAdmin();
+    if (!admin) return unauthorizedResponse();
 
-    if (!adminId) {
-      return unauthorizedResponse();
-    }
-
-    // Placeholder — real stats will query MongoDB in Phase 2
-    const stats = {
-      services: 0,
-      projects: 0,
-      teamMembers: 0,
-      newEnquiries: 0,
-    };
-
-    return successResponse("Dashboard stats retrieved.", stats);
+    return successResponse("Dashboard stats retrieved.", {
+      currentUser: {
+        id: admin.id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role,
+      },
+      stats: {
+        services: 0,
+        projects: 0,
+        teamMembers: 0,
+        enquiries: 0,
+      },
+    });
   } catch (err) {
     console.error("[GET /api/admin/dashboard]", err);
-    const { errorResponse } = await import("@/lib/api-response");
     return errorResponse("Failed to retrieve dashboard stats.");
   }
 }

@@ -1,22 +1,26 @@
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { AdminUser } from "@/models/AdminUser";
-import { verifyPassword } from "@/lib/password";
-import { signJwt } from "@/lib/jwt";
+import { comparePassword } from "@/lib/password";
+import { signAdminToken, jwtExpiresInSeconds } from "@/lib/jwt";
 import { loginValidator } from "@/validators/auth.validator";
 import {
-  successResponse,
   errorResponse,
   validationErrorResponse,
   unauthorizedResponse,
+  tooManyRequestsResponse,
 } from "@/lib/api-response";
 import { ADMIN_COOKIE_NAME } from "@/lib/constants";
+import { allowLoginAttempt } from "@/lib/login-rate-limit";
+import type { ApiResponse } from "@/lib/api-response";
 
 export async function POST(req: NextRequest) {
   try {
-    // Parse & validate body
     const body = await req.json().catch(() => null);
-    if (!body) return errorResponse("Invalid request body.", 400);
+    if (!body || typeof body !== "object") {
+      return errorResponse("Invalid request body.", 400);
+    }
 
     const parsed = loginValidator.safeParse(body);
     if (!parsed.success) {
@@ -25,50 +29,65 @@ export async function POST(req: NextRequest) {
 
     const { email, password } = parsed.data;
 
-    // Connect DB
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("x-real-ip")?.trim() ||
+      "unknown";
+    const rateKey = `${ip}:${email.toLowerCase()}`;
+    if (!allowLoginAttempt(rateKey)) {
+      return tooManyRequestsResponse();
+    }
+
     await connectDB();
 
-    // Find admin user (select password explicitly since it's hidden by default)
-    const user = await AdminUser.findOne({ email, isActive: true }).select(
-      "+password"
-    );
+    const user = await AdminUser.findOne({ email }).select("+passwordHash");
+    // Generic messaging for unknown account, inactive, or suspended — avoid account enumeration.
+    if (!user || user.status !== "active") {
+      return unauthorizedResponse("Invalid email or password.");
+    }
 
-    if (!user) return unauthorizedResponse("Invalid email or password.");
+    const passwordOk = await comparePassword(password, user.passwordHash);
+    if (!passwordOk) {
+      return unauthorizedResponse("Invalid email or password.");
+    }
 
-    const isValid = await verifyPassword(password, user.password);
-    if (!isValid) return unauthorizedResponse("Invalid email or password.");
+    await AdminUser.findByIdAndUpdate(user._id, { lastLogin: new Date() });
 
-    // Sign JWT
-    const token = signJwt({
+    const safeUser = {
       id: user._id.toString(),
+      name: user.name,
       email: user.email,
+      role: user.role,
+    };
+
+    const token = await signAdminToken({
+      userId: safeUser.id,
+      email: safeUser.email,
+      name: safeUser.name,
       role: user.role,
     });
 
-    // Update last login
-    await AdminUser.findByIdAndUpdate(user._id, { lastLoginAt: new Date() });
+    const maxAge = jwtExpiresInSeconds();
 
-    // Set httpOnly cookie
-    const expiresIn = process.env.JWT_EXPIRES_IN ?? "7d";
-    const maxAge = expiresIn.endsWith("d")
-      ? parseInt(expiresIn) * 86400
-      : 86400 * 7;
+    const jsonBody: ApiResponse<{ user: typeof safeUser }> = {
+      success: true,
+      message: "Login successful.",
+      data: { user: safeUser },
+    };
 
-    const response = successResponse("Login successful.", {
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+    const res = NextResponse.json(jsonBody, { status: 200 });
+
+    res.cookies.set({
+      name: ADMIN_COOKIE_NAME,
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge,
     });
 
-    // Clone response to set cookie header
-    const headers = new Headers(response.headers);
-    headers.set(
-      "Set-Cookie",
-      `${ADMIN_COOKIE_NAME}=${token}; HttpOnly; Path=/; Max-Age=${maxAge}; SameSite=Lax${process.env.NODE_ENV === "production" ? "; Secure" : ""}`
-    );
-
-    return new Response(response.body, {
-      status: response.status,
-      headers,
-    });
+    return res;
   } catch (err) {
     console.error("[POST /api/auth/login]", err);
     return errorResponse("An unexpected error occurred. Please try again.");

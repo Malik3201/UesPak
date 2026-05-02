@@ -46,6 +46,13 @@ export function forbiddenResponse(
   return Response.json(body, { status: 403 });
 }
 
+export function tooManyRequestsResponse(
+  message = "Too many login attempts. Please try again later."
+): Response {
+  const body: ApiResponse = { success: false, message };
+  return Response.json(body, { status: 429 });
+}
+
 export function notFoundResponse(message = "Resource not found."): Response {
   const body: ApiResponse = { success: false, message };
   return Response.json(body, { status: 404 });

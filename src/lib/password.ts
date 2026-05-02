@@ -5,16 +5,16 @@ const SALT_ROUNDS = 12;
 /**
  * Hash a plain-text password.
  */
-export async function hashPassword(plain: string): Promise<string> {
-  return bcrypt.hash(plain, SALT_ROUNDS);
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, SALT_ROUNDS);
 }
 
 /**
- * Verify a plain-text password against a stored hash.
+ * Compare a plain-text password with a bcrypt hash.
  */
-export async function verifyPassword(
-  plain: string,
+export async function comparePassword(
+  password: string,
   hash: string
 ): Promise<boolean> {
-  return bcrypt.compare(plain, hash);
+  return bcrypt.compare(password, hash);
 }

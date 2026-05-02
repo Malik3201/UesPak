@@ -1,18 +1,22 @@
+import { NextResponse } from "next/server";
 import { ADMIN_COOKIE_NAME } from "@/lib/constants";
-import { successResponse } from "@/lib/api-response";
+import type { ApiResponse } from "@/lib/api-response";
 
 export async function POST() {
-  const response = successResponse("Logged out successfully.");
+  const jsonBody: ApiResponse = {
+    success: true,
+    message: "Logged out successfully.",
+  };
 
-  const headers = new Headers(response.headers);
-  // Expire the cookie immediately
-  headers.set(
-    "Set-Cookie",
-    `${ADMIN_COOKIE_NAME}=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax${process.env.NODE_ENV === "production" ? "; Secure" : ""}`
-  );
-
-  return new Response(response.body, {
-    status: response.status,
-    headers,
+  const res = NextResponse.json(jsonBody, { status: 200 });
+  res.cookies.set({
+    name: ADMIN_COOKIE_NAME,
+    value: "",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
   });
+  return res;
 }

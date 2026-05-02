@@ -1,6 +1,7 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 import type { MediaObject } from "@/types/media";
 import type { SeoData } from "@/types/seo";
+import type { AdminRole, AdminStatus } from "@/types/admin";
 
 // ─── SEO subdocument schema (reusable) ────────────────────────────────────────
 export const seoSchema = new Schema<SeoData>(
@@ -35,14 +36,21 @@ export const mediaSchema = new Schema<MediaObject>(
   { _id: false }
 );
 
+const ADMIN_ROLE_VALUES: AdminRole[] = ["superAdmin", "admin", "editor"];
+const ADMIN_STATUS_VALUES: AdminStatus[] = [
+  "active",
+  "inactive",
+  "suspended",
+];
+
 // ─── AdminUser ─────────────────────────────────────────────────────────────────
 export interface IAdminUser extends Document {
   name: string;
   email: string;
-  password: string;
-  role: "super_admin" | "admin" | "editor";
-  isActive: boolean;
-  lastLoginAt?: Date;
+  passwordHash: string;
+  role: AdminRole;
+  status: AdminStatus;
+  lastLogin?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,19 +65,25 @@ const adminUserSchema = new Schema<IAdminUser>(
       lowercase: true,
       trim: true,
     },
-    password: { type: String, required: true, select: false },
+    passwordHash: { type: String, required: true, select: false },
     role: {
       type: String,
-      enum: ["super_admin", "admin", "editor"],
-      default: "admin",
+      enum: ADMIN_ROLE_VALUES,
+      default: "editor",
     },
-    isActive: { type: Boolean, default: true },
-    lastLoginAt: { type: Date },
+    status: {
+      type: String,
+      enum: ADMIN_STATUS_VALUES,
+      default: "active",
+    },
+    lastLogin: { type: Date },
   },
   { timestamps: true }
 );
 
 adminUserSchema.index({ email: 1 }, { unique: true });
+adminUserSchema.index({ role: 1 });
+adminUserSchema.index({ status: 1 });
 
 export const AdminUser: Model<IAdminUser> =
   mongoose.models.AdminUser ??
