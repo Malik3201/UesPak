@@ -9,6 +9,11 @@ import { loginValidator, type LoginInput } from "@/validators/auth.validator";
 import { Button } from "@/components/shared/Button";
 import { Input } from "@/components/shared/Input";
 
+type LoginApiJson = {
+  success?: boolean;
+  message?: string;
+};
+
 export default function AdminLoginForm() {
   const router = useRouter();
   const [genericError, setGenericError] = useState<string | null>(null);
@@ -19,21 +24,34 @@ export default function AdminLoginForm() {
     mode: "onSubmit",
   });
 
-  const loading = form.formState.isSubmitting;
+  const { isSubmitting } = form.formState;
 
-  async function onSubmit(data: LoginInput) {
+  async function onSubmit(values: LoginInput) {
     setGenericError(null);
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         credentials: "include",
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          email: values.email,
+          password: values.password,
+        }),
       });
 
-      const json = await res.json().catch(() => null);
+      const text = await res.text();
+      let json: LoginApiJson | null = null;
+      if (text) {
+        try {
+          json = JSON.parse(text) as LoginApiJson;
+        } catch {
+          json = null;
+        }
+      }
 
-      if (!res.ok) {
+      if (!res.ok || json?.success !== true) {
         setGenericError(
           typeof json?.message === "string"
             ? json.message
@@ -42,7 +60,7 @@ export default function AdminLoginForm() {
         return;
       }
 
-      router.push("/admin/dashboard");
+      router.replace("/admin/dashboard");
       router.refresh();
     } catch {
       setGenericError("Something went wrong. Please try again.");
@@ -65,9 +83,13 @@ export default function AdminLoginForm() {
       </div>
 
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        noValidate
         className="space-y-5"
         id="admin-login-form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void form.handleSubmit(onSubmit)(e);
+        }}
       >
         {genericError && (
           <p
@@ -83,7 +105,7 @@ export default function AdminLoginForm() {
           type="email"
           autoComplete="email"
           placeholder="you@company.com"
-          disabled={loading}
+          disabled={isSubmitting}
           error={form.formState.errors.email?.message}
           {...form.register("email")}
         />
@@ -93,7 +115,7 @@ export default function AdminLoginForm() {
           type="password"
           autoComplete="current-password"
           placeholder="••••••••"
-          disabled={loading}
+          disabled={isSubmitting}
           error={form.formState.errors.password?.message}
           {...form.register("password")}
         />
@@ -101,8 +123,8 @@ export default function AdminLoginForm() {
         <Button
           type="submit"
           className="w-full"
-          isLoading={loading}
-          disabled={loading}
+          isLoading={isSubmitting}
+          disabled={isSubmitting}
           id="login-submit-btn"
         >
           Sign In
