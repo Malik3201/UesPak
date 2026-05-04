@@ -26,9 +26,21 @@ export const DEFAULT_SITE_SETTINGS_DTO: SiteSettingsDTO = {
   footerText: undefined,
   copyrightText: undefined,
   footerDescription: undefined,
-  globalCTA: { isActive: false },
+  globalCTA: {
+    title: "",
+    description: "",
+    buttonText: "",
+    buttonUrl: "",
+    isActive: false,
+  },
   seo: {
+    metaTitle: "",
+    metaDescription: "",
     keywords: [],
+    canonicalUrl: "",
+    ogTitle: "",
+    ogDescription: "",
+    schemaType: "",
     robots: { index: true, follow: true },
   },
 };
@@ -41,13 +53,26 @@ export function cloneDefaultSiteSettings(): SiteSettingsDTO {
 export function siteSettingsDtoToForm(dto: SiteSettingsDTO): SiteSettingsDTO {
   return {
     ...dto,
+    globalCTA: {
+      title: dto.globalCTA?.title ?? "",
+      description: dto.globalCTA?.description ?? "",
+      buttonText: dto.globalCTA?.buttonText ?? "",
+      buttonUrl: dto.globalCTA?.buttonUrl ?? "",
+      isActive: dto.globalCTA?.isActive === true,
+    },
     logo: dto.logo?.url?.trim() ? dto.logo : EMPTY_MEDIA,
     darkLogo: dto.darkLogo?.url?.trim() ? dto.darkLogo : EMPTY_MEDIA,
     favicon: dto.favicon?.url?.trim() ? dto.favicon : EMPTY_MEDIA,
     profilePdf: dto.profilePdf?.url?.trim() ? dto.profilePdf : EMPTY_MEDIA,
     seo: {
       ...dto.seo,
+      metaTitle: dto.seo.metaTitle ?? "",
+      metaDescription: dto.seo.metaDescription ?? "",
       keywords: [...(dto.seo.keywords ?? [])],
+      canonicalUrl: dto.seo.canonicalUrl ?? "",
+      ogTitle: dto.seo.ogTitle ?? "",
+      ogDescription: dto.seo.ogDescription ?? "",
+      schemaType: dto.seo.schemaType ?? "",
       robots: {
         index: dto.seo.robots?.index !== false,
         follow: dto.seo.robots?.follow !== false,

@@ -8,6 +8,7 @@ import {
   cloneDefaultSiteSettings,
   siteSettingsDtoToForm,
 } from "@/constants/default-site-settings";
+import { shapeSiteSettingsClientPayload } from "@/lib/site-settings-normalize";
 import { siteSettingsSchema } from "@/validators/settings.validator";
 import { Button } from "@/components/shared/Button";
 import { Input } from "@/components/shared/Input";
@@ -16,14 +17,6 @@ import LoadingSpinner from "@/components/shared/LoadingSpinner";
 
 const isBrowserDev =
   typeof process !== "undefined" && process.env.NODE_ENV === "development";
-
-function splitKeywords(csv: string): string[] {
-  return csv
-    .split(",")
-    .map((k) => k.trim())
-    .filter(Boolean)
-    .slice(0, 80);
-}
 
 function Section({
   title,
@@ -118,7 +111,7 @@ export default function SiteSettingsForm() {
     setBanner(null);
     setFieldErrorsJson(null);
 
-    const payload: SiteSettingsDTO = {
+    const draft: SiteSettingsDTO = {
       ...raw,
       phones: (raw.phones ?? []).filter((p) => p.value?.trim()),
       emails: (raw.emails ?? []).filter((e) => e.value?.trim()),
@@ -131,12 +124,9 @@ export default function SiteSettingsForm() {
           order: typeof s.order === "number" ? s.order : i,
         }))
         .map((s, i) => ({ ...s, order: i })),
-      seo: {
-        ...raw.seo,
-        keywords: splitKeywords(keywordsCsv),
-      },
     };
 
+    const payload = shapeSiteSettingsClientPayload(draft, keywordsCsv);
     const parsed = siteSettingsSchema.safeParse(payload);
     if (!parsed.success) {
       setFieldErrorsJson(

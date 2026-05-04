@@ -20,6 +20,7 @@ import {
   getDefaultSiteSettings,
   getSiteSettings,
 } from "@/lib/site-settings";
+import { normalizeSiteSettingsPatchInput } from "@/lib/site-settings-normalize";
 import { mergeSiteSettingsPatchPayload } from "@/lib/site-settings-patch-merge";
 import {
   siteSettingsSchema,
@@ -93,24 +94,22 @@ export async function GET() {
       null;
     const dto = await getSiteSettings();
 
-    return successResponse(
-      persisted
-        ? "Site settings retrieved."
-        : "Using default settings — save to create the document.",
-      {
-        settings: dto,
-        persisted,
-        publicPreview: dtoToPublic(dto),
-      }
-    );
+    return successResponse("Settings loaded successfully.", {
+      settings: dto,
+      persisted,
+      publicPreview: dtoToPublic(dto),
+    });
   } catch (err) {
     console.error("[GET /api/admin/settings]", err);
     const defaults = getDefaultSiteSettings();
-    return successResponse("Using defaults after read error.", {
-      settings: defaults,
-      persisted: false,
-      publicPreview: dtoToPublic(defaults),
-    });
+    return successResponse(
+      "Settings loaded successfully. (Defaults — database unavailable.)",
+      {
+        settings: defaults,
+        persisted: false,
+        publicPreview: dtoToPublic(defaults),
+      }
+    );
   }
 }
 
@@ -151,7 +150,10 @@ export async function PATCH(req: NextRequest) {
       : getDefaultSiteSettings();
 
     const merged = mergeSiteSettingsPatchPayload(existingDto, sanitized);
-    const parsed = siteSettingsSchema.safeParse(merged);
+    const normalized = normalizeSiteSettingsPatchInput(
+      merged as Record<string, unknown>
+    );
+    const parsed = siteSettingsSchema.safeParse(normalized);
 
     if (!parsed.success) {
       if (isDev) {

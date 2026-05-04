@@ -132,8 +132,15 @@ const socialEntrySchema = z.object({
   platform: z.string().trim().min(1, "Platform is required").max(80),
   url: flexRequiredLinkUrl,
   icon: trimToUndef(80),
-  isActive: z.boolean(),
-  order: z.coerce.number().int().min(0).max(999),
+  isActive: z.preprocess(
+    (v) => (v === false ? false : true),
+    z.boolean()
+  ),
+  order: z.preprocess((v) => {
+    if (v === undefined || v === null || v === "") return 0;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  }, z.number().int().min(0).max(999)),
 });
 
 const mapEmbedUrlSchema = z.preprocess(
@@ -159,7 +166,10 @@ const globalCTASchema = z.object({
   description: trimToUndef(280),
   buttonText: trimToUndef(80),
   buttonUrl: flexOptionalPublicUrl,
-  isActive: z.boolean().optional().default(false),
+  isActive: z.preprocess(
+    (v) => (v === true ? true : false),
+    z.boolean()
+  ),
 });
 
 const robotsSchema = z
@@ -186,7 +196,43 @@ const siteNameField = z.preprocess((val) => {
   return s.length < 2 ? "UESPAK" : s;
 }, z.string().min(2, "Site name must be at least 2 characters").max(160));
 
-/** Full CMS payload — used for PATCH after merge with existing settings. */
+const globalCTASchemaSafe = z.preprocess(
+  (v) => {
+    if (v === undefined || v === null || typeof v !== "object" || Array.isArray(v)) {
+      return {
+        title: "",
+        description: "",
+        buttonText: "",
+        buttonUrl: "",
+        isActive: false,
+      };
+    }
+    return v;
+  },
+  globalCTASchema
+);
+
+const seoSchemaSafe = z.preprocess(
+  (v) => {
+    if (v === undefined || v === null || typeof v !== "object" || Array.isArray(v)) {
+      return {
+        metaTitle: "",
+        metaDescription: "",
+        keywords: [],
+        canonicalUrl: "",
+        ogTitle: "",
+        ogDescription: "",
+        ogImage: undefined,
+        robots: { index: true, follow: true },
+        schemaType: "",
+      };
+    }
+    return v;
+  },
+  seoSchema
+);
+
+/** Full CMS payload — PATCH + admin form (after normalization). */
 export const siteSettingsSchema = z.object({
   key: z.literal(SITE_SETTINGS_DOCUMENT_KEY).optional(),
   siteName: siteNameField,
@@ -195,40 +241,40 @@ export const siteSettingsSchema = z.object({
   darkLogo: mediaInputSchema,
   favicon: mediaInputSchema,
 
-  phones: z
-    .preprocess((input) => {
-      if (!Array.isArray(input)) return [];
-      return input.filter((p) => {
-        if (!p || typeof p !== "object") return false;
-        const v = (p as { value?: string }).value;
-        return typeof v === "string" && v.trim().length > 0;
-      });
-    }, z.array(phoneEntrySchema).max(20).optional().default([])),
+  phones: z.preprocess((input) => {
+    if (input === undefined || input === null) return [];
+    if (!Array.isArray(input)) return [];
+    return input.filter((p) => {
+      if (!p || typeof p !== "object") return false;
+      const val = (p as { value?: string }).value;
+      return typeof val === "string" && val.trim().length > 0;
+    });
+  }, z.array(phoneEntrySchema).max(20).optional().default([])),
 
-  emails: z
-    .preprocess((input) => {
-      if (!Array.isArray(input)) return [];
-      return input.filter((e) => {
-        if (!e || typeof e !== "object") return false;
-        const v = (e as { value?: string }).value;
-        return typeof v === "string" && v.trim().length > 0;
-      });
-    }, z.array(emailEntrySchema).max(20).optional().default([])),
+  emails: z.preprocess((input) => {
+    if (input === undefined || input === null) return [];
+    if (!Array.isArray(input)) return [];
+    return input.filter((e) => {
+      if (!e || typeof e !== "object") return false;
+      const val = (e as { value?: string }).value;
+      return typeof val === "string" && val.trim().length > 0;
+    });
+  }, z.array(emailEntrySchema).max(20).optional().default([])),
 
   address: trimToUndef(2000),
   workingHours: trimToUndef(500),
   mapEmbedUrl: mapEmbedUrlSchema,
 
-  socialLinks: z
-    .preprocess((input) => {
-      if (!Array.isArray(input)) return [];
-      return input.filter((s) => {
-        if (!s || typeof s !== "object") return false;
-        const plat = String((s as { platform?: string }).platform ?? "").trim();
-        const u = String((s as { url?: string }).url ?? "").trim();
-        return plat.length > 0 && u.length > 0;
-      });
-    }, z.array(socialEntrySchema).max(30).optional().default([])),
+  socialLinks: z.preprocess((input) => {
+    if (input === undefined || input === null) return [];
+    if (!Array.isArray(input)) return [];
+    return input.filter((s) => {
+      if (!s || typeof s !== "object") return false;
+      const plat = String((s as { platform?: string }).platform ?? "").trim();
+      const u = String((s as { url?: string }).url ?? "").trim();
+      return plat.length > 0 && u.length > 0;
+    });
+  }, z.array(socialEntrySchema).max(30).optional().default([])),
 
   profilePdf: mediaInputSchema,
   profileButtonText: trimToUndef(120),
@@ -237,8 +283,8 @@ export const siteSettingsSchema = z.object({
   copyrightText: trimToUndef(400),
   footerDescription: trimToUndef(2000),
 
-  globalCTA: globalCTASchema,
-  seo: seoSchema,
+  globalCTA: globalCTASchemaSafe,
+  seo: seoSchemaSafe,
 });
 
 /** Alias — PATCH upserts entire settings document using the same validation shape. */
