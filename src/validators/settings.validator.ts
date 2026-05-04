@@ -3,51 +3,43 @@ import { SITE_SETTINGS_DOCUMENT_KEY } from "@/constants/site-settings";
 
 const HTTPS_PREFIX = /^https?:\/\//i;
 
+/** Zod 4: avoid `union(...undefined).pipe(string)` — pipe can see `undefined` and fail. */
 function trimToUndef(max: number) {
-  return z
-    .union([z.string(), z.undefined(), z.null()])
-    .transform((v) =>
-      v === undefined || v === null ? "" : String(v).trim()
-    )
-    .pipe(
-      z
-        .string()
-        .max(max)
-        .transform((v) => (v === "" ? undefined : v))
-    );
+  return z.preprocess(
+    (v) => (v === undefined || v === null ? "" : String(v).trim()),
+    z
+      .string()
+      .max(max)
+      .transform((s) => (s === "" ? undefined : s))
+  );
 }
 
 /**
  * Public / CTA URLs: https, site-relative `/...`, mailto:, or tel:.
  * Empty string → undefined.
  */
-const flexOptionalPublicUrl = z
-  .union([z.string(), z.literal(""), z.undefined()])
-  .transform((v) => {
-    if (v === undefined) return "";
-    return String(v).trim();
-  })
-  .pipe(
-    z
-      .string()
-      .max(2048)
-      .superRefine((val, ctx) => {
-        if (!val) return;
-        const ok =
-          HTTPS_PREFIX.test(val) ||
-          val.startsWith("/") ||
-          val.startsWith("mailto:") ||
-          val.startsWith("tel:");
-        if (!ok) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message:
-              "Must use http(s)://, a path starting with /, mailto:, or tel:",
-          });
-        }
-      })
-      .transform((val) => (val === "" ? undefined : val))
-  );
+const flexOptionalPublicUrl = z.preprocess(
+  (v) => (v === undefined || v === null ? "" : String(v).trim()),
+  z
+    .string()
+    .max(2048)
+    .superRefine((val, ctx) => {
+      if (!val) return;
+      const ok =
+        HTTPS_PREFIX.test(val) ||
+        val.startsWith("/") ||
+        val.startsWith("mailto:") ||
+        val.startsWith("tel:");
+      if (!ok) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Must use http(s)://, a path starting with /, mailto:, or tel:",
+        });
+      }
+    })
+    .transform((val) => (val === "" ? undefined : val))
+);
 
 const mediaInputSchema = z
   .union([
@@ -144,28 +136,23 @@ const socialEntrySchema = z.object({
   order: z.coerce.number().int().min(0).max(999),
 });
 
-const mapEmbedUrlSchema = z
-  .union([z.string(), z.literal(""), z.undefined()])
-  .transform((v) => {
-    if (v === undefined) return "";
-    return String(v).trim();
-  })
-  .pipe(
-    z
-      .string()
-      .max(12000)
-      .superRefine((val, ctx) => {
-        if (!val) return;
-        if (!HTTPS_PREFIX.test(val)) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message:
-              "Map embed URL should start with http:// or https:// (iframe src URL)",
-          });
-        }
-      })
-      .transform((val) => (val === "" ? undefined : val))
-  );
+const mapEmbedUrlSchema = z.preprocess(
+  (v) => (v === undefined || v === null ? "" : String(v).trim()),
+  z
+    .string()
+    .max(12000)
+    .superRefine((val, ctx) => {
+      if (!val) return;
+      if (!HTTPS_PREFIX.test(val)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Map embed URL should start with http:// or https:// (iframe src URL)",
+        });
+      }
+    })
+    .transform((val) => (val === "" ? undefined : val))
+);
 
 const globalCTASchema = z.object({
   title: trimToUndef(120),
@@ -177,8 +164,8 @@ const globalCTASchema = z.object({
 
 const robotsSchema = z
   .object({
-    index: z.boolean(),
-    follow: z.boolean(),
+    index: z.boolean().optional().default(true),
+    follow: z.boolean().optional().default(true),
   })
   .default({ index: true, follow: true });
 
