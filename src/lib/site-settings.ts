@@ -30,7 +30,12 @@ function pickPrimary<T extends { value: string; isPrimary?: boolean }>(
 }
 
 function coerceLegacySocials(dto: SiteSettingsDTO, rawDoc: Record<string, unknown>): void {
-  if (dto.socialLinks.length === 0) {
+  /** Skip legacy coercion when canonical array fields exist on the document so cleared lists stay empty. */
+  const hasPhonesKey = Object.prototype.hasOwnProperty.call(rawDoc, "phones");
+  const hasEmailsKey = Object.prototype.hasOwnProperty.call(rawDoc, "emails");
+  const hasSocialKey = Object.prototype.hasOwnProperty.call(rawDoc, "socialLinks");
+
+  if (!hasSocialKey && dto.socialLinks.length === 0) {
     const add = (
       platform: string,
       url: string | undefined,
@@ -52,10 +57,20 @@ function coerceLegacySocials(dto: SiteSettingsDTO, rawDoc: Record<string, unknow
     add("Instagram", rawDoc.instagram as string | undefined, 3);
   }
 
-  if (!dto.phones.length && typeof rawDoc.phone === "string" && rawDoc.phone.trim()) {
+  if (
+    !hasPhonesKey &&
+    !dto.phones.length &&
+    typeof rawDoc.phone === "string" &&
+    rawDoc.phone.trim()
+  ) {
     dto.phones.push({ value: rawDoc.phone.trim(), isPrimary: true });
   }
-  if (!dto.emails.length && typeof rawDoc.email === "string" && rawDoc.email.includes("@")) {
+  if (
+    !hasEmailsKey &&
+    !dto.emails.length &&
+    typeof rawDoc.email === "string" &&
+    rawDoc.email.includes("@")
+  ) {
     dto.emails.push({ value: rawDoc.email.trim(), isPrimary: true });
   }
 }

@@ -14,6 +14,9 @@ import { Input } from "@/components/shared/Input";
 import Textarea from "@/components/shared/Textarea";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
 
+const isBrowserDev =
+  typeof process !== "undefined" && process.env.NODE_ENV === "development";
+
 function splitKeywords(csv: string): string[] {
   return csv
     .split(",")
@@ -147,18 +150,43 @@ export default function SiteSettingsForm() {
       return;
     }
 
+    const bodyPayload = parsed.data;
+
+    if (isBrowserDev) {
+      console.debug(
+        "[SiteSettingsForm] PATCH body keys:",
+        Object.keys(bodyPayload as Record<string, unknown>)
+      );
+    }
+
     try {
       const res = await fetch("/api/admin/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(parsed.data),
+        body: JSON.stringify(bodyPayload),
       });
       const json = await res.json().catch(() => null);
 
       if (!res.ok || json?.success !== true) {
         if (res.status === 401) {
           router.replace("/admin/login");
+          return;
+        }
+        if (res.status === 422 && json?.errors != null) {
+          setFieldErrorsJson(
+            typeof json.errors === "string"
+              ? json.errors
+              : JSON.stringify(json.errors, null, 2)
+          );
+          setBanner({
+            type: "err",
+            text:
+              typeof json.message === "string"
+                ? json.message
+                : "Validation failed. Please check your input.",
+          });
+          setSaving(false);
           return;
         }
         throw new Error(
@@ -170,7 +198,8 @@ export default function SiteSettingsForm() {
 
       const dto = json?.data?.settings as SiteSettingsDTO | undefined;
       if (dto) applyDto(dto);
-      setBanner({ type: "ok", text: "Saved successfully." });
+      setBanner({ type: "ok", text: "Settings saved successfully." });
+      router.refresh();
     } catch (e) {
       setBanner({
         type: "err",
@@ -181,6 +210,14 @@ export default function SiteSettingsForm() {
       setSaving(false);
     }
   }
+
+  const toolbar = (
+    <div className="flex flex-wrap items-center gap-3">
+      <Button type="submit" variant="primary" isLoading={saving} disabled={saving}>
+        {saving ? "Saving..." : "Save settings"}
+      </Button>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -195,38 +232,43 @@ export default function SiteSettingsForm() {
       id="site-settings-form"
       noValidate
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-6 pb-10"
+      className="space-y-6 pb-28"
     >
-      {banner?.type === "ok" ? (
-        <div
-          className="rounded-md border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-primary"
-          role="status"
-        >
-          {banner.text}
+      <div className="sticky top-0 z-40 space-y-3 border-b border-border bg-background/95 pb-4 pt-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        {banner?.type === "ok" ? (
+          <div
+            className="rounded-md border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-primary"
+            role="status"
+          >
+            {banner.text}
+          </div>
+        ) : null}
+        {banner?.type === "err" ? (
+          <div
+            className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+            role="alert"
+          >
+            {banner.text}
+          </div>
+        ) : null}
+        {fieldErrorsJson ? (
+          <details className="rounded-md border border-border bg-muted/40 px-4 py-2 text-xs">
+            <summary className="cursor-pointer font-medium">
+              Validation details (server/client)
+            </summary>
+            <pre className="mt-2 whitespace-pre-wrap break-words text-muted-foreground">
+              {fieldErrorsJson}
+            </pre>
+          </details>
+        ) : null}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          {toolbar}
         </div>
-      ) : null}
-      {banner?.type === "err" ? (
-        <div
-          className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
-          role="alert"
-        >
-          {banner.text}
-        </div>
-      ) : null}
-      {fieldErrorsJson ? (
-        <details className="rounded-md border border-border bg-muted/40 px-4 py-2 text-xs">
-          <summary className="cursor-pointer font-medium">
-            Validation details
-          </summary>
-          <pre className="mt-2 whitespace-pre-wrap break-words text-muted-foreground">
-            {fieldErrorsJson}
-          </pre>
-        </details>
-      ) : null}
+      </div>
 
       <Section
         title="Brand"
-        description="Site identity and core assets (URLs only — uploads come later)."
+        description="Site identity and core assets (URLs — uploads come later)."
       >
         <Input
           label="Site name"
@@ -236,22 +278,13 @@ export default function SiteSettingsForm() {
         <Input label="Tagline" {...register("tagline")} />
         <Input
           label="Logo URL"
-          type="url"
-          hint="HTTPS URL — e.g. Cloudinary delivery URL."
+          hint="HTTPS or site-relative path (starts with /). Cloudinary HTTPS preferred."
           {...register("logo.url")}
         />
         <Input label="Logo alt text" {...register("logo.altText")} />
-        <Input
-          label="Dark logo URL"
-          type="url"
-          {...register("darkLogo.url")}
-        />
+        <Input label="Dark logo URL" {...register("darkLogo.url")} />
         <Input label="Dark logo alt text" {...register("darkLogo.altText")} />
-        <Input
-          label="Favicon URL"
-          type="url"
-          {...register("favicon.url")}
-        />
+        <Input label="Favicon URL" {...register("favicon.url")} />
       </Section>
 
       <Section
@@ -335,7 +368,6 @@ export default function SiteSettingsForm() {
               <Input
                 className="flex-1"
                 label="Email"
-                type="email"
                 required
                 {...register(`emails.${idx}.value` as const)}
               />
@@ -366,7 +398,6 @@ export default function SiteSettingsForm() {
         <Input label="Working hours" {...register("workingHours")} />
         <Input
           label="Google Maps embed URL (iframe src)"
-          type="url"
           hint='Must start with http:// or https:// — paste the embed "src".'
           {...register("mapEmbedUrl")}
         />
@@ -374,7 +405,7 @@ export default function SiteSettingsForm() {
 
       <Section
         title="Social links"
-        description="Active rows appear in the footer; drag order controls display order via “Order”."
+        description="Active rows appear in the footer; order controls display order via “Order”."
       >
         <div className="flex justify-end">
           <Button
@@ -407,7 +438,6 @@ export default function SiteSettingsForm() {
             <Input
               className="lg:col-span-5"
               label="URL"
-              type="url"
               {...register(`socialLinks.${idx}.url` as const)}
             />
             <Input
@@ -451,7 +481,7 @@ export default function SiteSettingsForm() {
         title="Profile PDF"
         description="Adds a downloadable profile button in the public navbar."
       >
-        <Input label="PDF URL (HTTPS)" type="url" {...register("profilePdf.url")} />
+        <Input label="PDF URL (HTTPS)" {...register("profilePdf.url")} />
         <Input
           label="Button label"
           {...register("profileButtonText")}
@@ -477,7 +507,6 @@ export default function SiteSettingsForm() {
         <Input label="CTA button text" {...register("globalCTA.buttonText")} />
         <Input
           label="CTA button URL"
-          type="url"
           {...register("globalCTA.buttonUrl")}
         />
       </Section>
@@ -502,7 +531,7 @@ export default function SiteSettingsForm() {
         <Input label="Canonical URL (site-wide)" {...register("seo.canonicalUrl")} />
         <Input label="OG title" {...register("seo.ogTitle")} />
         <Textarea rows={3} label="OG description" {...register("seo.ogDescription")} />
-        <Input label="OG image URL" type="url" {...register("seo.ogImage.url")} />
+        <Input label="OG image URL" {...register("seo.ogImage.url")} />
         <Input label="OG image alt" {...register("seo.ogImage.altText")} />
         <div className="flex flex-wrap gap-6 pt-2 text-sm">
           <label className="flex items-center gap-2 text-muted-foreground">
@@ -516,11 +545,7 @@ export default function SiteSettingsForm() {
       </Section>
 
       <div className="sticky bottom-0 z-30 border-t border-border bg-background/90 py-4 backdrop-blur">
-        <div className="flex flex-wrap gap-3">
-          <Button type="submit" isLoading={saving} disabled={saving}>
-            Save settings
-          </Button>
-        </div>
+        <div className="flex flex-wrap gap-3">{toolbar}</div>
       </div>
     </form>
   );

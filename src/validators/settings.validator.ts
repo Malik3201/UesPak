@@ -17,7 +17,11 @@ function trimToUndef(max: number) {
     );
 }
 
-const optionalHttpUrl = z
+/**
+ * Public / CTA URLs: https, site-relative `/...`, mailto:, or tel:.
+ * Empty string → undefined.
+ */
+const flexOptionalPublicUrl = z
   .union([z.string(), z.literal(""), z.undefined()])
   .transform((v) => {
     if (v === undefined) return "";
@@ -29,10 +33,16 @@ const optionalHttpUrl = z
       .max(2048)
       .superRefine((val, ctx) => {
         if (!val) return;
-        if (!HTTPS_PREFIX.test(val)) {
+        const ok =
+          HTTPS_PREFIX.test(val) ||
+          val.startsWith("/") ||
+          val.startsWith("mailto:") ||
+          val.startsWith("tel:");
+        if (!ok) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: "Must be a URL starting with http:// or https://",
+            message:
+              "Must use http(s)://, a path starting with /, mailto:, or tel:",
           });
         }
       })
@@ -58,11 +68,15 @@ const mediaInputSchema = z
     if (!input || input === null || typeof input !== "object") return undefined;
     const raw = typeof input.url === "string" ? input.url.trim() : "";
     if (!raw) return undefined;
-    if (!HTTPS_PREFIX.test(raw)) return undefined;
+    const isHttps = HTTPS_PREFIX.test(raw);
+    const isRootRelative = raw.startsWith("/");
+    if (!isHttps && !isRootRelative) return undefined;
     const pub =
       typeof input.publicId === "string" && input.publicId.trim().length > 0
         ? input.publicId.trim()
-        : "external";
+        : isRootRelative
+          ? raw.replace(/^\/+/, "").replace(/\//g, "-") || "path"
+          : "external";
     const altRaw = typeof input.altText === "string" ? input.altText.trim() : "";
     const out: {
       url: string;
@@ -102,13 +116,29 @@ const emailEntrySchema = z.object({
   isPrimary: z.boolean().optional(),
 });
 
+/** Social / external link — must be usable in href; allows https or site-relative. */
+const flexRequiredLinkUrl = z
+  .string()
+  .trim()
+  .min(1, "URL is required")
+  .max(2048)
+  .superRefine((val, ctx) => {
+    const ok =
+      HTTPS_PREFIX.test(val) ||
+      val.startsWith("/") ||
+      val.startsWith("mailto:");
+    if (!ok) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "Must use http(s)://, a path starting with /, or mailto:",
+      });
+    }
+  });
+
 const socialEntrySchema = z.object({
   platform: z.string().trim().min(1, "Platform is required").max(80),
-  url: z
-    .string()
-    .trim()
-    .min(1)
-    .url("Must be a valid URL"),
+  url: flexRequiredLinkUrl,
   icon: trimToUndef(80),
   isActive: z.boolean(),
   order: z.coerce.number().int().min(0).max(999),
@@ -141,7 +171,7 @@ const globalCTASchema = z.object({
   title: trimToUndef(120),
   description: trimToUndef(280),
   buttonText: trimToUndef(80),
-  buttonUrl: optionalHttpUrl,
+  buttonUrl: flexOptionalPublicUrl,
   isActive: z.boolean().optional().default(false),
 });
 
@@ -156,7 +186,7 @@ const seoSchema = z.object({
   metaTitle: trimToUndef(70),
   metaDescription: trimToUndef(180),
   keywords: z.array(z.string().trim().min(1).max(120)).optional().default([]),
-  canonicalUrl: optionalHttpUrl,
+  canonicalUrl: flexOptionalPublicUrl,
   ogTitle: trimToUndef(110),
   ogDescription: trimToUndef(200),
   ogImage: mediaInputSchema,
@@ -164,27 +194,54 @@ const seoSchema = z.object({
   schemaType: trimToUndef(80),
 });
 
-/** Full CMS payload — used for PATCH (replace document fields). */
+const siteNameField = z.preprocess((val) => {
+  const s = typeof val === "string" ? val.trim() : "";
+  return s.length < 2 ? "UESPAK" : s;
+}, z.string().min(2, "Site name must be at least 2 characters").max(160));
+
+/** Full CMS payload — used for PATCH after merge with existing settings. */
 export const siteSettingsSchema = z.object({
   key: z.literal(SITE_SETTINGS_DOCUMENT_KEY).optional(),
-  siteName: z
-    .string()
-    .trim()
-    .min(2, "Site name must be at least 2 characters")
-    .max(160),
+  siteName: siteNameField,
   tagline: trimToUndef(220),
   logo: mediaInputSchema,
   darkLogo: mediaInputSchema,
   favicon: mediaInputSchema,
 
-  phones: z.array(phoneEntrySchema).max(20).optional().default([]),
-  emails: z.array(emailEntrySchema).max(20).optional().default([]),
+  phones: z
+    .preprocess((input) => {
+      if (!Array.isArray(input)) return [];
+      return input.filter((p) => {
+        if (!p || typeof p !== "object") return false;
+        const v = (p as { value?: string }).value;
+        return typeof v === "string" && v.trim().length > 0;
+      });
+    }, z.array(phoneEntrySchema).max(20).optional().default([])),
+
+  emails: z
+    .preprocess((input) => {
+      if (!Array.isArray(input)) return [];
+      return input.filter((e) => {
+        if (!e || typeof e !== "object") return false;
+        const v = (e as { value?: string }).value;
+        return typeof v === "string" && v.trim().length > 0;
+      });
+    }, z.array(emailEntrySchema).max(20).optional().default([])),
 
   address: trimToUndef(2000),
   workingHours: trimToUndef(500),
   mapEmbedUrl: mapEmbedUrlSchema,
 
-  socialLinks: z.array(socialEntrySchema).max(30).optional().default([]),
+  socialLinks: z
+    .preprocess((input) => {
+      if (!Array.isArray(input)) return [];
+      return input.filter((s) => {
+        if (!s || typeof s !== "object") return false;
+        const plat = String((s as { platform?: string }).platform ?? "").trim();
+        const u = String((s as { url?: string }).url ?? "").trim();
+        return plat.length > 0 && u.length > 0;
+      });
+    }, z.array(socialEntrySchema).max(30).optional().default([])),
 
   profilePdf: mediaInputSchema,
   profileButtonText: trimToUndef(120),

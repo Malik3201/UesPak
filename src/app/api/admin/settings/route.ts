@@ -9,19 +9,34 @@ import {
 import { getCurrentAdmin } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { SITE_SETTINGS_DOCUMENT_KEY } from "@/constants/site-settings";
-import { SiteSetting, siteSettingToDTO, type ISiteSetting } from "@/models/SiteSetting";
+import {
+  SiteSetting,
+  siteSettingToDTO,
+  type ISiteSetting,
+} from "@/models/SiteSetting";
 import type { SiteSettingsDTO } from "@/types/site-settings";
 import {
   dtoToPublic,
   getDefaultSiteSettings,
   getSiteSettings,
 } from "@/lib/site-settings";
+import { mergeSiteSettingsPatchPayload } from "@/lib/site-settings-patch-merge";
 import {
   siteSettingsSchema,
   type SiteSettingsInput,
 } from "@/validators/settings.validator";
 
 const LEGACY_KEY_GLOBAL = "global";
+
+const LEGACY_FIELDS_UNSET = {
+  phone: "",
+  email: "",
+  linkedIn: "",
+  twitter: "",
+  facebook: "",
+  instagram: "",
+  defaultSeo: "",
+} as const;
 
 function singletonFilter() {
   return {
@@ -66,9 +81,7 @@ function buildUpsertPayload(
   } as mongoose.UpdateQuery<ISiteSetting>["$set"];
 }
 
-/**
- * GET /api/admin/settings
- */
+/** GET /api/admin/settings */
 export async function GET() {
   try {
     const admin = await getCurrentAdmin();
@@ -101,10 +114,10 @@ export async function GET() {
   }
 }
 
-/**
- * PATCH /api/admin/settings — full validated replace (CMS form snapshot)
- */
+/** PATCH /api/admin/settings — validated upsert merged with existing snapshot */
 export async function PATCH(req: NextRequest) {
+  const isDev = process.env.NODE_ENV === "development";
+
   try {
     const admin = await getCurrentAdmin();
     if (!admin) return unauthorizedResponse();
@@ -118,47 +131,78 @@ export async function PATCH(req: NextRequest) {
       Object.entries(body as Record<string, unknown>).filter(
         ([k]) => k !== "createdBy" && k !== "updatedBy"
       )
-    );
+    ) as Record<string, unknown>;
 
-    const parsed = siteSettingsSchema.safeParse(sanitized);
-    if (!parsed.success) {
-      return validationErrorResponse(parsed.error.flatten().fieldErrors);
+    if (isDev) {
+      console.log(
+        "[PATCH /api/admin/settings] incoming keys:",
+        Object.keys(sanitized)
+      );
     }
 
     await connectDB();
 
-    const existing = await SiteSetting.findOne(singletonFilter())
+    const rawExisting = await SiteSetting.findOne(singletonFilter()).lean<
+      Record<string, unknown> | null
+    >();
+
+    const existingDto: SiteSettingsDTO = rawExisting
+      ? siteSettingToDTO(rawExisting as Parameters<typeof siteSettingToDTO>[0])
+      : getDefaultSiteSettings();
+
+    const merged = mergeSiteSettingsPatchPayload(existingDto, sanitized);
+    const parsed = siteSettingsSchema.safeParse(merged);
+
+    if (!parsed.success) {
+      if (isDev) {
+        console.warn(
+          "[PATCH /api/admin/settings] validation failed:",
+          parsed.error.flatten()
+        );
+      }
+      return validationErrorResponse(parsed.error.flatten().fieldErrors);
+    }
+
+    const existingForInsert = await SiteSetting.findOne(singletonFilter())
       .select("createdBy")
       .lean<{ createdBy?: mongoose.Types.ObjectId } | null>();
 
     const payload = buildUpsertPayload(parsed.data, admin.id);
 
     const adminOid = new mongoose.Types.ObjectId(admin.id);
-    const update: mongoose.UpdateQuery<ISiteSetting> = { $set: payload };
-    if (!existing?.createdBy) {
+    const update: mongoose.UpdateQuery<ISiteSetting> = {
+      $set: payload,
+      $unset: { ...LEGACY_FIELDS_UNSET },
+    };
+    if (!existingForInsert?.createdBy) {
       update.$setOnInsert = { createdBy: adminOid };
     }
 
-    await SiteSetting.findOneAndUpdate(singletonFilter(), update, {
+    const updated = await SiteSetting.findOneAndUpdate(singletonFilter(), update, {
       upsert: true,
       new: true,
       runValidators: true,
       setDefaultsOnInsert: true,
-    });
+    }).exec();
 
-    const freshRaw = await SiteSetting.findOne({
-      key: SITE_SETTINGS_DOCUMENT_KEY,
-    }).lean();
-
-    let dto: SiteSettingsDTO;
-    if (freshRaw) {
-      dto = siteSettingToDTO(freshRaw as unknown as Record<string, unknown>);
-    } else {
-      dto = await getSiteSettings();
+    if (!updated) {
+      return errorResponse("Failed to save site settings.");
     }
 
-    return successResponse("Site settings saved.", {
+    const dto = siteSettingToDTO(updated);
+
+    if (isDev) {
+      console.log(
+        "[PATCH /api/admin/settings] saved key:",
+        dto.key,
+        "document id:",
+        String(updated._id)
+      );
+    }
+
+    return successResponse("Settings saved successfully.", {
       settings: dto,
+      persisted: true,
       publicPreview: dtoToPublic(dto),
     });
   } catch (err) {
