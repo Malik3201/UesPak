@@ -40,31 +40,76 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    const user = await AdminUser.findOne({ email }).select("+passwordHash");
+    const user = (await AdminUser.findOne({ email })
+      .select("+passwordHash +password +isActive")
+      .lean()) as
+      | (Record<string, unknown> & {
+          _id: { toString(): string };
+          name?: string;
+          email?: string;
+          role?: string;
+          status?: string;
+          passwordHash?: string;
+          password?: string;
+          isActive?: boolean;
+        })
+      | null;
+
     // Generic messaging for unknown account, inactive, or suspended — avoid account enumeration.
-    if (!user || user.status !== "active") {
+    if (!user) {
       return unauthorizedResponse("Invalid email or password.");
     }
 
-    const passwordOk = await comparePassword(password, user.passwordHash);
+    const status =
+      typeof user.status === "string"
+        ? user.status
+        : user.isActive === false
+          ? "inactive"
+          : "active";
+    if (status !== "active") {
+      return unauthorizedResponse("Invalid email or password.");
+    }
+
+    const storedHash =
+      typeof user.passwordHash === "string"
+        ? user.passwordHash
+        : typeof user.password === "string"
+          ? user.password
+          : null;
+    if (!storedHash) {
+      return unauthorizedResponse("Invalid email or password.");
+    }
+
+    const passwordOk = await comparePassword(password, storedHash);
     if (!passwordOk) {
       return unauthorizedResponse("Invalid email or password.");
     }
 
-    await AdminUser.findByIdAndUpdate(user._id, { lastLogin: new Date() });
+    const updatePayload: Record<string, unknown> = { lastLogin: new Date() };
+    if (!user.passwordHash && user.password) {
+      // Seamless migration for older records that still used `password`.
+      updatePayload.passwordHash = user.password;
+      updatePayload.password = undefined;
+    }
+    await AdminUser.findByIdAndUpdate(user._id, updatePayload);
 
     const safeUser = {
       id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-      role: user.role,
+      name: typeof user.name === "string" ? user.name : "Admin User",
+      email: typeof user.email === "string" ? user.email : email,
+      role: typeof user.role === "string" ? user.role : "admin",
     };
 
     const token = await signAdminToken({
       userId: safeUser.id,
       email: safeUser.email,
       name: safeUser.name,
-      role: user.role,
+      role:
+        safeUser.role === "superAdmin" ||
+        safeUser.role === "admin" ||
+        safeUser.role === "editor"
+          ? safeUser.role
+          : "admin",
     });
 
     const maxAge = jwtExpiresInSeconds();

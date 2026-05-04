@@ -28,7 +28,8 @@ type NavItem =
 const navItems: NavItem[] = [
   { kind: "link", href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   {
-    kind: "placeholder",
+    kind: "link",
+    href: "/admin/settings",
     label: "Site Settings",
     icon: Settings,
   },
@@ -65,7 +66,8 @@ export default function AdminSidebar() {
               const active =
                 item.href === "/admin/dashboard"
                   ? pathname === item.href
-                  : pathname.startsWith(item.href);
+                  : pathname.startsWith(item.href + "/") ||
+                    pathname === item.href;
               const Icon = item.icon;
               return (
                 <li key={item.href}>

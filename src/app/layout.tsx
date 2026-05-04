@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { defaultMetadata } from "@/lib/seo";
+import { defaultMetadata, mergeRootSiteMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = defaultMetadata;
+export async function generateMetadata(): Promise<Metadata> {
+  return mergeRootSiteMetadata(defaultMetadata);
+}
 
 export default function RootLayout({
   children,
@@ -12,9 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
-      <body className="flex min-h-screen flex-col antialiased">
-        {children}
-      </body>
+      <body className="flex min-h-screen flex-col antialiased">{children}</body>
     </html>
   );
 }
