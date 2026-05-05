@@ -84,7 +84,10 @@ export async function uploadToImageKit({
   const authHeader = Buffer.from(`${privateKey}:`).toString("base64");
 
   const formData = new FormData();
-  formData.append("file", new Blob([fileBuffer], { type: mimeType }));
+  formData.append(
+    "file",
+    new Blob([new Uint8Array(fileBuffer)], { type: mimeType })
+  );
   formData.append("fileName", fileName);
   formData.append("folder", normalizedFolder);
   formData.append("useUniqueFileName", "true");

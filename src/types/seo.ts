@@ -1,3 +1,5 @@
+import type { MediaObject } from "@/types/media";
+
 // ─── SEO subdocument ──────────────────────────────────────────────────────────
 export interface SeoData {
   metaTitle?: string;
@@ -6,7 +8,7 @@ export interface SeoData {
   canonicalUrl?: string;
   ogTitle?: string;
   ogDescription?: string;
-  ogImage?: string;
+  ogImage?: string | MediaObject;
   robots?: {
     index: boolean;
     follow: boolean;
