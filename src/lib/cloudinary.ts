@@ -8,14 +8,9 @@ cloudinary.config({
   secure: true,
 });
 
-// ─── Folder constants ──────────────────────────────────────────────────────────
-export const CLOUDINARY_FOLDERS = {
-  services: "uespak/services",
-  projects: "uespak/projects",
-  team: "uespak/team",
-  profilePdf: "uespak/profile-pdf",
-  general: "uespak/general",
-} as const;
+// ─── Folder constants (re-exported from client-safe constants file) ────────────
+export { CLOUDINARY_FOLDERS } from "@/constants/cloudinary-folders";
+export type { CloudinaryFolder } from "@/constants/cloudinary-folders";
 
 // ─── Upload helper ─────────────────────────────────────────────────────────────
 export interface UploadOptions {

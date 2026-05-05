@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import type { SiteSettingsDTO } from "@/types/site-settings";
+import type { MediaObject } from "@/types/media";
 import {
   cloneDefaultSiteSettings,
   siteSettingsDtoToForm,
@@ -14,6 +15,8 @@ import { Button } from "@/components/shared/Button";
 import { Input } from "@/components/shared/Input";
 import Textarea from "@/components/shared/Textarea";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
+import AdminMediaUploader from "@/components/admin/media/AdminMediaUploader";
+import { CLOUDINARY_FOLDERS } from "@/constants/cloudinary-folders";
 
 const isBrowserDev =
   typeof process !== "undefined" && process.env.NODE_ENV === "development";
@@ -54,11 +57,18 @@ export default function SiteSettingsForm() {
     defaultValues: siteSettingsDtoToForm(cloneDefaultSiteSettings()),
   });
 
-  const { control, handleSubmit, register, reset } = form;
+  const { control, handleSubmit, register, reset, setValue } = form;
 
   const phones = useFieldArray({ control, name: "phones" });
   const emails = useFieldArray({ control, name: "emails" });
   const socialLinks = useFieldArray({ control, name: "socialLinks" });
+
+  // Watch media fields for uploader preview
+  const logoVal = useWatch({ control, name: "logo" });
+  const darkLogoVal = useWatch({ control, name: "darkLogo" });
+  const faviconVal = useWatch({ control, name: "favicon" });
+  const profilePdfVal = useWatch({ control, name: "profilePdf" });
+  const ogImageVal = useWatch({ control, name: "seo.ogImage" });
 
   const applyDto = useCallback((dto: SiteSettingsDTO) => {
     reset(siteSettingsDtoToForm(dto));
@@ -258,7 +268,7 @@ export default function SiteSettingsForm() {
 
       <Section
         title="Brand"
-        description="Site identity and core assets (URLs — uploads come later)."
+        description="Site identity and core assets. Upload or enter a URL manually."
       >
         <Input
           label="Site name"
@@ -266,15 +276,81 @@ export default function SiteSettingsForm() {
           {...register("siteName")}
         />
         <Input label="Tagline" {...register("tagline")} />
-        <Input
-          label="Logo URL"
-          hint="HTTPS or site-relative path (starts with /). Cloudinary HTTPS preferred."
-          {...register("logo.url")}
-        />
-        <Input label="Logo alt text" {...register("logo.altText")} />
-        <Input label="Dark logo URL" {...register("darkLogo.url")} />
-        <Input label="Dark logo alt text" {...register("darkLogo.altText")} />
-        <Input label="Favicon URL" {...register("favicon.url")} />
+
+        {/* Logo */}
+        <div className="space-y-2 rounded-md border border-border/60 bg-muted/20 p-4">
+          <p className="text-sm font-semibold text-foreground">Logo</p>
+          <Input
+            label="Logo URL"
+            hint="HTTPS or site-relative path (starts with /). Cloudinary HTTPS preferred."
+            {...register("logo.url")}
+          />
+          <Input label="Logo alt text" {...register("logo.altText")} />
+          <AdminMediaUploader
+            label="Upload logo image"
+            folder={CLOUDINARY_FOLDERS.settings}
+            usage="logo"
+            mediaType="image"
+            maxSizeMB={5}
+            showPreview
+            value={logoVal as MediaObject | undefined}
+            onChange={(asset) => {
+              if (asset) {
+                setValue("logo", asset, { shouldDirty: true });
+              } else {
+                setValue("logo", undefined, { shouldDirty: true });
+              }
+            }}
+            helperText="Upload to auto-fill the URL fields above (JPG, PNG, WebP, SVG — max 5MB)."
+          />
+        </div>
+
+        {/* Dark Logo */}
+        <div className="space-y-2 rounded-md border border-border/60 bg-muted/20 p-4">
+          <p className="text-sm font-semibold text-foreground">Dark Logo</p>
+          <Input label="Dark logo URL" {...register("darkLogo.url")} />
+          <Input label="Dark logo alt text" {...register("darkLogo.altText")} />
+          <AdminMediaUploader
+            label="Upload dark logo image"
+            folder={CLOUDINARY_FOLDERS.settings}
+            usage="darkLogo"
+            mediaType="image"
+            maxSizeMB={5}
+            showPreview
+            value={darkLogoVal as MediaObject | undefined}
+            onChange={(asset) => {
+              if (asset) {
+                setValue("darkLogo", asset, { shouldDirty: true });
+              } else {
+                setValue("darkLogo", undefined, { shouldDirty: true });
+              }
+            }}
+            helperText="Optional dark-mode logo variant (JPG, PNG, WebP, SVG — max 5MB)."
+          />
+        </div>
+
+        {/* Favicon */}
+        <div className="space-y-2 rounded-md border border-border/60 bg-muted/20 p-4">
+          <p className="text-sm font-semibold text-foreground">Favicon</p>
+          <Input label="Favicon URL" {...register("favicon.url")} />
+          <AdminMediaUploader
+            label="Upload favicon"
+            folder={CLOUDINARY_FOLDERS.settings}
+            usage="favicon"
+            mediaType="image"
+            maxSizeMB={2}
+            showPreview
+            value={faviconVal as MediaObject | undefined}
+            onChange={(asset) => {
+              if (asset) {
+                setValue("favicon", asset, { shouldDirty: true });
+              } else {
+                setValue("favicon", undefined, { shouldDirty: true });
+              }
+            }}
+            helperText="PNG or SVG favicon (max 2MB). After upload, click Save settings."
+          />
+        </div>
       </Section>
 
       <Section
@@ -395,7 +471,7 @@ export default function SiteSettingsForm() {
 
       <Section
         title="Social links"
-        description="Active rows appear in the footer; order controls display order via “Order”."
+        description={'Active rows appear in the footer; order controls display order via \u201cOrder\u201d.'}
       >
         <div className="flex justify-end">
           <Button
@@ -475,7 +551,24 @@ export default function SiteSettingsForm() {
         <Input
           label="Button label"
           {...register("profileButtonText")}
-          hint='Default: “Download Profile”'
+          hint='Default: "Download Profile"'
+        />
+        <AdminMediaUploader
+          label="Upload company profile PDF"
+          folder={CLOUDINARY_FOLDERS.profilePdf}
+          usage="profilePdf"
+          mediaType="pdf"
+          maxSizeMB={20}
+          showPreview
+          value={profilePdfVal as MediaObject | undefined}
+          onChange={(asset) => {
+            if (asset) {
+              setValue("profilePdf", asset, { shouldDirty: true });
+            } else {
+              setValue("profilePdf", undefined, { shouldDirty: true });
+            }
+          }}
+          helperText="Upload a PDF to replace the manual URL above (max 20MB). After upload, click Save settings."
         />
       </Section>
 
@@ -487,7 +580,7 @@ export default function SiteSettingsForm() {
 
       <Section
         title="Global navbar CTA"
-        description="Overrides the desktop “Get in Touch” destination when enabled."
+        description={'Overrides the desktop \u201cGet in Touch\u201d destination when enabled.'}
       >
         <label className="flex items-center gap-2 text-sm font-medium">
           <input type="checkbox" {...register("globalCTA.isActive")} /> CTA enabled
@@ -521,8 +614,31 @@ export default function SiteSettingsForm() {
         <Input label="Canonical URL (site-wide)" {...register("seo.canonicalUrl")} />
         <Input label="OG title" {...register("seo.ogTitle")} />
         <Textarea rows={3} label="OG description" {...register("seo.ogDescription")} />
-        <Input label="OG image URL" {...register("seo.ogImage.url")} />
-        <Input label="OG image alt" {...register("seo.ogImage.altText")} />
+
+        {/* OG Image */}
+        <div className="space-y-2 rounded-md border border-border/60 bg-muted/20 p-4">
+          <p className="text-sm font-semibold text-foreground">OG Image</p>
+          <Input label="OG image URL" {...register("seo.ogImage.url")} />
+          <Input label="OG image alt" {...register("seo.ogImage.altText")} />
+          <AdminMediaUploader
+            label="Upload OG image"
+            folder={CLOUDINARY_FOLDERS.seo}
+            usage="ogImage"
+            mediaType="image"
+            maxSizeMB={5}
+            showPreview
+            value={ogImageVal as MediaObject | undefined}
+            onChange={(asset) => {
+              if (asset) {
+                setValue("seo.ogImage", asset, { shouldDirty: true });
+              } else {
+                setValue("seo.ogImage", undefined, { shouldDirty: true });
+              }
+            }}
+            helperText="Recommended: 1200×630px (JPG or PNG, max 5MB)."
+          />
+        </div>
+
         <div className="flex flex-wrap gap-6 pt-2 text-sm">
           <label className="flex items-center gap-2 text-muted-foreground">
             <input type="checkbox" {...register("seo.robots.index")} /> Search engines may index (robots:index)

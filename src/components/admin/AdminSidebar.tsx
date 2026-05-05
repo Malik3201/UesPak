@@ -41,7 +41,7 @@ const navItems: NavItem[] = [
   { kind: "placeholder", label: "Team Members", icon: Users },
   { kind: "placeholder", label: "Jobs", icon: ClipboardList },
   { kind: "placeholder", label: "Enquiries", icon: Mail },
-  { kind: "placeholder", label: "Media Library", icon: Image },
+  { kind: "link", href: "/admin/media", label: "Media Library", icon: Image },
   { kind: "placeholder", label: "SEO Manager", icon: Search },
   { kind: "placeholder", label: "Redirects", icon: ArrowLeftRight },
   { kind: "placeholder", label: "Admin Users", icon: Shield },
