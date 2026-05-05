@@ -22,8 +22,9 @@ export interface AdminMediaUploaderProps {
 interface UploadedAssetPayload {
   id: string;
   url: string;
-  secureUrl: string;
+  secureUrl?: string;
   publicId: string;
+  fileId?: string;
   type: string;
   filename?: string;
   originalFilename?: string;
@@ -41,7 +42,7 @@ export default function AdminMediaUploader({
   label,
   value,
   onChange,
-  folder = "uespak/general",
+  folder = "/uespak/general",
   usage,
   accept,
   maxSizeMB,
@@ -119,14 +120,15 @@ export default function AdminMediaUploader({
       }
 
       const payload = json?.data?.asset as UploadedAssetPayload | undefined;
-      if (!payload?.publicId) {
+      if (!payload?.publicId && !payload?.fileId) {
         setError("Upload response is missing asset data.");
         return;
       }
 
       const mediaObj: MediaObject = {
         url: payload.secureUrl || payload.url,
-        publicId: payload.publicId,
+        publicId: payload.publicId ?? payload.fileId ?? "",
+        fileId: payload.fileId,
         altText: payload.altText,
         width: payload.width,
         height: payload.height,

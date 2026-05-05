@@ -8,8 +8,10 @@ export interface IMediaAsset extends Document {
   url: string;
   secureUrl: string;
   publicId: string;
+  fileId?: string;
+  provider?: "imagekit" | "cloudinary";
   type: MediaAssetType;
-  resourceType: "image" | "video" | "raw";
+  resourceType: "image" | "raw";
   filename?: string;
   originalFilename?: string;
   altText?: string;
@@ -33,6 +35,12 @@ const mediaAssetSchema = new Schema<IMediaAsset>(
     url: { type: String, required: true },
     secureUrl: { type: String, required: true },
     publicId: { type: String, required: true, unique: true },
+    fileId: { type: String, trim: true },
+    provider: {
+      type: String,
+      enum: ["imagekit", "cloudinary"],
+      default: "imagekit",
+    },
     type: {
       type: String,
       enum: ["image", "pdf", "document", "other"],
@@ -41,7 +49,7 @@ const mediaAssetSchema = new Schema<IMediaAsset>(
     },
     resourceType: {
       type: String,
-      enum: ["image", "video", "raw"],
+      enum: ["image", "raw"],
       default: "image",
     },
     filename: { type: String, trim: true },
@@ -67,6 +75,8 @@ const mediaAssetSchema = new Schema<IMediaAsset>(
 );
 
 mediaAssetSchema.index({ publicId: 1 }, { unique: true });
+mediaAssetSchema.index({ fileId: 1 });
+mediaAssetSchema.index({ provider: 1 });
 mediaAssetSchema.index({ type: 1 });
 mediaAssetSchema.index({ folder: 1, resourceType: 1 });
 mediaAssetSchema.index({ uploadedBy: 1 });

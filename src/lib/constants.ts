@@ -27,8 +27,8 @@ export const ROLES = {
 
 export type RoleValue = (typeof ROLES)[keyof typeof ROLES];
 
-// ─── Cloudinary folders (mirrored from lib/cloudinary.ts for UI use) ──────────
-export const CLOUDINARY_FOLDER_KEYS = [
+// ─── Media upload folders ───────────────────────────────────────────────────────
+export const MEDIA_FOLDER_KEYS = [
   "services",
   "projects",
   "team",

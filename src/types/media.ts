@@ -2,6 +2,7 @@
 export interface MediaObject {
   url: string;
   publicId: string;
+  fileId?: string;
   altText?: string;
   width?: number;
   height?: number;

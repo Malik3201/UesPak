@@ -16,7 +16,7 @@ import { Input } from "@/components/shared/Input";
 import Textarea from "@/components/shared/Textarea";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
 import AdminMediaUploader from "@/components/admin/media/AdminMediaUploader";
-import { CLOUDINARY_FOLDERS } from "@/constants/cloudinary-folders";
+import { MEDIA_UPLOAD_FOLDERS } from "@/constants/media-folders";
 
 const isBrowserDev =
   typeof process !== "undefined" && process.env.NODE_ENV === "development";
@@ -282,13 +282,13 @@ export default function SiteSettingsForm() {
           <p className="text-sm font-semibold text-foreground">Logo</p>
           <Input
             label="Logo URL"
-            hint="HTTPS or site-relative path (starts with /). Cloudinary HTTPS preferred."
+            hint="HTTPS or site-relative path (starts with /). ImageKit HTTPS preferred."
             {...register("logo.url")}
           />
           <Input label="Logo alt text" {...register("logo.altText")} />
           <AdminMediaUploader
             label="Upload logo image"
-            folder={CLOUDINARY_FOLDERS.settings}
+            folder={MEDIA_UPLOAD_FOLDERS.settings}
             usage="logo"
             mediaType="image"
             maxSizeMB={5}
@@ -312,7 +312,7 @@ export default function SiteSettingsForm() {
           <Input label="Dark logo alt text" {...register("darkLogo.altText")} />
           <AdminMediaUploader
             label="Upload dark logo image"
-            folder={CLOUDINARY_FOLDERS.settings}
+            folder={MEDIA_UPLOAD_FOLDERS.settings}
             usage="darkLogo"
             mediaType="image"
             maxSizeMB={5}
@@ -335,7 +335,7 @@ export default function SiteSettingsForm() {
           <Input label="Favicon URL" {...register("favicon.url")} />
           <AdminMediaUploader
             label="Upload favicon"
-            folder={CLOUDINARY_FOLDERS.settings}
+            folder={MEDIA_UPLOAD_FOLDERS.settings}
             usage="favicon"
             mediaType="image"
             maxSizeMB={2}
@@ -555,7 +555,7 @@ export default function SiteSettingsForm() {
         />
         <AdminMediaUploader
           label="Upload company profile PDF"
-          folder={CLOUDINARY_FOLDERS.profilePdf}
+          folder={MEDIA_UPLOAD_FOLDERS.profilePdf}
           usage="profilePdf"
           mediaType="pdf"
           maxSizeMB={20}
@@ -622,7 +622,7 @@ export default function SiteSettingsForm() {
           <Input label="OG image alt" {...register("seo.ogImage.altText")} />
           <AdminMediaUploader
             label="Upload OG image"
-            folder={CLOUDINARY_FOLDERS.seo}
+            folder={MEDIA_UPLOAD_FOLDERS.seo}
             usage="ogImage"
             mediaType="image"
             maxSizeMB={5}

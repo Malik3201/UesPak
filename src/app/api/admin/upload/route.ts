@@ -2,8 +2,11 @@ import type { NextRequest } from "next/server";
 import mongoose from "mongoose";
 import { requireAdmin, AdminAuthError } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
-import { uploadToCloudinary } from "@/lib/cloudinary";
-import { CLOUDINARY_FOLDERS } from "@/constants/cloudinary-folders";
+import {
+  uploadToImageKit,
+  resolveMediaFolder,
+  hasImageKitConfig,
+} from "@/lib/imagekit";
 import { MediaAsset } from "@/models/MediaAsset";
 import {
   successResponse,
@@ -18,30 +21,15 @@ import {
 
 export const runtime = "nodejs";
 
-const VALID_FOLDERS = new Set(Object.values(CLOUDINARY_FOLDERS));
-
-function resolveFolder(raw: string | null): string {
-  if (!raw) return CLOUDINARY_FOLDERS.general;
-  const trimmed = raw.trim();
-  if (VALID_FOLDERS.has(trimmed as (typeof CLOUDINARY_FOLDERS)[keyof typeof CLOUDINARY_FOLDERS])) {
-    return trimmed;
-  }
-  return CLOUDINARY_FOLDERS.general;
-}
-
 /** POST /api/admin/upload */
 export async function POST(request: NextRequest) {
   try {
     const admin = await requireAdmin();
 
-    // Verify Cloudinary config is present
-    if (
-      !process.env.CLOUDINARY_CLOUD_NAME ||
-      !process.env.CLOUDINARY_API_KEY ||
-      !process.env.CLOUDINARY_API_SECRET
-    ) {
+    // Verify ImageKit config is present
+    if (!hasImageKitConfig()) {
       return errorResponse(
-        "Cloudinary is not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.",
+        "ImageKit is not configured. Please set IMAGEKIT_PUBLIC_KEY, IMAGEKIT_PRIVATE_KEY, and IMAGEKIT_URL_ENDPOINT.",
         500
       );
     }
@@ -78,26 +66,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const folder = resolveFolder(folderRaw);
+    const folder = resolveMediaFolder(folderRaw);
     const assetType = resolveMediaType(mimeType);
-    const isPdf = mimeType === "application/pdf";
-    const resourceType = isPdf ? "raw" : "image";
 
     // Convert File → Buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Upload to Cloudinary
+    // Upload to ImageKit
     let uploadResult;
     try {
-      uploadResult = await uploadToCloudinary(buffer, {
+      uploadResult = await uploadToImageKit({
+        fileBuffer: buffer,
+        fileName: file.name,
         folder,
-        resourceType: resourceType as "image" | "raw",
+        mimeType,
+        altText,
+        usage,
       });
     } catch (uploadErr) {
-      console.error("[POST /api/admin/upload] Cloudinary error:", uploadErr);
+      console.error("[POST /api/admin/upload] ImageKit error:", uploadErr);
       return errorResponse(
-        "Failed to upload file to Cloudinary. Please check your configuration and try again.",
+        "Failed to upload file to ImageKit. Please check your configuration and try again.",
         502
       );
     }
@@ -108,14 +98,16 @@ export async function POST(request: NextRequest) {
       url: uploadResult.url,
       secureUrl: uploadResult.secureUrl,
       publicId: uploadResult.publicId,
+      fileId: uploadResult.fileId,
+      provider: "imagekit",
       type: assetType,
-      resourceType: uploadResult.resourceType as "image" | "video" | "raw",
-      filename: file.name,
-      originalFilename: file.name,
+      resourceType: uploadResult.resourceType,
+      filename: uploadResult.filename,
+      originalFilename: uploadResult.originalFilename,
       altText,
       folder,
       format: uploadResult.format,
-      size: uploadResult.bytes,
+      size: uploadResult.size,
       width: uploadResult.width,
       height: uploadResult.height,
       mimeType,
@@ -132,6 +124,7 @@ export async function POST(request: NextRequest) {
           url: asset.url,
           secureUrl: asset.secureUrl,
           publicId: asset.publicId,
+          fileId: asset.fileId,
           type: asset.type,
           filename: asset.filename,
           originalFilename: asset.originalFilename,

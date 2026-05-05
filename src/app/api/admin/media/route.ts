@@ -46,6 +46,8 @@ export async function GET(request: NextRequest) {
         url: a.url,
         secureUrl: a.secureUrl,
         publicId: a.publicId,
+        fileId: a.fileId,
+        provider: a.provider,
         type: a.type,
         resourceType: a.resourceType,
         filename: a.filename,

@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import mongoose from "mongoose";
 import { requireAdmin, AdminAuthError } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
-import { deleteFromCloudinary } from "@/lib/cloudinary";
+import { deleteFromImageKit } from "@/lib/imagekit";
 import { MediaAsset } from "@/models/MediaAsset";
 import {
   successResponse,
@@ -13,7 +13,7 @@ import {
 
 export const runtime = "nodejs";
 
-/** DELETE /api/admin/media/[id] — soft-archives and removes from Cloudinary */
+/** DELETE /api/admin/media/[id] — soft-archives and removes from ImageKit when possible */
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -38,15 +38,20 @@ export async function DELETE(
       return successResponse("Asset is already archived.");
     }
 
-    // Delete from Cloudinary
+    // Delete from ImageKit (best effort, only when fileId is available)
     try {
-      const cloudinaryResourceType =
-        asset.resourceType === "raw" ? "raw" : asset.resourceType === "video" ? "video" : "image";
-      await deleteFromCloudinary(asset.publicId, cloudinaryResourceType);
-    } catch (cloudErr) {
+      if (asset.fileId) {
+        await deleteFromImageKit(asset.fileId);
+      } else {
+        // Compatibility: older Cloudinary-era records may not have ImageKit fileId.
+        console.warn(
+          "[DELETE /api/admin/media] Missing fileId for remote deletion; archiving DB record only."
+        );
+      }
+    } catch (remoteErr) {
       console.warn(
-        "[DELETE /api/admin/media] Cloudinary delete warning — proceeding with DB archive:",
-        cloudErr
+        "[DELETE /api/admin/media] ImageKit delete warning — proceeding with DB archive:",
+        remoteErr
       );
     }
 

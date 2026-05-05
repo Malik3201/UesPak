@@ -17,12 +17,16 @@ const envSchema = z.object({
     .min(32, "JWT_SECRET must be at least 32 characters"),
   JWT_EXPIRES_IN: z.string().default("7d"),
 
-  // Cloudinary
-  CLOUDINARY_CLOUD_NAME: z.string().min(1, "CLOUDINARY_CLOUD_NAME is required"),
-  CLOUDINARY_API_KEY: z.string().min(1, "CLOUDINARY_API_KEY is required"),
-  CLOUDINARY_API_SECRET: z
+  // ImageKit
+  IMAGEKIT_PUBLIC_KEY: z
     .string()
-    .min(1, "CLOUDINARY_API_SECRET is required"),
+    .min(1, "IMAGEKIT_PUBLIC_KEY is required"),
+  IMAGEKIT_PRIVATE_KEY: z
+    .string()
+    .min(1, "IMAGEKIT_PRIVATE_KEY is required"),
+  IMAGEKIT_URL_ENDPOINT: z
+    .string()
+    .url("IMAGEKIT_URL_ENDPOINT must be a valid URL"),
 
   // Email
   EMAIL_HOST: z.string().min(1, "EMAIL_HOST is required"),
