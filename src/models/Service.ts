@@ -7,6 +7,7 @@ export interface IService extends Document {
   slug: string;
   excerpt?: string;
   content?: string;
+  serviceGroup: "engineering" | "agriculture";
   category?: string;
   icon?: string;
   featuredImage?: MediaObject;
@@ -75,6 +76,12 @@ const serviceSchema = new Schema<IService>(
     },
     excerpt: { type: String, trim: true },
     content: { type: String },
+    serviceGroup: {
+      type: String,
+      enum: ["engineering", "agriculture"],
+      default: "engineering",
+      index: true,
+    },
     category: { type: String, trim: true },
     icon: { type: String, trim: true },
     featuredImage: mediaObjectSchema,
@@ -122,6 +129,7 @@ const serviceSchema = new Schema<IService>(
 
 serviceSchema.index({ slug: 1 }, { unique: true });
 serviceSchema.index({ status: 1 });
+serviceSchema.index({ serviceGroup: 1 });
 serviceSchema.index({ isFeatured: 1 });
 serviceSchema.index({ order: 1 });
 serviceSchema.index({ category: 1 });

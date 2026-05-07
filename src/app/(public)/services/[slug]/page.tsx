@@ -4,6 +4,7 @@ import Link from "next/link";
 import Container from "@/components/shared/Container";
 import { getAllServiceSlugs, getServiceBySlug, getServiceSeoMetadata } from "@/lib/services";
 import { SITE_URL } from "@/lib/seo";
+import { getServiceGroupLabel } from "@/types/service";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -31,6 +32,13 @@ export default async function ServiceDetailPage({ params }: Props) {
   const service = await getServiceBySlug(slug);
   if (!service) notFound();
 
+  const serviceGroup =
+    (service as unknown as { serviceGroup?: "engineering" | "agriculture" }).serviceGroup ===
+    "agriculture"
+      ? "agriculture"
+      : "engineering";
+  const groupLabel = getServiceGroupLabel(serviceGroup);
+
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -40,6 +48,12 @@ export default async function ServiceDetailPage({ params }: Props) {
       {
         "@type": "ListItem",
         position: 3,
+        name: groupLabel,
+        item: `${SITE_URL}/services/group/${serviceGroup}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
         name: service.title,
         item: `${SITE_URL}/services/${service.slug}`,
       },
@@ -70,6 +84,10 @@ export default async function ServiceDetailPage({ params }: Props) {
           /{" "}
           <Link href="/services" className="hover:underline">
             Services
+          </Link>{" "}
+          /{" "}
+          <Link href={`/services/group/${serviceGroup}`} className="hover:underline">
+            {groupLabel}
           </Link>{" "}
           / <span className="text-foreground">{service.title}</span>
         </nav>

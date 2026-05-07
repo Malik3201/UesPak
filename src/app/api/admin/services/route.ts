@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status");
     const search = searchParams.get("search");
     const category = searchParams.get("category");
+    const serviceGroup = searchParams.get("serviceGroup");
     const featured = searchParams.get("featured");
     const page = Math.max(1, Number(searchParams.get("page") || 1));
     const limit = Math.min(
@@ -54,6 +55,9 @@ export async function GET(request: NextRequest) {
     const filter: Record<string, unknown> = {};
     if (status && ["draft", "published", "archived"].includes(status)) {
       filter.status = status;
+    }
+    if (serviceGroup && ["engineering", "agriculture"].includes(serviceGroup)) {
+      filter.serviceGroup = serviceGroup;
     }
     if (category) filter.category = category;
     if (featured != null && featured !== "") {
@@ -111,6 +115,7 @@ export async function POST(request: NextRequest) {
 
     const service = await Service.create({
       ...data,
+      serviceGroup: data.serviceGroup || "engineering",
       slug,
       content: data.content ? sanitizeHtml(data.content) : undefined,
       createdBy: new mongoose.Types.ObjectId(admin.id),

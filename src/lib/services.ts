@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Service, type IService } from "@/models/Service";
 import { connectDB } from "@/lib/db";
 import { SITE_URL } from "@/lib/seo";
+import type { ServiceGroup } from "@/types/service";
 
 export async function getPublishedServices(): Promise<IService[]> {
   try {
@@ -12,6 +13,64 @@ export async function getPublishedServices(): Promise<IService[]> {
   } catch {
     return [];
   }
+}
+
+function getServiceGroupValue(service: Pick<IService, "serviceGroup"> | (IService & { serviceGroup?: unknown })): ServiceGroup {
+  return (service as unknown as { serviceGroup?: ServiceGroup }).serviceGroup === "agriculture"
+    ? "agriculture"
+    : "engineering";
+}
+
+export async function getPublishedServicesByGroup(
+  group: ServiceGroup
+): Promise<IService[]> {
+  try {
+    await connectDB();
+    const filter: Record<string, unknown> =
+      group === "engineering"
+        ? {
+            status: "published",
+            $or: [
+              { serviceGroup: "engineering" },
+              { serviceGroup: { $exists: false } },
+            ],
+          }
+        : { status: "published", serviceGroup: "agriculture" };
+
+    return await Service.find(filter)
+      .sort({ order: 1, createdAt: -1 })
+      .lean();
+  } catch {
+    return [];
+  }
+}
+
+export async function getGroupedPublishedServices(): Promise<{
+  engineering: IService[];
+  agriculture: IService[];
+}> {
+  const [all] = await Promise.all([getPublishedServices()]);
+
+  const engineering: IService[] = [];
+  const agriculture: IService[] = [];
+
+  for (const service of all) {
+    const group = getServiceGroupValue(service as unknown as IService);
+    if (group === "agriculture") agriculture.push(service);
+    else engineering.push(service);
+  }
+
+  return { engineering, agriculture };
+}
+
+export async function getServiceGroupsWithCounts(): Promise<
+  Array<{ group: ServiceGroup; count: number }>
+> {
+  const grouped = await getGroupedPublishedServices();
+  return [
+    { group: "engineering", count: grouped.engineering.length },
+    { group: "agriculture", count: grouped.agriculture.length },
+  ];
 }
 
 export async function getFeaturedServices(): Promise<IService[]> {

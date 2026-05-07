@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const serviceStatusEnum = z.enum(["draft", "published", "archived"]);
+const serviceGroupEnum = z.enum(["engineering", "agriculture"]);
 
 const lowercaseSlug = z
   .string()
@@ -67,6 +68,7 @@ export const serviceCreateSchema = z.object({
   slug: lowercaseSlug.optional(),
   excerpt: trimToOptional(500),
   content: trimToOptional(50000),
+  serviceGroup: serviceGroupEnum.default("engineering"),
   category: trimToOptional(120),
   icon: trimToOptional(120),
   featuredImage: mediaObjectSchema.optional(),

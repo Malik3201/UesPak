@@ -91,7 +91,10 @@ export async function PATCH(
       return validationErrorResponse(parsed.error.flatten().fieldErrors);
     }
     const data = parsed.data;
-    const updatePayload: Record<string, unknown> = { ...data };
+    const updatePayload: Record<string, unknown> = {
+      ...data,
+      ...(data.serviceGroup ? { serviceGroup: data.serviceGroup } : {}),
+    };
 
     if (data.slug || data.title) {
       const slugBase = data.slug || data.title || existing.title;

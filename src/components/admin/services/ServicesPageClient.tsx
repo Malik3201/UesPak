@@ -7,6 +7,7 @@ import { Button } from "@/components/shared/Button";
 import { Input } from "@/components/shared/Input";
 import ServicesTable from "@/components/admin/services/ServicesTable";
 import type { ServiceDto } from "@/types/service";
+import { SERVICE_GROUPS } from "@/types/service";
 
 interface ServicesResponse {
   services: ServiceDto[];
@@ -28,12 +29,14 @@ export default function ServicesPageClient() {
   const page = Number(searchParams.get("page") || "1");
   const status = searchParams.get("status") || "";
   const search = searchParams.get("search") || "";
+  const serviceGroup = searchParams.get("serviceGroup") || "";
 
   async function loadServices() {
     try {
       const q = new URLSearchParams();
       if (status) q.set("status", status);
       if (search) q.set("search", search);
+      if (serviceGroup) q.set("serviceGroup", serviceGroup);
       q.set("page", String(page));
       q.set("limit", "20");
       const res = await fetch(`/api/admin/services?${q.toString()}`, {
@@ -77,7 +80,7 @@ export default function ServicesPageClient() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadServices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, status, search]);
+  }, [page, status, search, serviceGroup]);
 
   return (
     <div className="space-y-6">
@@ -107,6 +110,27 @@ export default function ServicesPageClient() {
             router.push(`/admin/services?${q.toString()}`);
           }}
         />
+        <label className="flex min-w-[220px] flex-col gap-1 text-sm">
+          <span className="font-medium text-foreground">Service Group</span>
+          <select
+            className="h-10 rounded-md border border-border bg-background px-3 text-sm"
+            value={serviceGroup}
+            onChange={(e) => {
+              const q = new URLSearchParams(searchParams.toString());
+              if (e.target.value) q.set("serviceGroup", e.target.value);
+              else q.delete("serviceGroup");
+              q.set("page", "1");
+              router.push(`/admin/services?${q.toString()}`);
+            }}
+          >
+            <option value="">All groups</option>
+            {SERVICE_GROUPS.map((g) => (
+              <option key={g.value} value={g.value}>
+                {g.label}
+              </option>
+            ))}
+          </select>
+        </label>
         <label className="flex min-w-[180px] flex-col gap-1 text-sm">
           <span className="font-medium text-foreground">Status</span>
           <select

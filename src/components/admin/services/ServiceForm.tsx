@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { ServiceDto, ServiceStatus } from "@/types/service";
+import type { ServiceDto, ServiceGroup, ServiceStatus } from "@/types/service";
+import { SERVICE_GROUPS, getServiceGroupLabel } from "@/types/service";
 import type { MediaObject } from "@/types/media";
 import { Input } from "@/components/shared/Input";
 import Textarea from "@/components/shared/Textarea";
@@ -18,6 +19,7 @@ const defaultService: Partial<ServiceDto> = {
   slug: "",
   excerpt: "",
   content: "",
+  serviceGroup: "engineering",
   category: "",
   icon: "",
   status: "draft",
@@ -172,6 +174,27 @@ export default function ServiceForm({ mode, initialService }: ServiceFormProps) 
             updateSlugFromTitle(title);
           }}
         />
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="font-medium text-foreground">Service Group</span>
+          <select
+            className="h-10 rounded-md border border-border bg-background px-3 text-sm"
+            value={(form.serviceGroup as ServiceGroup | undefined) || "engineering"}
+            onChange={(e) => update("serviceGroup", e.target.value as ServiceGroup)}
+          >
+            {SERVICE_GROUPS.map((g) => (
+              <option key={g.value} value={g.value}>
+                {g.label}
+              </option>
+            ))}
+          </select>
+          <span className="text-xs text-muted-foreground">
+            Controls where this service appears in the Services menu and listing pages (
+            {getServiceGroupLabel(
+              ((form.serviceGroup as ServiceGroup | undefined) || "engineering") as ServiceGroup
+            )}
+            ).
+          </span>
+        </label>
         <Input
           label="Slug"
           value={form.slug || ""}
@@ -188,6 +211,7 @@ export default function ServiceForm({ mode, initialService }: ServiceFormProps) 
           label="Category"
           value={form.category || ""}
           onChange={(e) => update("category", e.target.value)}
+          hint="Optional specific classification (e.g., HVAC-R, Facility Management, Regenerative Farming)."
         />
         <Input
           label="Icon class/name (optional)"

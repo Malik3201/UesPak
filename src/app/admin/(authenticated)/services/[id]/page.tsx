@@ -4,7 +4,7 @@ import ServiceForm from "@/components/admin/services/ServiceForm";
 import { getCurrentAdmin } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { Service } from "@/models/Service";
-import type { ServiceDto } from "@/types/service";
+import type { ServiceDto, ServiceGroup } from "@/types/service";
 
 export const metadata: Metadata = {
   title: "Edit Service | UESPAK Admin",
@@ -30,6 +30,10 @@ export default async function EditServicePage({
     slug: service.slug,
     excerpt: service.excerpt,
     content: service.content,
+    serviceGroup:
+      ((service as unknown as { serviceGroup?: string }).serviceGroup === "agriculture"
+        ? "agriculture"
+        : "engineering") satisfies ServiceGroup,
     category: service.category,
     icon: service.icon,
     featuredImage: service.featuredImage,

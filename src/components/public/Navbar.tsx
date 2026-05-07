@@ -1,11 +1,11 @@
 import Link from "next/link";
 import Container from "@/components/shared/Container";
 import type { PublicSiteSettings } from "@/types/site-settings";
+import { getGroupedPublishedServices } from "@/lib/services";
 
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/about-us", label: "About Us" },
-  { href: "/services", label: "Services" },
   { href: "/projects", label: "Projects" },
   { href: "/careers", label: "Careers" },
   { href: "/contact-us", label: "Contact" },
@@ -15,7 +15,7 @@ interface NavbarProps {
   settings: PublicSiteSettings;
 }
 
-export default function Navbar({ settings }: NavbarProps) {
+export default async function Navbar({ settings }: NavbarProps) {
   const pdfUrl = settings.profilePdfUrl?.trim();
   const profileLabel =
     settings.profileButtonText?.trim() || "Download Profile";
@@ -32,6 +32,10 @@ export default function Navbar({ settings }: NavbarProps) {
       : "Get in Touch";
 
   const ctaIsAbsolute = /^https?:\/\//i.test(ctaHref);
+
+  const grouped = await getGroupedPublishedServices();
+  const engineeringLinks = grouped.engineering.slice(0, 7);
+  const agricultureLinks = grouped.agriculture.slice(0, 7);
 
   return (
     <nav className="bg-background border-b border-border sticky top-0 z-40 shadow-sm">
@@ -69,6 +73,99 @@ export default function Navbar({ settings }: NavbarProps) {
               </Link>
             </li>
           ))}
+
+          <li className="relative group">
+            <Link
+              href="/services"
+              className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors duration-150"
+            >
+              Services
+            </Link>
+            <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-all duration-150 absolute left-1/2 -translate-x-1/2 top-full pt-3">
+              <div className="w-[720px] max-w-[85vw] rounded-xl border border-border bg-card shadow-lg p-5">
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                        Engineering Services
+                      </h3>
+                      <Link
+                        href="/services/group/engineering"
+                        className="text-xs font-semibold text-primary hover:underline"
+                      >
+                        View all
+                      </Link>
+                    </div>
+                    {engineeringLinks.length ? (
+                      <ul className="mt-3 space-y-2">
+                        {engineeringLinks.map((s) => (
+                          <li key={String(s._id)}>
+                            <Link
+                              href={`/services/${s.slug}`}
+                              className="block rounded-md px-2 py-1.5 text-sm text-foreground/85 hover:bg-accent hover:text-foreground transition-colors"
+                            >
+                              {s.title}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-3 text-sm text-muted-foreground">
+                        Browse engineering services.
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                        Agriculture Services
+                      </h3>
+                      <Link
+                        href="/services/group/agriculture"
+                        className="text-xs font-semibold text-primary hover:underline"
+                      >
+                        View all
+                      </Link>
+                    </div>
+                    {agricultureLinks.length ? (
+                      <ul className="mt-3 space-y-2">
+                        {agricultureLinks.map((s) => (
+                          <li key={String(s._id)}>
+                            <Link
+                              href={`/services/${s.slug}`}
+                              className="block rounded-md px-2 py-1.5 text-sm text-foreground/85 hover:bg-accent hover:text-foreground transition-colors"
+                            >
+                              {s.title}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-3 text-sm text-muted-foreground">
+                        Browse agriculture services.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
+                  <Link
+                    href="/services"
+                    className="text-sm font-semibold text-foreground/85 hover:text-primary transition-colors"
+                  >
+                    View All Services
+                  </Link>
+                  <Link
+                    href="/contact-us"
+                    className="text-sm font-semibold text-primary hover:underline"
+                  >
+                    Contact us
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </li>
         </ul>
 
         <div className="hidden md:flex items-center gap-2 shrink-0">

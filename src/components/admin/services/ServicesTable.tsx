@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/shared/Button";
 import ServiceStatusBadge from "@/components/admin/services/ServiceStatusBadge";
 import type { ServiceDto } from "@/types/service";
+import { getServiceGroupLabel } from "@/types/service";
 
 interface ServicesTableProps {
   services: ServiceDto[];
@@ -25,6 +26,7 @@ export default function ServicesTable({ services, onArchive }: ServicesTableProp
         <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
           <tr>
             <th className="px-4 py-3 font-semibold">Title</th>
+            <th className="px-4 py-3 font-semibold">Group</th>
             <th className="px-4 py-3 font-semibold">Slug</th>
             <th className="px-4 py-3 font-semibold">Category</th>
             <th className="px-4 py-3 font-semibold">Status</th>
@@ -44,6 +46,23 @@ export default function ServicesTable({ services, onArchive }: ServicesTableProp
                     {service.excerpt}
                   </div>
                 ) : null}
+              </td>
+              <td className="px-4 py-3">
+                <span
+                  className={[
+                    "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold",
+                    (service.serviceGroup || "engineering") === "agriculture"
+                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                      : "border-primary/30 bg-primary/10 text-primary",
+                  ].join(" ")}
+                  title={getServiceGroupLabel(
+                    ((service.serviceGroup || "engineering") as "engineering" | "agriculture")
+                  )}
+                >
+                  {(service.serviceGroup || "engineering") === "agriculture"
+                    ? "Agriculture"
+                    : "Engineering"}
+                </span>
               </td>
               <td className="px-4 py-3 text-xs text-muted-foreground">{service.slug}</td>
               <td className="px-4 py-3 text-xs text-muted-foreground">
