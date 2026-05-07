@@ -2,11 +2,11 @@ import Link from "next/link";
 import Container from "@/components/shared/Container";
 import type { PublicSiteSettings } from "@/types/site-settings";
 import { getGroupedPublishedServices } from "@/lib/services";
+import { getGroupedPublishedProjects } from "@/lib/projects";
 
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/about-us", label: "About Us" },
-  { href: "/projects", label: "Projects" },
   { href: "/careers", label: "Careers" },
   { href: "/contact-us", label: "Contact" },
 ];
@@ -36,6 +36,10 @@ export default async function Navbar({ settings }: NavbarProps) {
   const grouped = await getGroupedPublishedServices();
   const engineeringLinks = grouped.engineering.slice(0, 7);
   const agricultureLinks = grouped.agriculture.slice(0, 7);
+  const groupedProjects = await getGroupedPublishedProjects();
+  const engineeringProjectLinks = groupedProjects.engineering.slice(0, 5);
+  const agricultureProjectLinks = groupedProjects.agriculture.slice(0, 5);
+  const automationProjectLinks = groupedProjects.industrialAutomation.slice(0, 5);
 
   return (
     <nav className="bg-background border-b border-border sticky top-0 z-40 shadow-sm">
@@ -73,6 +77,71 @@ export default async function Navbar({ settings }: NavbarProps) {
               </Link>
             </li>
           ))}
+
+          <li className="relative group">
+            <Link
+              href="/projects"
+              className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors duration-150"
+            >
+              Projects
+            </Link>
+            <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-all duration-150 absolute left-1/2 -translate-x-1/2 top-full pt-3">
+              <div className="w-[860px] max-w-[90vw] rounded-xl border border-border bg-card shadow-lg p-5">
+                <div className="grid grid-cols-3 gap-6">
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                        Engineering Projects
+                      </h3>
+                      <Link href="/projects/group/engineering" className="text-xs font-semibold text-primary hover:underline">
+                        View all
+                      </Link>
+                    </div>
+                    {(engineeringProjectLinks.length ? engineeringProjectLinks : []).map((p) => (
+                      <Link key={String(p._id)} href={`/projects/${p.slug}`} className="mt-2 block rounded-md px-2 py-1.5 text-sm text-foreground/85 hover:bg-accent hover:text-foreground transition-colors">
+                        {p.title}
+                      </Link>
+                    ))}
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                        Agriculture Projects
+                      </h3>
+                      <Link href="/projects/group/agriculture" className="text-xs font-semibold text-primary hover:underline">
+                        View all
+                      </Link>
+                    </div>
+                    {(agricultureProjectLinks.length ? agricultureProjectLinks : []).map((p) => (
+                      <Link key={String(p._id)} href={`/projects/${p.slug}`} className="mt-2 block rounded-md px-2 py-1.5 text-sm text-foreground/85 hover:bg-accent hover:text-foreground transition-colors">
+                        {p.title}
+                      </Link>
+                    ))}
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                        Industrial Automation
+                      </h3>
+                      <Link href="/projects/group/industrial-automation" className="text-xs font-semibold text-primary hover:underline">
+                        View all
+                      </Link>
+                    </div>
+                    {(automationProjectLinks.length ? automationProjectLinks : []).map((p) => (
+                      <Link key={String(p._id)} href={`/projects/${p.slug}`} className="mt-2 block rounded-md px-2 py-1.5 text-sm text-foreground/85 hover:bg-accent hover:text-foreground transition-colors">
+                        {p.title}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
+                  <Link href="/projects" className="text-sm font-semibold text-foreground/85 hover:text-primary transition-colors">
+                    View All Projects
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </li>
 
           <li className="relative group">
             <Link

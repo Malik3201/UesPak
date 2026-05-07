@@ -80,7 +80,6 @@ const serviceSchema = new Schema<IService>(
       type: String,
       enum: ["engineering", "agriculture"],
       default: "engineering",
-      index: true,
     },
     category: { type: String, trim: true },
     icon: { type: String, trim: true },
@@ -127,7 +126,6 @@ const serviceSchema = new Schema<IService>(
   { timestamps: true }
 );
 
-serviceSchema.index({ slug: 1 }, { unique: true });
 serviceSchema.index({ status: 1 });
 serviceSchema.index({ serviceGroup: 1 });
 serviceSchema.index({ isFeatured: 1 });

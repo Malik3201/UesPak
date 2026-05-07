@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed:admin": "tsx scripts/seed-admin.ts",
-    "seed:agriculture-services": "tsx scripts/seed-agriculture-services.ts"
+    "seed:agriculture-services": "tsx scripts/seed-agriculture-services.ts",
+    "seed:project-categories": "tsx scripts/seed-project-categories.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
