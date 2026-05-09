@@ -33,7 +33,7 @@ const navItems: NavItem[] = [
     label: "Site Settings",
     icon: Settings,
   },
-  { kind: "placeholder", label: "Home Page", icon: Home },
+  { kind: "link", href: "/admin/home", label: "Home Page", icon: Home },
   { kind: "placeholder", label: "Pages", icon: FileText },
   { kind: "link", href: "/admin/services", label: "Services", icon: Briefcase },
   { kind: "link", href: "/admin/project-categories", label: "Project Categories", icon: FolderTree },

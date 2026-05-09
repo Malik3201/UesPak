@@ -174,8 +174,6 @@ const siteSettingSchema = new Schema<ISiteSetting>(
   { timestamps: true }
 );
 
-siteSettingSchema.index({ key: 1 }, { unique: true });
-
 export const SiteSetting: Model<ISiteSetting> =
   mongoose.models.SiteSetting ??
   mongoose.model<ISiteSetting>("SiteSetting", siteSettingSchema);

@@ -74,7 +74,6 @@ const mediaAssetSchema = new Schema<IMediaAsset>(
   { timestamps: true }
 );
 
-mediaAssetSchema.index({ publicId: 1 }, { unique: true });
 mediaAssetSchema.index({ fileId: 1 });
 mediaAssetSchema.index({ provider: 1 });
 mediaAssetSchema.index({ type: 1 });
