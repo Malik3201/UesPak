@@ -12,11 +12,13 @@ interface HomeHeroProps {
 
 export default function HomeHero({ hero }: HomeHeroProps) {
   const images = useMemo(() => {
-    const list = [...(hero.backgroundImages || [])];
-    if (!list.length && hero.backgroundImage?.url) {
-      list.push(hero.backgroundImage);
-    }
-    return list.filter((item) => item?.url);
+    const fromList =
+      Array.isArray(hero.backgroundImages) && hero.backgroundImages.length > 0
+        ? hero.backgroundImages
+        : hero.backgroundImage?.url
+          ? [hero.backgroundImage]
+          : [];
+    return fromList.filter((item) => Boolean(item?.url));
   }, [hero.backgroundImage, hero.backgroundImages]);
 
   const [activeIndex, setActiveIndex] = useState(0);

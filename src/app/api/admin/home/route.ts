@@ -37,6 +37,12 @@ function mergeDeep<T>(base: T, incoming: unknown): T {
   return result as T;
 }
 
+function isPresentMediaItem(item: Record<string, unknown>) {
+  const url = item?.url;
+  const id = item?.publicId || item?.fileId;
+  return Boolean(url && id);
+}
+
 function toSerializable(homePage: Record<string, unknown>) {
   const { _id, ...rest } = homePage;
   const hero = (rest.hero as Record<string, unknown>) || {};
@@ -45,7 +51,7 @@ function toSerializable(homePage: Record<string, unknown>) {
     hero: {
       ...hero,
       backgroundImages: (((hero.backgroundImages as unknown[]) || []) as Array<Record<string, unknown>>)
-        .filter((item) => Boolean(item?.url && item?.publicId))
+        .filter((item) => isPresentMediaItem(item))
         .map((item) => ({ ...item })),
     },
     featuredServices: {
@@ -82,8 +88,10 @@ export async function GET() {
       existing as unknown as Record<string, unknown>
     );
 
+    const serializable = toSerializable(merged as unknown as Record<string, unknown>);
+
     return successResponse("Home page loaded successfully.", {
-      homePage: toSerializable(merged as unknown as Record<string, unknown>),
+      homePage: serializable,
       persisted: true,
     });
   } catch (err) {
@@ -108,11 +116,32 @@ export async function PATCH(request: NextRequest) {
       return validationErrorResponse(partialParsed.error.flatten().fieldErrors);
     }
 
+    const body = json as Record<string, unknown>;
+    const rawHero = body.hero as Record<string, unknown> | undefined;
+
+    const patchFromClient = { ...partialParsed.data } as Record<string, unknown>;
+    const patchHero = patchFromClient.hero as Record<string, unknown> | undefined;
+    const heroKeyPresent = Object.prototype.hasOwnProperty.call(body, "hero");
+
+    if (!heroKeyPresent) {
+      delete patchFromClient.hero;
+    } else if (
+      patchHero &&
+      typeof patchHero === "object" &&
+      rawHero &&
+      typeof rawHero === "object" &&
+      !Object.prototype.hasOwnProperty.call(rawHero, "backgroundImages")
+    ) {
+      const restHeroPatch = { ...patchHero };
+      delete restHeroPatch.backgroundImages;
+      patchFromClient.hero = restHeroPatch;
+    }
+
     const existing = await HomePage.findOne({ key: HOME_PAGE_KEY }).lean();
     const defaults = getDefaultHomePageContent();
     const mergedRaw = mergeDeep(
       mergeDeep(defaults, existing || {}),
-      partialParsed.data
+      patchFromClient
     );
 
     const parsed = homePageSchema.safeParse(mergedRaw);
@@ -120,25 +149,20 @@ export async function PATCH(request: NextRequest) {
       return validationErrorResponse(parsed.error.flatten().fieldErrors);
     }
     const data = parsed.data;
-    const incomingHero = (partialParsed.data.hero as Record<string, unknown> | undefined) || {};
-    const incomingBackgroundCount =
-      (incomingHero.backgroundImages as unknown[] | undefined)?.length ?? 0;
     const existingHero = ((existing as Record<string, unknown> | null)?.hero ||
       {}) as Record<string, unknown>;
     const defaultHero = defaults.hero as unknown as Record<string, unknown>;
-    const incomingBackgroundImages = incomingHero.backgroundImages as unknown[] | undefined;
-    const existingBackgroundImages = existingHero.backgroundImages as unknown[] | undefined;
-    const defaultBackgroundImages = defaultHero.backgroundImages as unknown[] | undefined;
-
+    const parsedHero = data.hero as unknown as Record<string, unknown>;
+    const incomingHero = (rawHero || {}) as Record<string, unknown>;
     const mergedHero = {
       ...defaultHero,
       ...existingHero,
-      ...(data.hero as unknown as Record<string, unknown>),
-      backgroundImages:
-        incomingBackgroundImages ??
-        existingBackgroundImages ??
-        defaultBackgroundImages ??
-        [],
+      ...parsedHero,
+      backgroundImages: Array.isArray(incomingHero.backgroundImages)
+        ? (parsedHero.backgroundImages as unknown[])
+        : Array.isArray(existingHero.backgroundImages)
+          ? (existingHero.backgroundImages as unknown[])
+          : [],
     };
 
     const updatePayload = {
@@ -160,15 +184,6 @@ export async function PATCH(request: NextRequest) {
       updatedBy: new mongoose.Types.ObjectId(admin.id),
     };
 
-    if (process.env.NODE_ENV !== "production") {
-      console.info(
-        "[PATCH /api/admin/home] hero.backgroundImages length (incoming -> parsed):",
-        incomingBackgroundCount,
-        "->",
-        updatePayload.hero.backgroundImages?.length ?? 0
-      );
-    }
-
     const updated = await HomePage.findOneAndUpdate(
       { key: HOME_PAGE_KEY },
       {
@@ -179,14 +194,6 @@ export async function PATCH(request: NextRequest) {
     ).lean();
 
     revalidatePath("/");
-
-    if (process.env.NODE_ENV !== "production") {
-      const savedHero = (updated as unknown as { hero?: { backgroundImages?: unknown[] } })?.hero;
-      console.info(
-        "[PATCH /api/admin/home] hero.backgroundImages length (saved):",
-        savedHero?.backgroundImages?.length ?? 0
-      );
-    }
 
     return successResponse("Home page updated successfully.", {
       homePage: updated

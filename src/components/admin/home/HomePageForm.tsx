@@ -15,6 +15,17 @@ interface OptionRow {
   title: string;
 }
 
+function normalizeHeroMedia(asset: MediaObject): MediaObject {
+  const publicId =
+    (asset.publicId && String(asset.publicId).trim()) ||
+    (asset.fileId && String(asset.fileId).trim()) ||
+    "";
+  return {
+    ...asset,
+    publicId,
+  };
+}
+
 export default function HomePageForm() {
   const [form, setForm] = useState<HomePageContent>(getDefaultHomePageContent());
   const [services, setServices] = useState<OptionRow[]>([]);
@@ -46,7 +57,9 @@ export default function HomePageForm() {
 
   function mergeHomePageData(loaded?: HomePageContent | null): HomePageContent {
     const defaults = getDefaultHomePageContent();
-    const loadedBackgroundImages = loaded?.hero?.backgroundImages || [];
+    const loadedBackgroundImages = (loaded?.hero?.backgroundImages || []).filter((item) =>
+      Boolean(item?.url && (item?.publicId || item?.fileId))
+    );
     const shouldUseLegacyFallback =
       loadedBackgroundImages.length === 0 && Boolean(loaded?.hero?.backgroundImage?.url);
     const normalizedBackgroundImages =
@@ -66,11 +79,12 @@ export default function HomePageForm() {
   }
 
   function addHeroBackgroundImage(asset: MediaObject) {
+    const normalized = normalizeHeroMedia(asset);
     setForm((prev) => ({
       ...prev,
       hero: {
         ...prev.hero,
-        backgroundImages: [...(prev.hero.backgroundImages || []), asset],
+        backgroundImages: [...(prev.hero.backgroundImages || []), normalized],
       },
     }));
   }
@@ -145,6 +159,12 @@ export default function HomePageForm() {
     try {
       const payload = {
         ...form,
+        hero: {
+          ...form.hero,
+          backgroundImages: Array.isArray(form.hero.backgroundImages)
+            ? form.hero.backgroundImages
+            : [],
+        },
         seo: {
           ...form.seo,
           keywords: keywordsCsv

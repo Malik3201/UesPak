@@ -19,16 +19,28 @@ const objectIdString = z
   .trim()
   .regex(/^[a-fA-F0-9]{24}$/, "Invalid ObjectId.");
 
-const mediaObjectSchema = z.object({
-  url: z.string().trim().min(1),
-  publicId: z.string().trim().min(1),
-  fileId: z.string().trim().optional(),
-  altText: trimToOptional(300),
-  width: z.number().optional(),
-  height: z.number().optional(),
-  format: trimToOptional(50),
-  size: z.number().optional(),
-});
+const mediaObjectSchema = z
+  .object({
+    url: z.string().trim().min(1),
+    publicId: z.string().trim().optional(),
+    fileId: z.string().trim().optional(),
+    altText: trimToOptional(300),
+    width: z.number().optional(),
+    height: z.number().optional(),
+    format: trimToOptional(50),
+    size: z.number().optional(),
+  })
+  .transform((m) => {
+    const pid =
+      (m.publicId && String(m.publicId).trim()) ||
+      (m.fileId && String(m.fileId).trim()) ||
+      "";
+    return { ...m, publicId: pid };
+  })
+  .refine((m) => m.publicId.length > 0, {
+    message: "publicId or fileId is required.",
+    path: ["publicId"],
+  });
 
 const simpleItemSchema = z.object({
   title: z.string().trim().min(1).max(160),

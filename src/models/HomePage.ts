@@ -125,7 +125,7 @@ export interface IHomePage extends Document {
 const mediaSchema = new Schema<MediaObject>(
   {
     url: { type: String, required: true },
-    publicId: { type: String, required: true },
+    publicId: { type: String, trim: true },
     fileId: { type: String, trim: true },
     altText: { type: String, trim: true },
     width: { type: Number },
