@@ -188,6 +188,48 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
+  .animate-capability-fade-up {
+    animation: capabilityFadeUp 720ms ease-out both;
+  }
+
+  .animate-capability-slide-left {
+    animation: capabilitySlideLeft 760ms ease-out 120ms both;
+  }
+
+  .animate-capability-slide-right {
+    animation: capabilitySlideRight 760ms ease-out 180ms both;
+  }
+
+  .capability-card {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: capabilityCardUp 680ms ease-out forwards;
+  }
+
+  .capability-card:nth-child(1) {
+    animation-delay: 260ms;
+  }
+
+  .capability-card:nth-child(2) {
+    animation-delay: 380ms;
+  }
+
+  .capability-float {
+    animation: capabilityFloat 5.5s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-capability-fade-up,
+    .animate-capability-slide-left,
+    .animate-capability-slide-right,
+    .capability-card,
+    .capability-float {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 @keyframes heroFadeUp {
@@ -198,5 +240,59 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes capabilityFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes capabilitySlideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes capabilitySlideRight {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes capabilityCardUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes capabilityFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
   }
 }

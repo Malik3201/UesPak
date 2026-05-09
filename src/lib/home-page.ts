@@ -152,25 +152,39 @@ export async function getPublicHomePage(): Promise<PublicHomePageData> {
 
   try {
     await connectDB();
-    if (serviceIds.length) {
-      const ids = serviceIds
-        .filter((id) => mongoose.isValidObjectId(id))
-        .map((id) => new mongoose.Types.ObjectId(id));
-      const docs = await Service.find({
-        _id: { $in: ids },
-        status: "published",
-      })
-        .sort({ order: 1, createdAt: -1 })
-        .lean();
-      featuredServicesResolved = docs.map((s) =>
-        serializeServiceForHome(s as unknown as Record<string, unknown>)
-      );
-    } else {
-      const fallback = await getFeaturedServices();
-      featuredServicesResolved = fallback.map((s) =>
-        serializeServiceForHome(s as unknown as Record<string, unknown>)
-      );
-    }
+
+    const curatedDocs = serviceIds.length
+      ? await Service.find({
+          _id: {
+            $in: serviceIds
+              .filter((id) => mongoose.isValidObjectId(id))
+              .map((id) => new mongoose.Types.ObjectId(id)),
+          },
+          status: "published",
+        })
+          .sort({ order: 1, createdAt: -1 })
+          .lean()
+      : [];
+
+    const curatedById = new Map(
+      curatedDocs.map((doc) => [String(doc._id), doc])
+    );
+    const orderedCurated = serviceIds.length
+      ? serviceIds
+          .map((id) => curatedById.get(String(id)))
+          .filter((doc): doc is (typeof curatedDocs)[number] => Boolean(doc))
+      : curatedDocs;
+
+    const featuredFallback = await getFeaturedServices();
+    const seen = new Set(orderedCurated.map((doc) => String(doc._id)));
+    const remainingFeatured = featuredFallback.filter(
+      (doc) => !seen.has(String(doc._id))
+    );
+
+    const combinedDocs = [...orderedCurated, ...remainingFeatured];
+    featuredServicesResolved = combinedDocs.map((s) =>
+      serializeServiceForHome(s as unknown as Record<string, unknown>)
+    );
   } catch {
     featuredServicesResolved = [];
   }

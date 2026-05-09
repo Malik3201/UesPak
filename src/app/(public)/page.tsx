@@ -4,7 +4,9 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { SITE_URL, buildOrganizationJsonLd, buildMetadata } from "@/lib/seo";
 import Container from "@/components/shared/Container";
 import HomeHero from "@/components/public/home/HomeHero";
+import OurStorySection from "@/components/public/home/OurStorySection";
 import FeaturedServicesSection from "@/components/public/home/FeaturedServicesSection";
+import ServicesOverviewSection from "@/components/public/home/ServicesOverviewSection";
 import { getPublicHomePage } from "@/lib/home-page";
 import { getPublicSiteSettings } from "@/lib/site-settings";
 import { getProjectGroupLabel } from "@/types/project";
@@ -98,6 +100,8 @@ export default async function HomePage() {
     <>
       {home.hero.isActive ? <HomeHero hero={home.hero} /> : null}
 
+      <OurStorySection />
+
       {home.featuredServices.isActive && home.featuredServicesResolved.length ? (
         <FeaturedServicesSection
           section={home.featuredServices}
@@ -108,68 +112,7 @@ export default async function HomePage() {
       <section className="section-py bg-[linear-gradient(to_bottom,#ffffff_0%,#f7fbf8_100%)]">
         <Container className="space-y-16">
           {home.servicesOverview.isActive ? (
-            <section className="rounded-3xl bg-[linear-gradient(140deg,#f4faf6,#eef7f1)] p-6 md:p-8 shadow-[0_12px_32px_rgba(15,23,42,0.08)]">
-              <div className="grid gap-8 md:grid-cols-2">
-                <div className="space-y-4">
-                {home.servicesOverview.eyebrow ? (
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#075f3f]">
-                    {home.servicesOverview.eyebrow}
-                  </p>
-                ) : null}
-                  <h2 className="text-3xl font-bold text-foreground">
-                  {home.servicesOverview.title || "What We Offer"}
-                </h2>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                  {home.servicesOverview.description}
-                </p>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
-                      <h3 className="text-sm font-semibold text-foreground">Engineering Services</h3>
-                      <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
-                        <li>HVAC-R and environmental systems</li>
-                        <li>Facility and technical project delivery</li>
-                        <li>Mechanical and electrical execution</li>
-                      </ul>
-                    </div>
-                    <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
-                      <h3 className="text-sm font-semibold text-foreground">Agriculture Services</h3>
-                      <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
-                        <li>Training and implementation support</li>
-                        <li>Regenerative and practical models</li>
-                        <li>Agriculture engineering integration</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-3 pt-1">
-                    <Link href="/services/group/engineering" className="inline-flex rounded-lg border border-[#b4d8c5] bg-white px-4 py-2 text-sm font-semibold text-[#075f3f] hover:border-[#7eb79a]">
-                    Engineering Services
-                  </Link>
-                    <Link href="/services/group/agriculture" className="inline-flex rounded-lg border border-[#b4d8c5] bg-white px-4 py-2 text-sm font-semibold text-[#075f3f] hover:border-[#7eb79a]">
-                    Agriculture Services
-                  </Link>
-                  </div>
-                </div>
-                <div>
-                  {home.servicesOverview.image?.url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={home.servicesOverview.image.url}
-                      alt={home.servicesOverview.image.altText || "Services Overview"}
-                      className="h-full min-h-72 w-full rounded-2xl object-cover shadow-md"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="h-full min-h-72 rounded-2xl bg-gradient-to-br from-[#0f7a54] to-[#1f8f62]" />
-                  )}
-                </div>
-              </div>
-              <div className="mt-7">
-                <Link href="/services" className="inline-flex items-center gap-1 text-sm font-semibold text-[#075f3f] hover:underline">
-                  View All Services
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-            </section>
+            <ServicesOverviewSection section={home.servicesOverview} />
           ) : null}
 
           {home.whyChooseUs.isActive && whyChooseItems.length ? (

@@ -171,7 +171,7 @@ export default function FeaturedServicesSection({
                 type="button"
                 aria-label="Previous services"
                 onClick={() => scrollByDirection(-1)}
-                className="absolute left-0 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 -translate-x-2 items-center justify-center rounded-full border border-white/40 bg-white/15 text-white opacity-0 backdrop-blur transition-all duration-300 hover:bg-white/25 group-hover/carousel:-translate-x-6 group-hover/carousel:opacity-100 md:flex lg:-translate-x-4 lg:group-hover/carousel:-translate-x-12"
+                className="absolute left-0 top-1/2 z-10 hidden h-12 w-12 -translate-x-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-white text-[#075f3f] opacity-0 shadow-[0_14px_34px_rgba(2,33,23,0.22)] transition-all duration-300 hover:bg-emerald-50 hover:text-[#03452e] group-hover/carousel:-translate-x-14 group-hover/carousel:opacity-100 md:flex lg:-translate-x-12 lg:group-hover/carousel:-translate-x-20"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
@@ -179,7 +179,7 @@ export default function FeaturedServicesSection({
                 type="button"
                 aria-label="Next services"
                 onClick={() => scrollByDirection(1)}
-                className="absolute right-0 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 translate-x-2 items-center justify-center rounded-full border border-white/40 bg-white/15 text-white opacity-0 backdrop-blur transition-all duration-300 hover:bg-white/25 group-hover/carousel:translate-x-6 group-hover/carousel:opacity-100 md:flex lg:translate-x-4 lg:group-hover/carousel:translate-x-12"
+                className="absolute right-0 top-1/2 z-10 hidden h-12 w-12 translate-x-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-white text-[#075f3f] opacity-0 shadow-[0_14px_34px_rgba(2,33,23,0.22)] transition-all duration-300 hover:bg-emerald-50 hover:text-[#03452e] group-hover/carousel:translate-x-14 group-hover/carousel:opacity-100 md:flex lg:translate-x-12 lg:group-hover/carousel:translate-x-20"
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
