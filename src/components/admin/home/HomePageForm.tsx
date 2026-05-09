@@ -370,6 +370,19 @@ export default function HomePageForm() {
             ))}
           </select>
         </label>
+        <AdminMediaUploader
+          label="Services Section Background Image"
+          value={form.featuredServices.backgroundImage}
+          folder={MEDIA_UPLOAD_FOLDERS.general.replace("/general", "/home")}
+          usage="home-featured-services-background"
+          mediaType="image"
+          helperText="Used behind the homepage services carousel section."
+          onChange={(asset) =>
+            updateNested("featuredServices", {
+              backgroundImage: asset || undefined,
+            })
+          }
+        />
       </section>
 
       <section className="space-y-4 rounded-xl border border-border bg-card p-5">

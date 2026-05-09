@@ -180,6 +180,14 @@
   .hero-animate > *:nth-child(6) {
     animation-delay: 500ms;
   }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @keyframes heroFadeUp {

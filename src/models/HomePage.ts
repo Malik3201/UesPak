@@ -27,6 +27,7 @@ export interface IHomePage extends Document {
     subtitle?: string;
     description?: string;
     serviceIds: mongoose.Types.ObjectId[];
+    backgroundImage?: MediaObject;
     isActive: boolean;
   };
   servicesOverview: {
@@ -196,6 +197,7 @@ const homePageSchema = new Schema<IHomePage>(
           subtitle: { type: String, trim: true },
           description: { type: String, trim: true },
           serviceIds: { type: [{ type: Schema.Types.ObjectId, ref: "Service" }], default: [] },
+          backgroundImage: mediaSchema,
           isActive: { type: Boolean, default: true },
         },
         { _id: false }

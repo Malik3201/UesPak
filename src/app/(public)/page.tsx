@@ -4,9 +4,9 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { SITE_URL, buildOrganizationJsonLd, buildMetadata } from "@/lib/seo";
 import Container from "@/components/shared/Container";
 import HomeHero from "@/components/public/home/HomeHero";
+import FeaturedServicesSection from "@/components/public/home/FeaturedServicesSection";
 import { getPublicHomePage } from "@/lib/home-page";
 import { getPublicSiteSettings } from "@/lib/site-settings";
-import { getServiceGroupLabel } from "@/types/service";
 import { getProjectGroupLabel } from "@/types/project";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -98,67 +98,15 @@ export default async function HomePage() {
     <>
       {home.hero.isActive ? <HomeHero hero={home.hero} /> : null}
 
+      {home.featuredServices.isActive && home.featuredServicesResolved.length ? (
+        <FeaturedServicesSection
+          section={home.featuredServices}
+          services={home.featuredServicesResolved}
+        />
+      ) : null}
+
       <section className="section-py bg-[linear-gradient(to_bottom,#ffffff_0%,#f7fbf8_100%)]">
         <Container className="space-y-16">
-          {home.featuredServices.isActive && home.featuredServicesResolved.length ? (
-            <section className="space-y-7">
-              <div className="flex flex-wrap items-end justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#075f3f]">
-                    Core Expertise
-                  </p>
-                  <h2 className="mt-2 text-3xl font-bold text-foreground md:text-4xl">
-                    {home.featuredServices.title || "Featured Services"}
-                  </h2>
-                  {home.featuredServices.description ? (
-                    <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground md:text-base">
-                      {home.featuredServices.description}
-                    </p>
-                  ) : null}
-                </div>
-                <Link href="/services" className="text-sm font-semibold text-emerald-700 hover:underline">
-                  View all services
-                </Link>
-              </div>
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {home.featuredServicesResolved.slice(0, 4).map((service) => (
-                  <article
-                    key={service.id}
-                    className="group overflow-hidden rounded-2xl bg-white shadow-[0_12px_36px_rgba(15,23,42,0.08)] ring-1 ring-black/5 transition-all hover:-translate-y-1 hover:shadow-[0_20px_42px_rgba(15,23,42,0.14)]"
-                  >
-                    {service.featuredImage?.url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={service.featuredImage.url}
-                        alt={service.featuredImage.altText || service.title}
-                        className="h-52 w-full object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="h-52 w-full bg-gradient-to-br from-[#0a6d49] via-[#0f7a54] to-[#46a56c]" />
-                    )}
-                    <div className="space-y-3 p-5">
-                      <p className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#075f3f]">
-                        {getServiceGroupLabel(service.serviceGroup || "engineering")}
-                      </p>
-                      <h3 className="text-lg font-semibold text-foreground">{service.title}</h3>
-                      <p className="line-clamp-3 text-sm text-muted-foreground">
-                        {service.excerpt || "Explore this service by UESPAK."}
-                      </p>
-                      <Link
-                        href={`/services/${service.slug}`}
-                        className="inline-flex items-center gap-1 text-sm font-semibold text-[#075f3f] transition-colors group-hover:text-[#03452e]"
-                      >
-                        Learn More
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
-          ) : null}
-
           {home.servicesOverview.isActive ? (
             <section className="rounded-3xl bg-[linear-gradient(140deg,#f4faf6,#eef7f1)] p-6 md:p-8 shadow-[0_12px_32px_rgba(15,23,42,0.08)]">
               <div className="grid gap-8 md:grid-cols-2">

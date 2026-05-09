@@ -50,6 +50,7 @@ export interface HomePageContent {
     subtitle?: string;
     description?: string;
     serviceIds: string[];
+    backgroundImage?: MediaObject;
     isActive: boolean;
   };
   servicesOverview: {

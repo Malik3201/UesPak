@@ -114,6 +114,7 @@ export const homePageSchema = z.object({
       subtitle: trimToOptional(180),
       description: trimToOptional(800),
       serviceIds: z.array(objectIdString).default([]),
+      backgroundImage: mediaObjectSchema.optional(),
       isActive: z.boolean().default(true),
     })
     .default({ serviceIds: [], isActive: true }),
