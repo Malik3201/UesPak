@@ -54,34 +54,35 @@ export default function HomeHero({ hero }: HomeHeroProps) {
       <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(2,41,28,0.6)_0%,rgba(4,64,43,0.48)_52%,rgba(10,25,17,0.36)_100%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.07)_1px,transparent_1px)] bg-[size:52px_52px] opacity-20" />
 
-      <Container className="relative min-h-[82vh] py-16 sm:py-20 lg:min-h-[86vh] lg:py-24">
-        <div className="hero-animate mx-auto flex max-w-3xl flex-col justify-center space-y-6 text-left">
+      <Container className="relative flex min-h-[78vh] items-center justify-center py-20 sm:py-24 lg:min-h-[82vh] lg:py-28">
+        <div className="hero-animate mx-auto flex w-full max-w-3xl flex-col items-center space-y-7 text-center sm:px-2 lg:px-6">
           {hero.eyebrow ? (
-            <p className="inline-flex w-fit items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] backdrop-blur-sm">
               <Sparkles className="h-3.5 w-3.5" />
               {hero.eyebrow}
             </p>
           ) : null}
-          {hero.title ? (
-            <h1 className="text-balance text-4xl font-bold leading-tight md:text-5xl xl:text-6xl">
-              {hero.title}
-            </h1>
-          ) : null}
           {hero.subtitle ? (
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-100 md:text-base">
+            <p className="text-xs font-semibold uppercase tracking-[0.32em] text-emerald-100/90 md:text-sm">
               {hero.subtitle}
             </p>
           ) : null}
+          {hero.title ? (
+            <h1 className="text-balance text-4xl font-bold leading-[1.1] tracking-tight md:text-5xl xl:text-6xl">
+              {hero.title}
+            </h1>
+          ) : null}
+          <span className="block h-px w-24 bg-gradient-to-r from-transparent via-white/60 to-transparent" />
           {hero.description ? (
-            <p className="max-w-3xl text-sm leading-relaxed text-emerald-50/95 md:text-lg">
+            <p className="mx-auto max-w-2xl text-pretty text-justify text-sm leading-relaxed text-emerald-50/95 md:text-base lg:text-lg [text-align-last:center]">
               {hero.description}
             </p>
           ) : null}
-          <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center">
+          <div className="flex flex-col items-center justify-center gap-3 pt-2 sm:flex-row">
             {hero.primaryButtonText && hero.primaryButtonUrl ? (
               <Link
                 href={hero.primaryButtonUrl}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-white px-6 text-sm font-semibold text-[#075f3f] shadow-[0_12px_30px_rgba(0,0,0,0.25)] transition-all hover:-translate-y-0.5 hover:bg-emerald-50"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-white px-7 text-sm font-semibold text-[#075f3f] shadow-[0_12px_30px_rgba(0,0,0,0.25)] transition-all hover:-translate-y-0.5 hover:bg-emerald-50"
               >
                 {hero.primaryButtonText}
                 <ArrowRight className="h-4 w-4" />
@@ -90,18 +91,18 @@ export default function HomeHero({ hero }: HomeHeroProps) {
             {hero.secondaryButtonText && hero.secondaryButtonUrl ? (
               <Link
                 href={hero.secondaryButtonUrl}
-                className="inline-flex h-12 items-center justify-center rounded-lg border border-white/40 bg-white/5 px-6 text-sm font-semibold text-white transition-colors hover:bg-white/15"
+                className="inline-flex h-12 items-center justify-center rounded-lg border border-white/40 bg-white/5 px-7 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/15"
               >
                 {hero.secondaryButtonText}
               </Link>
             ) : null}
           </div>
           {hero.badges?.length ? (
-            <div className="flex flex-wrap gap-2 pt-2">
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-3">
               {hero.badges.map((badge, idx) => (
                 <span
                   key={`hero-badge-${idx}`}
-                  className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-emerald-50"
+                  className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-emerald-50 backdrop-blur-sm"
                 >
                   {badge}
                 </span>
