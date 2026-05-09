@@ -187,7 +187,7 @@ const homePageSchema = new Schema<IHomePage>(
         },
         { _id: false }
       ),
-      default: { isActive: true, badges: [] },
+      default: { isActive: true, badges: [], backgroundImages: [] },
     },
     featuredServices: {
       type: new Schema(

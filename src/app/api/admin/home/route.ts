@@ -39,8 +39,15 @@ function mergeDeep<T>(base: T, incoming: unknown): T {
 
 function toSerializable(homePage: Record<string, unknown>) {
   const { _id, ...rest } = homePage;
+  const hero = (rest.hero as Record<string, unknown>) || {};
   const normalized = {
     ...rest,
+    hero: {
+      ...hero,
+      backgroundImages: (((hero.backgroundImages as unknown[]) || []) as Array<Record<string, unknown>>)
+        .filter((item) => Boolean(item?.url && item?.publicId))
+        .map((item) => ({ ...item })),
+    },
     featuredServices: {
       ...((rest.featuredServices as Record<string, unknown>) || {}),
       serviceIds: (
@@ -112,6 +119,8 @@ export async function PATCH(request: NextRequest) {
       return validationErrorResponse(parsed.error.flatten().fieldErrors);
     }
     const data = parsed.data;
+    const incomingHero = (partialParsed.data.hero as { backgroundImages?: unknown[] } | undefined);
+    const incomingBackgroundCount = incomingHero?.backgroundImages?.length ?? 0;
 
     const updatePayload = {
       ...data,
@@ -131,6 +140,15 @@ export async function PATCH(request: NextRequest) {
       updatedBy: new mongoose.Types.ObjectId(admin.id),
     };
 
+    if (process.env.NODE_ENV !== "production") {
+      console.info(
+        "[PATCH /api/admin/home] hero.backgroundImages length (incoming -> parsed):",
+        incomingBackgroundCount,
+        "->",
+        updatePayload.hero.backgroundImages?.length ?? 0
+      );
+    }
+
     const updated = await HomePage.findOneAndUpdate(
       { key: HOME_PAGE_KEY },
       {
@@ -141,6 +159,14 @@ export async function PATCH(request: NextRequest) {
     ).lean();
 
     revalidatePath("/");
+
+    if (process.env.NODE_ENV !== "production") {
+      const savedHero = (updated as unknown as { hero?: { backgroundImages?: unknown[] } })?.hero;
+      console.info(
+        "[PATCH /api/admin/home] hero.backgroundImages length (saved):",
+        savedHero?.backgroundImages?.length ?? 0
+      );
+    }
 
     return successResponse("Home page updated successfully.", {
       homePage: updated

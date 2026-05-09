@@ -127,6 +127,9 @@ export async function getHomePage(): Promise<{
     const doc = await HomePage.findOne({ key: HOME_PAGE_KEY }).lean();
     if (!doc) return { homePage: defaults, persisted: false };
     const merged = mergeDeep(defaults, normalizeObject(doc));
+    merged.hero.backgroundImages = (merged.hero.backgroundImages || []).filter(
+      (item) => Boolean(item?.url && item?.publicId)
+    );
     merged.featuredServices.serviceIds = (merged.featuredServices.serviceIds || []).map((id) =>
       String(id)
     );

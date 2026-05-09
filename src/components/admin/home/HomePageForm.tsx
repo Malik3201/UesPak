@@ -7,6 +7,7 @@ import { Button } from "@/components/shared/Button";
 import AdminMediaUploader from "@/components/admin/media/AdminMediaUploader";
 import { MEDIA_UPLOAD_FOLDERS } from "@/constants/media-folders";
 import type { HomePageContent } from "@/types/home-page";
+import type { MediaObject } from "@/types/media";
 import { getDefaultHomePageContent } from "@/constants/home-page";
 
 interface OptionRow {
@@ -43,6 +44,54 @@ export default function HomePageForm() {
     }));
   }
 
+  function mergeHomePageData(loaded?: HomePageContent | null): HomePageContent {
+    const defaults = getDefaultHomePageContent();
+    return {
+      ...defaults,
+      ...(loaded || {}),
+      hero: {
+        ...defaults.hero,
+        ...(loaded?.hero || {}),
+        backgroundImages: loaded?.hero?.backgroundImages || defaults.hero.backgroundImages || [],
+        badges: loaded?.hero?.badges || defaults.hero.badges || [],
+      },
+    };
+  }
+
+  function addHeroBackgroundImage(asset: MediaObject) {
+    setForm((prev) => ({
+      ...prev,
+      hero: {
+        ...prev.hero,
+        backgroundImages: [...(prev.hero.backgroundImages || []), asset],
+      },
+    }));
+  }
+
+  function removeHeroBackgroundImage(removeIndex: number) {
+    setForm((prev) => ({
+      ...prev,
+      hero: {
+        ...prev.hero,
+        backgroundImages: (prev.hero.backgroundImages || []).filter(
+          (_, imageIdx) => imageIdx !== removeIndex
+        ),
+      },
+    }));
+  }
+
+  function updateHeroBackgroundAltText(index: number, altText: string) {
+    setForm((prev) => ({
+      ...prev,
+      hero: {
+        ...prev.hero,
+        backgroundImages: (prev.hero.backgroundImages || []).map((image, imageIdx) =>
+          imageIdx === index ? { ...image, altText } : image
+        ),
+      },
+    }));
+  }
+
   useEffect(() => {
     void (async () => {
       try {
@@ -65,10 +114,7 @@ export default function HomePageForm() {
         }
 
         const loaded = homeJson?.data?.homePage as HomePageContent;
-        const merged = {
-          ...getDefaultHomePageContent(),
-          ...loaded,
-        };
+        const merged = mergeHomePageData(loaded);
         setForm(merged);
         setKeywordsCsv((merged.seo?.keywords ?? []).join(", "));
         const servicesRows = (servicesJson?.data?.services as Array<{ id: string; title: string }>) || [];
@@ -112,7 +158,7 @@ export default function HomePageForm() {
       }
       const saved = json?.data?.homePage as HomePageContent;
       if (saved) {
-        setForm({ ...getDefaultHomePageContent(), ...saved });
+        setForm(mergeHomePageData(saved));
         setKeywordsCsv((saved.seo?.keywords ?? []).join(", "));
       }
       setMessage("Home page saved successfully.");
@@ -206,14 +252,6 @@ export default function HomePageForm() {
           <Input label="Secondary button text" value={form.hero.secondaryButtonText || ""} onChange={(e) => updateNested("hero", { secondaryButtonText: e.target.value })} />
           <Input label="Secondary button URL" value={form.hero.secondaryButtonUrl || ""} onChange={(e) => updateNested("hero", { secondaryButtonUrl: e.target.value })} />
         </div>
-        <AdminMediaUploader
-          label="Hero background image"
-          value={form.hero.backgroundImage}
-          folder={MEDIA_UPLOAD_FOLDERS.general.replace("/general", "/home")}
-          usage="home-hero-background"
-          mediaType="image"
-          onChange={(asset) => updateNested("hero", { backgroundImage: asset || undefined })}
-        />
         <div className="space-y-3 rounded-md border border-border p-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-foreground">Hero background carousel images</h3>
@@ -226,9 +264,7 @@ export default function HomePageForm() {
             mediaType="image"
             onChange={(asset) => {
               if (!asset) return;
-              updateNested("hero", {
-                backgroundImages: [...(form.hero.backgroundImages || []), asset],
-              });
+              addHeroBackgroundImage(asset);
             }}
           />
           {(form.hero.backgroundImages || []).length ? (
@@ -247,17 +283,17 @@ export default function HomePageForm() {
                   <p className="flex-1 truncate text-xs text-muted-foreground">
                     {item.altText || item.publicId || `Image ${idx + 1}`}
                   </p>
+                  <Input
+                    className="w-52"
+                    placeholder="Alt text (optional)"
+                    value={item.altText || ""}
+                    onChange={(e) => updateHeroBackgroundAltText(idx, e.target.value)}
+                  />
                   <Button
                     type="button"
                     size="sm"
                     variant="ghost"
-                    onClick={() =>
-                      updateNested("hero", {
-                        backgroundImages: (form.hero.backgroundImages || []).filter(
-                          (_, imageIdx) => imageIdx !== idx
-                        ),
-                      })
-                    }
+                    onClick={() => removeHeroBackgroundImage(idx)}
                   >
                     Remove
                   </Button>
@@ -270,14 +306,21 @@ export default function HomePageForm() {
             </p>
           )}
         </div>
-        <AdminMediaUploader
-          label="Hero foreground image"
-          value={form.hero.foregroundImage}
-          folder={MEDIA_UPLOAD_FOLDERS.general.replace("/general", "/home")}
-          usage="home-hero-foreground"
-          mediaType="image"
-          onChange={(asset) => updateNested("hero", { foregroundImage: asset || undefined })}
-        />
+        <details className="rounded-md border border-border/80 bg-background/50 p-3">
+          <summary className="cursor-pointer text-sm font-medium text-muted-foreground">
+            Legacy fallback image (used only when no carousel images exist)
+          </summary>
+          <div className="mt-3">
+            <AdminMediaUploader
+              label="Legacy single hero background"
+              value={form.hero.backgroundImage}
+              folder={MEDIA_UPLOAD_FOLDERS.general.replace("/general", "/home")}
+              usage="home-hero-background"
+              mediaType="image"
+              onChange={(asset) => updateNested("hero", { backgroundImage: asset || undefined })}
+            />
+          </div>
+        </details>
         {renderStringArrayEditor("Badges", form.hero.badges || [], (next) =>
           updateNested("hero", { badges: next })
         )}
