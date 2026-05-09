@@ -46,13 +46,20 @@ export default function HomePageForm() {
 
   function mergeHomePageData(loaded?: HomePageContent | null): HomePageContent {
     const defaults = getDefaultHomePageContent();
+    const loadedBackgroundImages = loaded?.hero?.backgroundImages || [];
+    const shouldUseLegacyFallback =
+      loadedBackgroundImages.length === 0 && Boolean(loaded?.hero?.backgroundImage?.url);
+    const normalizedBackgroundImages =
+      shouldUseLegacyFallback && loaded?.hero?.backgroundImage
+        ? [loaded.hero.backgroundImage]
+        : loadedBackgroundImages;
     return {
       ...defaults,
       ...(loaded || {}),
       hero: {
         ...defaults.hero,
         ...(loaded?.hero || {}),
-        backgroundImages: loaded?.hero?.backgroundImages || defaults.hero.backgroundImages || [],
+        backgroundImages: normalizedBackgroundImages,
         badges: loaded?.hero?.badges || defaults.hero.badges || [],
       },
     };
@@ -136,7 +143,7 @@ export default function HomePageForm() {
     setError(null);
 
     try {
-      const body = {
+      const payload = {
         ...form,
         seo: {
           ...form.seo,
@@ -150,7 +157,7 @@ export default function HomePageForm() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(body),
+        body: JSON.stringify(payload),
       });
       const json = await res.json().catch(() => null);
       if (!res.ok || !json?.success) {
@@ -254,14 +261,18 @@ export default function HomePageForm() {
         </div>
         <div className="space-y-3 rounded-md border border-border p-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-foreground">Hero background carousel images</h3>
+            <h3 className="text-sm font-semibold text-foreground">Hero Background Images</h3>
+            <p className="text-xs font-medium text-muted-foreground">
+              {(form.hero.backgroundImages || []).length} background images selected
+            </p>
           </div>
           <AdminMediaUploader
-            label="Add carousel image"
+            label="Add background image"
             value={undefined}
             folder={MEDIA_UPLOAD_FOLDERS.general.replace("/general", "/home")}
             usage="home-hero-background"
             mediaType="image"
+            helperText="Upload one or more hero background images. If multiple images are added, they will transition automatically on the homepage."
             onChange={(asset) => {
               if (!asset) return;
               addHeroBackgroundImage(asset);
@@ -302,25 +313,10 @@ export default function HomePageForm() {
             </div>
           ) : (
             <p className="text-xs text-muted-foreground">
-              No carousel images selected. Public hero falls back to single background image.
+              No hero background images selected yet.
             </p>
           )}
         </div>
-        <details className="rounded-md border border-border/80 bg-background/50 p-3">
-          <summary className="cursor-pointer text-sm font-medium text-muted-foreground">
-            Legacy fallback image (used only when no carousel images exist)
-          </summary>
-          <div className="mt-3">
-            <AdminMediaUploader
-              label="Legacy single hero background"
-              value={form.hero.backgroundImage}
-              folder={MEDIA_UPLOAD_FOLDERS.general.replace("/general", "/home")}
-              usage="home-hero-background"
-              mediaType="image"
-              onChange={(asset) => updateNested("hero", { backgroundImage: asset || undefined })}
-            />
-          </div>
-        </details>
         {renderStringArrayEditor("Badges", form.hero.badges || [], (next) =>
           updateNested("hero", { badges: next })
         )}

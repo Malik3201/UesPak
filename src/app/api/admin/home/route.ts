@@ -109,8 +109,9 @@ export async function PATCH(request: NextRequest) {
     }
 
     const existing = await HomePage.findOne({ key: HOME_PAGE_KEY }).lean();
+    const defaults = getDefaultHomePageContent();
     const mergedRaw = mergeDeep(
-      mergeDeep(getDefaultHomePageContent(), existing || {}),
+      mergeDeep(defaults, existing || {}),
       partialParsed.data
     );
 
@@ -119,12 +120,31 @@ export async function PATCH(request: NextRequest) {
       return validationErrorResponse(parsed.error.flatten().fieldErrors);
     }
     const data = parsed.data;
-    const incomingHero = (partialParsed.data.hero as { backgroundImages?: unknown[] } | undefined);
-    const incomingBackgroundCount = incomingHero?.backgroundImages?.length ?? 0;
+    const incomingHero = (partialParsed.data.hero as Record<string, unknown> | undefined) || {};
+    const incomingBackgroundCount =
+      (incomingHero.backgroundImages as unknown[] | undefined)?.length ?? 0;
+    const existingHero = ((existing as Record<string, unknown> | null)?.hero ||
+      {}) as Record<string, unknown>;
+    const defaultHero = defaults.hero as unknown as Record<string, unknown>;
+    const incomingBackgroundImages = incomingHero.backgroundImages as unknown[] | undefined;
+    const existingBackgroundImages = existingHero.backgroundImages as unknown[] | undefined;
+    const defaultBackgroundImages = defaultHero.backgroundImages as unknown[] | undefined;
+
+    const mergedHero = {
+      ...defaultHero,
+      ...existingHero,
+      ...(data.hero as unknown as Record<string, unknown>),
+      backgroundImages:
+        incomingBackgroundImages ??
+        existingBackgroundImages ??
+        defaultBackgroundImages ??
+        [],
+    };
 
     const updatePayload = {
       ...data,
       key: HOME_PAGE_KEY,
+      hero: mergedHero,
       featuredServices: {
         ...data.featuredServices,
         serviceIds: (data.featuredServices.serviceIds || []).map(

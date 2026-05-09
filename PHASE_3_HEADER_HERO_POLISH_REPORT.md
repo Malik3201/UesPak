@@ -7,6 +7,7 @@
 - Reworked public hero into text-focused premium layout with smooth background fade transitions.
 - Fixed hero carousel persistence across `/admin/home` save/refresh cycles.
 - Deprecated foreground-image usage in public hero and de-emphasized legacy single-image admin field.
+- Simplified Hero admin image management to one clear field: `Hero Background Images`.
 
 ## Files created
 - `src/components/public/NavbarClient.tsx`
@@ -65,6 +66,8 @@
 - Added API normalization/serialization guards so `hero.backgroundImages` always returns as a full array.
 - Added development-only PATCH logs for incoming/saved `hero.backgroundImages` lengths.
 - Hero section in admin now promotes carousel images as the primary field and moves legacy single-image field into a clear fallback section.
+- Removed competing hero image inputs from the main admin flow to avoid accidental overwrite.
+- Public hero uses `hero.backgroundImages` as primary slideshow source; legacy single `backgroundImage` remains fallback-only.
 
 ## Testing performed
 - Verified implementation behavior and save-path correctness for:
@@ -73,6 +76,7 @@
   - Public hero priority chain (`backgroundImages` -> `backgroundImage` -> gradient fallback)
   - Public hero text-only rendering (no foreground hero visual)
   - Header/hero integration remains intact
+  - Hero admin label and UX simplification (`Hero Background Images`, preview count and list)
 
 ## Lint/build status
 - `npm run lint`: pass
