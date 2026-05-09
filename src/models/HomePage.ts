@@ -17,6 +17,7 @@ export interface IHomePage extends Document {
     secondaryButtonText?: string;
     secondaryButtonUrl?: string;
     backgroundImage?: MediaObject;
+    backgroundImages?: MediaObject[];
     foregroundImage?: MediaObject;
     badges: string[];
     isActive: boolean;
@@ -179,6 +180,7 @@ const homePageSchema = new Schema<IHomePage>(
           secondaryButtonText: { type: String, trim: true },
           secondaryButtonUrl: { type: String, trim: true },
           backgroundImage: mediaSchema,
+          backgroundImages: { type: [mediaSchema], default: [] },
           foregroundImage: mediaSchema,
           badges: { type: [{ type: String, trim: true }], default: [] },
           isActive: { type: Boolean, default: true },

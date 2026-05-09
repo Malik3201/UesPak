@@ -40,6 +40,7 @@ export interface HomePageContent {
     secondaryButtonText?: string;
     secondaryButtonUrl?: string;
     backgroundImage?: MediaObject;
+    backgroundImages?: MediaObject[];
     foregroundImage?: MediaObject;
     badges: string[];
     isActive: boolean;

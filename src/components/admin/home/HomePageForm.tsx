@@ -214,6 +214,62 @@ export default function HomePageForm() {
           mediaType="image"
           onChange={(asset) => updateNested("hero", { backgroundImage: asset || undefined })}
         />
+        <div className="space-y-3 rounded-md border border-border p-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-foreground">Hero background carousel images</h3>
+          </div>
+          <AdminMediaUploader
+            label="Add carousel image"
+            value={undefined}
+            folder={MEDIA_UPLOAD_FOLDERS.general.replace("/general", "/home")}
+            usage="home-hero-background"
+            mediaType="image"
+            onChange={(asset) => {
+              if (!asset) return;
+              updateNested("hero", {
+                backgroundImages: [...(form.hero.backgroundImages || []), asset],
+              });
+            }}
+          />
+          {(form.hero.backgroundImages || []).length ? (
+            <div className="space-y-2">
+              {(form.hero.backgroundImages || []).map((item, idx) => (
+                <div
+                  key={`hero-bg-${idx}-${item.publicId}`}
+                  className="flex items-center gap-3 rounded-md border border-border p-2"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.url}
+                    alt={item.altText || `Hero background ${idx + 1}`}
+                    className="h-12 w-20 rounded object-cover"
+                  />
+                  <p className="flex-1 truncate text-xs text-muted-foreground">
+                    {item.altText || item.publicId || `Image ${idx + 1}`}
+                  </p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() =>
+                      updateNested("hero", {
+                        backgroundImages: (form.hero.backgroundImages || []).filter(
+                          (_, imageIdx) => imageIdx !== idx
+                        ),
+                      })
+                    }
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              No carousel images selected. Public hero falls back to single background image.
+            </p>
+          )}
+        </div>
         <AdminMediaUploader
           label="Hero foreground image"
           value={form.hero.foregroundImage}

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { SITE_URL, buildOrganizationJsonLd, buildMetadata } from "@/lib/seo";
 import Container from "@/components/shared/Container";
+import HomeHero from "@/components/public/home/HomeHero";
 import { getPublicHomePage } from "@/lib/home-page";
 import { getPublicSiteSettings } from "@/lib/site-settings";
 import { getServiceGroupLabel } from "@/types/service";
@@ -95,100 +96,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#03452e] via-[#075f3f] to-[#0a6d49] text-white">
-        {home.hero.backgroundImage?.url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={home.hero.backgroundImage.url}
-            alt={home.hero.backgroundImage.altText || "Hero background"}
-            className="absolute inset-0 h-full w-full object-cover opacity-30"
-          />
-        ) : null}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_25%,rgba(255,255,255,0.22),transparent_42%),radial-gradient(circle_at_80%_20%,rgba(255,236,179,0.16),transparent_35%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.07)_1px,transparent_1px)] bg-[size:44px_44px] opacity-25" />
-        <Container className="relative section-py !pt-16 !pb-20 grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-          <div className="space-y-6">
-            {home.hero.eyebrow ? (
-              <p className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
-                <Sparkles className="h-3.5 w-3.5" />
-                {home.hero.eyebrow}
-              </p>
-            ) : null}
-            <h1 className="max-w-3xl text-4xl font-bold leading-tight md:text-5xl xl:text-6xl">
-              {home.hero.title}
-            </h1>
-            {home.hero.subtitle ? (
-              <p className="text-base font-semibold uppercase tracking-[0.22em] text-emerald-100">
-                {home.hero.subtitle}
-              </p>
-            ) : null}
-            {home.hero.description ? (
-              <p className="max-w-2xl text-sm text-emerald-50/95 md:text-lg md:leading-relaxed">
-                {home.hero.description}
-              </p>
-            ) : null}
-            <div className="flex flex-wrap gap-3 pt-1">
-              {home.hero.primaryButtonText && home.hero.primaryButtonUrl ? (
-                <Link
-                  href={home.hero.primaryButtonUrl}
-                  className="inline-flex h-12 items-center gap-2 rounded-lg bg-white px-6 text-sm font-semibold text-[#075f3f] shadow-[0_10px_30px_rgba(0,0,0,0.2)] hover:bg-emerald-50 transition-all hover:-translate-y-0.5"
-                >
-                  {home.hero.primaryButtonText}
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              ) : null}
-              {home.hero.secondaryButtonText && home.hero.secondaryButtonUrl ? (
-                <Link
-                  href={home.hero.secondaryButtonUrl}
-                  className="inline-flex h-12 items-center rounded-lg border border-white/40 bg-white/5 px-6 text-sm font-semibold text-white hover:bg-white/15 transition-colors"
-                >
-                  {home.hero.secondaryButtonText}
-                </Link>
-              ) : null}
-            </div>
-            {home.hero.badges?.length ? (
-              <div className="flex flex-wrap gap-2 pt-3">
-                {home.hero.badges.map((badge, idx) => (
-                  <span
-                    key={`badge-${idx}`}
-                    className="rounded-full border border-white/20 bg-white/8 px-3 py-1 text-xs font-medium text-emerald-50"
-                  >
-                    {badge}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-          </div>
-          <div className="relative">
-            {home.hero.foregroundImage?.url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={home.hero.foregroundImage.url}
-                alt={home.hero.foregroundImage.altText || "Hero"}
-                className="mx-auto w-full max-w-xl rounded-2xl border border-white/30 object-cover shadow-[0_24px_64px_rgba(0,0,0,0.35)]"
-              />
-            ) : (
-              <div className="mx-auto flex h-[25rem] w-full max-w-xl flex-col justify-between rounded-2xl border border-white/25 bg-white/10 p-6 backdrop-blur-sm shadow-[0_24px_64px_rgba(0,0,0,0.32)]">
-                <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">UESPAK</p>
-                <div className="space-y-3">
-                  <p className="text-2xl font-semibold leading-tight text-white">
-                    Engineering and technical delivery with practical business outcomes.
-                  </p>
-                  <p className="text-sm text-emerald-50/90">
-                    Built for reliability, compliance, and long-term operational performance.
-                  </p>
-                </div>
-                <div className="grid grid-cols-2 gap-3 text-xs text-emerald-100/90">
-                  <span className="rounded-md bg-white/10 px-3 py-2">Engineering</span>
-                  <span className="rounded-md bg-white/10 px-3 py-2">Automation</span>
-                  <span className="rounded-md bg-white/10 px-3 py-2">Agriculture</span>
-                  <span className="rounded-md bg-white/10 px-3 py-2">Facility Systems</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </Container>
-      </section>
+      {home.hero.isActive ? <HomeHero hero={home.hero} /> : null}
 
       <section className="section-py bg-[linear-gradient(to_bottom,#ffffff_0%,#f7fbf8_100%)]">
         <Container className="space-y-16">

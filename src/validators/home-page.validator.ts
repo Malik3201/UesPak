@@ -90,11 +90,12 @@ export const homePageSchema = z.object({
       secondaryButtonText: trimToOptional(80),
       secondaryButtonUrl: trimToOptional(2048),
       backgroundImage: mediaObjectSchema.optional(),
+      backgroundImages: z.array(mediaObjectSchema).default([]),
       foregroundImage: mediaObjectSchema.optional(),
       badges: z.array(z.string().trim().min(1).max(120)).default([]),
       isActive: z.boolean().default(true),
     })
-    .default({ isActive: true, badges: [] }),
+    .default({ isActive: true, badges: [], backgroundImages: [] }),
   featuredServices: z
     .object({
       title: trimToOptional(140),

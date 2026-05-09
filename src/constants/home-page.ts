@@ -15,6 +15,7 @@ export const DEFAULT_HOME_PAGE_CONTENT: HomePageContent = {
     primaryButtonUrl: "/services",
     secondaryButtonText: "View Projects",
     secondaryButtonUrl: "/projects",
+    backgroundImages: [],
     badges: ["Engineering Excellence", "Industrial Automation", "Agriculture Solutions"],
     isActive: true,
   },
