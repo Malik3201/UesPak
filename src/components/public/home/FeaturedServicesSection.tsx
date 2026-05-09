@@ -120,7 +120,7 @@ export default function FeaturedServicesSection({
               <article
                 key={service.id}
                 data-services-card
-                className="group/card relative flex shrink-0 basis-full flex-col overflow-hidden rounded-2xl bg-white text-foreground shadow-[0_18px_42px_rgba(2,33,23,0.28)] ring-1 ring-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_60px_rgba(2,33,23,0.35)] sm:basis-[calc((100%-1.5rem)/2)] lg:basis-[calc((100%-3rem)/3)]"
+                className="group/card relative flex shrink-0 basis-full flex-col overflow-hidden rounded-2xl bg-white text-slate-900 shadow-[0_18px_42px_rgba(2,33,23,0.28)] ring-1 ring-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_60px_rgba(2,33,23,0.35)] sm:basis-[calc((100%-1.5rem)/2)] lg:basis-[calc((100%-3rem)/3)]"
               >
                 <div className="relative h-56 w-full overflow-hidden">
                   {service.featuredImage?.url ? (
@@ -145,10 +145,10 @@ export default function FeaturedServicesSection({
                   <p className="inline-flex w-fit rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#075f3f]">
                     {getServiceGroupLabel(service.serviceGroup || "engineering")}
                   </p>
-                  <h3 className="text-lg font-semibold text-foreground">
+                  <h3 className="text-lg font-semibold leading-snug text-[#0f1f17]">
                     {service.title}
                   </h3>
-                  <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                  <p className="line-clamp-3 text-sm leading-relaxed text-slate-600">
                     {service.excerpt || "Explore this service by UESPAK."}
                   </p>
                   <div className="mt-auto pt-2">
