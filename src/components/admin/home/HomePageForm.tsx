@@ -15,14 +15,26 @@ interface OptionRow {
   title: string;
 }
 
-function normalizeHeroMedia(asset: MediaObject): MediaObject {
+type MediaAssetInput = Partial<MediaObject> & {
+  filePath?: string;
+};
+
+function normalizeMediaAsset(asset?: MediaAssetInput | null): MediaObject | undefined {
+  if (!asset?.url) return undefined;
   const publicId =
     (asset.publicId && String(asset.publicId).trim()) ||
     (asset.fileId && String(asset.fileId).trim()) ||
+    (asset.filePath && String(asset.filePath).trim()) ||
     "";
   return {
-    ...asset,
+    url: asset.url,
     publicId,
+    fileId: asset.fileId || "",
+    altText: asset.altText || "",
+    width: asset.width,
+    height: asset.height,
+    format: asset.format,
+    size: asset.size,
   };
 }
 
@@ -58,7 +70,7 @@ export default function HomePageForm() {
   function mergeHomePageData(loaded?: HomePageContent | null): HomePageContent {
     const defaults = getDefaultHomePageContent();
     const loadedBackgroundImages = (loaded?.hero?.backgroundImages || []).filter((item) =>
-      Boolean(item?.url && (item?.publicId || item?.fileId))
+      Boolean(item?.url)
     );
     const shouldUseLegacyFallback =
       loadedBackgroundImages.length === 0 && Boolean(loaded?.hero?.backgroundImage?.url);
@@ -79,7 +91,8 @@ export default function HomePageForm() {
   }
 
   function addHeroBackgroundImage(asset: MediaObject) {
-    const normalized = normalizeHeroMedia(asset);
+    const normalized = normalizeMediaAsset(asset);
+    if (!normalized) return;
     setForm((prev) => ({
       ...prev,
       hero: {
@@ -379,7 +392,7 @@ export default function HomePageForm() {
           helperText="Used behind the homepage services carousel section."
           onChange={(asset) =>
             updateNested("featuredServices", {
-              backgroundImage: asset || undefined,
+              backgroundImage: normalizeMediaAsset(asset),
             })
           }
         />
@@ -391,7 +404,7 @@ export default function HomePageForm() {
         <Input label="Eyebrow" value={form.servicesOverview.eyebrow || ""} onChange={(e) => updateNested("servicesOverview", { eyebrow: e.target.value })} />
         <Input label="Title" value={form.servicesOverview.title || ""} onChange={(e) => updateNested("servicesOverview", { title: e.target.value })} />
         <Textarea label="Description" rows={3} value={form.servicesOverview.description || ""} onChange={(e) => updateNested("servicesOverview", { description: e.target.value })} />
-        <AdminMediaUploader label="Overview image" value={form.servicesOverview.image} folder={MEDIA_UPLOAD_FOLDERS.general.replace("/general", "/home")} usage="home-services-overview" mediaType="image" onChange={(asset) => updateNested("servicesOverview", { image: asset || undefined })} />
+        <AdminMediaUploader label="Overview image" value={form.servicesOverview.image} folder={MEDIA_UPLOAD_FOLDERS.general.replace("/general", "/home")} usage="home-services-overview" mediaType="image" onChange={(asset) => updateNested("servicesOverview", { image: normalizeMediaAsset(asset) })} />
       </section>
 
       <section className="space-y-4 rounded-xl border border-border bg-card p-5">
@@ -447,7 +460,7 @@ export default function HomePageForm() {
         <Textarea label="Description" rows={3} value={form.aboutPreview.description || ""} onChange={(e) => updateNested("aboutPreview", { description: e.target.value })} />
         <Input label="Button text" value={form.aboutPreview.buttonText || ""} onChange={(e) => updateNested("aboutPreview", { buttonText: e.target.value })} />
         <Input label="Button URL" value={form.aboutPreview.buttonUrl || ""} onChange={(e) => updateNested("aboutPreview", { buttonUrl: e.target.value })} />
-        <AdminMediaUploader label="About image" value={form.aboutPreview.image} folder={MEDIA_UPLOAD_FOLDERS.general.replace("/general", "/home")} usage="home-about" mediaType="image" onChange={(asset) => updateNested("aboutPreview", { image: asset || undefined })} />
+        <AdminMediaUploader label="About image" value={form.aboutPreview.image} folder={MEDIA_UPLOAD_FOLDERS.general.replace("/general", "/home")} usage="home-about" mediaType="image" onChange={(asset) => updateNested("aboutPreview", { image: normalizeMediaAsset(asset) })} />
       </section>
 
       <section className="space-y-4 rounded-xl border border-border bg-card p-5">
@@ -461,7 +474,7 @@ export default function HomePageForm() {
         <Textarea label="Mission description" rows={2} value={form.visionMission.missionDescription || ""} onChange={(e) => updateNested("visionMission", { missionDescription: e.target.value })} />
         <Input label="Values title" value={form.visionMission.valuesTitle || ""} onChange={(e) => updateNested("visionMission", { valuesTitle: e.target.value })} />
         <Textarea label="Values description" rows={2} value={form.visionMission.valuesDescription || ""} onChange={(e) => updateNested("visionMission", { valuesDescription: e.target.value })} />
-        <AdminMediaUploader label="Section image" value={form.visionMission.image} folder={MEDIA_UPLOAD_FOLDERS.general.replace("/general", "/home")} usage="home-vision-mission" mediaType="image" onChange={(asset) => updateNested("visionMission", { image: asset || undefined })} />
+        <AdminMediaUploader label="Section image" value={form.visionMission.image} folder={MEDIA_UPLOAD_FOLDERS.general.replace("/general", "/home")} usage="home-vision-mission" mediaType="image" onChange={(asset) => updateNested("visionMission", { image: normalizeMediaAsset(asset) })} />
       </section>
 
       <section className="space-y-4 rounded-xl border border-border bg-card p-5">
@@ -628,7 +641,7 @@ export default function HomePageForm() {
                 mediaType="image"
                 onChange={(asset) => {
                   const copy = [...(form.clients.logos || [])];
-                  copy[idx] = { ...copy[idx], logo: asset || undefined };
+                  copy[idx] = { ...copy[idx], logo: normalizeMediaAsset(asset) };
                   updateNested("clients", { logos: copy });
                 }}
               />
@@ -675,7 +688,7 @@ export default function HomePageForm() {
           folder={MEDIA_UPLOAD_FOLDERS.seo}
           usage="home-og"
           mediaType="image"
-          onChange={(asset) => setPath("seo", { ...form.seo, ogImage: asset || undefined })}
+          onChange={(asset) => setPath("seo", { ...form.seo, ogImage: normalizeMediaAsset(asset) })}
         />
         <div className="flex flex-wrap gap-6 text-sm">
           <label className="flex items-center gap-2 text-muted-foreground">

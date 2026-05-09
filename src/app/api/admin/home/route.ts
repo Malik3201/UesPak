@@ -11,7 +11,7 @@ import {
   validationErrorResponse,
 } from "@/lib/api-response";
 import { HOME_PAGE_KEY, getDefaultHomePageContent } from "@/constants/home-page";
-import { homePageSchema, homePageUpdateSchema } from "@/validators/home-page.validator";
+import { homePageSchema } from "@/validators/home-page.validator";
 
 function mergeDeep<T>(base: T, incoming: unknown): T {
   if (incoming == null) return base;
@@ -39,8 +39,7 @@ function mergeDeep<T>(base: T, incoming: unknown): T {
 
 function isPresentMediaItem(item: Record<string, unknown>) {
   const url = item?.url;
-  const id = item?.publicId || item?.fileId;
-  return Boolean(url && id);
+  return Boolean(url);
 }
 
 function toSerializable(homePage: Record<string, unknown>) {
@@ -111,37 +110,13 @@ export async function PATCH(request: NextRequest) {
       return errorResponse("Invalid request body.", 400);
     }
 
-    const partialParsed = homePageUpdateSchema.safeParse(json);
-    if (!partialParsed.success) {
-      return validationErrorResponse(partialParsed.error.flatten().fieldErrors);
-    }
-
     const body = json as Record<string, unknown>;
-    const rawHero = body.hero as Record<string, unknown> | undefined;
-
-    const patchFromClient = { ...partialParsed.data } as Record<string, unknown>;
-    const patchHero = patchFromClient.hero as Record<string, unknown> | undefined;
-    const heroKeyPresent = Object.prototype.hasOwnProperty.call(body, "hero");
-
-    if (!heroKeyPresent) {
-      delete patchFromClient.hero;
-    } else if (
-      patchHero &&
-      typeof patchHero === "object" &&
-      rawHero &&
-      typeof rawHero === "object" &&
-      !Object.prototype.hasOwnProperty.call(rawHero, "backgroundImages")
-    ) {
-      const restHeroPatch = { ...patchHero };
-      delete restHeroPatch.backgroundImages;
-      patchFromClient.hero = restHeroPatch;
-    }
 
     const existing = await HomePage.findOne({ key: HOME_PAGE_KEY }).lean();
     const defaults = getDefaultHomePageContent();
     const mergedRaw = mergeDeep(
       mergeDeep(defaults, existing || {}),
-      patchFromClient
+      body
     );
 
     const parsed = homePageSchema.safeParse(mergedRaw);
@@ -149,26 +124,10 @@ export async function PATCH(request: NextRequest) {
       return validationErrorResponse(parsed.error.flatten().fieldErrors);
     }
     const data = parsed.data;
-    const existingHero = ((existing as Record<string, unknown> | null)?.hero ||
-      {}) as Record<string, unknown>;
-    const defaultHero = defaults.hero as unknown as Record<string, unknown>;
-    const parsedHero = data.hero as unknown as Record<string, unknown>;
-    const incomingHero = (rawHero || {}) as Record<string, unknown>;
-    const mergedHero = {
-      ...defaultHero,
-      ...existingHero,
-      ...parsedHero,
-      backgroundImages: Array.isArray(incomingHero.backgroundImages)
-        ? (parsedHero.backgroundImages as unknown[])
-        : Array.isArray(existingHero.backgroundImages)
-          ? (existingHero.backgroundImages as unknown[])
-          : [],
-    };
 
     const updatePayload = {
       ...data,
       key: HOME_PAGE_KEY,
-      hero: mergedHero,
       featuredServices: {
         ...data.featuredServices,
         serviceIds: (data.featuredServices.serviceIds || []).map(
@@ -190,7 +149,7 @@ export async function PATCH(request: NextRequest) {
         $set: updatePayload,
         $setOnInsert: { createdBy: new mongoose.Types.ObjectId(admin.id) },
       },
-      { upsert: true, new: true }
+      { upsert: true, new: true, runValidators: true }
     ).lean();
 
     revalidatePath("/");

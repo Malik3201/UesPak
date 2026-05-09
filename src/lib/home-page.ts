@@ -128,7 +128,7 @@ export async function getHomePage(): Promise<{
     if (!doc) return { homePage: defaults, persisted: false };
     const merged = mergeDeep(defaults, normalizeObject(doc));
     merged.hero.backgroundImages = (merged.hero.backgroundImages || []).filter((item) =>
-      Boolean(item?.url && (item?.publicId || item?.fileId))
+      Boolean(item?.url)
     );
     merged.featuredServices.serviceIds = (merged.featuredServices.serviceIds || []).map((id) =>
       String(id)

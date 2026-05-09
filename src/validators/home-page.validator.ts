@@ -22,12 +22,12 @@ const objectIdString = z
 const mediaObjectSchema = z
   .object({
     url: z.string().trim().min(1),
-    publicId: z.string().trim().optional(),
-    fileId: z.string().trim().optional(),
-    altText: trimToOptional(300),
+    publicId: z.string().trim().optional().default(""),
+    fileId: z.string().trim().optional().default(""),
+    altText: z.string().trim().max(300).optional().default(""),
     width: z.number().optional(),
     height: z.number().optional(),
-    format: trimToOptional(50),
+    format: z.string().trim().max(50).optional(),
     size: z.number().optional(),
   })
   .transform((m) => {
@@ -36,10 +36,6 @@ const mediaObjectSchema = z
       (m.fileId && String(m.fileId).trim()) ||
       "";
     return { ...m, publicId: pid };
-  })
-  .refine((m) => m.publicId.length > 0, {
-    message: "publicId or fileId is required.",
-    path: ["publicId"],
   });
 
 const simpleItemSchema = z.object({
