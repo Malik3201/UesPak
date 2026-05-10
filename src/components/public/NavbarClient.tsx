@@ -90,19 +90,29 @@ export default function NavbarClient({
       </div>
 
       <div className={`border-b backdrop-blur-xl transition-all duration-300 ${shellClass}`}>
-        <Container className="flex h-16 items-center justify-between gap-4">
-          <Link href="/" className="shrink-0" aria-label={`${siteName} home`}>
+        <Container className="flex h-16 items-center justify-between gap-4 md:h-20">
+          <Link
+            href="/"
+            className="group/logo shrink-0"
+            aria-label={`${siteName} home`}
+          >
             {settings.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={settings.logoUrl}
                 alt={siteName}
-                width={170}
-                height={52}
-                className="h-11 w-auto object-contain"
+                width={260}
+                height={96}
+                className="h-12 w-auto object-contain transition-transform duration-300 group-hover/logo:scale-[1.03] md:h-14 lg:h-16"
               />
             ) : (
-              <span className="text-2xl font-bold tracking-tight">{siteName}</span>
+              <span
+                className={`block text-2xl font-extrabold tracking-tight transition-colors md:text-3xl lg:text-[2rem] ${
+                  isHome && !isScrolled ? "text-white" : "text-[#075f3f]"
+                }`}
+              >
+                {siteName}
+              </span>
             )}
           </Link>
 

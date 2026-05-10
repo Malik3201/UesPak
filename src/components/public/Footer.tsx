@@ -37,7 +37,26 @@ export default function Footer({ settings }: FooterProps) {
       <Container className="py-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <span className="text-xl font-bold tracking-tight">{siteName}</span>
+            <Link
+              href="/"
+              aria-label={`${siteName} home`}
+              className="group/footer-logo inline-flex items-center"
+            >
+              {settings.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={settings.logoUrl}
+                  alt={siteName}
+                  width={300}
+                  height={108}
+                  className="h-16 w-auto object-contain transition-transform duration-300 group-hover/footer-logo:scale-[1.03] md:h-20"
+                />
+              ) : (
+                <span className="block text-3xl font-extrabold tracking-tight text-primary-foreground md:text-4xl">
+                  {siteName}
+                </span>
+              )}
+            </Link>
             {settings.footerText?.trim() ? (
               <p className="mt-2 text-sm font-medium text-primary-foreground/85">
                 {settings.footerText}

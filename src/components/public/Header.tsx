@@ -9,7 +9,7 @@ export default function Header({
   return (
     <header>
       <Navbar settings={settings} />
-      <div className="h-16 md:h-24" aria-hidden="true" />
+      <div className="h-16 md:h-[7.25rem]" aria-hidden="true" />
     </header>
   );
 }
