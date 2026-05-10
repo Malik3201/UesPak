@@ -127,65 +127,87 @@ export default function FeaturedProjectsSection({
               const groupLabel = getProjectGroupLabel(
                 project.projectGroup || "engineering"
               );
-              const meta = [project.client, project.location, project.discipline]
-                .filter(Boolean)
-                .join(" • ");
+              const metaItems = [
+                project.client,
+                project.location,
+                project.discipline,
+              ]
+                .filter((v): v is string => Boolean(v))
+                .slice(0, 3);
 
               return (
                 <article
                   key={project.id}
                   data-projects-card
                   style={{ animationDelay: `${280 + idx * 90}ms` }}
-                  className="featured-projects-card group/card relative flex shrink-0 basis-full snap-start flex-col overflow-hidden rounded-3xl bg-[#0f1f17] text-white shadow-[0_22px_48px_rgba(2,33,23,0.42)] ring-1 ring-white/10 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_32px_70px_rgba(2,33,23,0.55)] sm:basis-[calc((100%-1.5rem)/2)] lg:basis-[calc((100%-3rem)/3)]"
+                  className="featured-projects-card group/card relative flex h-[480px] shrink-0 basis-full snap-start overflow-hidden rounded-3xl text-white shadow-[0_22px_48px_rgba(2,33,23,0.42)] transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-[0_32px_70px_rgba(2,33,23,0.6)] sm:h-[520px] sm:basis-[calc((100%-1.5rem)/2)] lg:h-[540px] lg:basis-[calc((100%-3rem)/3)]"
                 >
-                  <div className="relative h-72 w-full overflow-hidden sm:h-80 lg:h-[340px]">
-                    {project.featuredImage?.url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={project.featuredImage.url}
-                        alt={project.featuredImage.altText || project.title}
-                        className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover/card:scale-110"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="grid h-full w-full place-items-center bg-gradient-to-br from-[#0a6d49] via-[#0f7a54] to-[#46a56c]">
-                        <span className="text-3xl font-bold tracking-tight text-white/90">
-                          {(project.title || "U").slice(0, 2).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
-                    <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(2,33,23,0)_38%,rgba(2,33,23,0.55)_70%,rgba(2,33,23,0.92)_100%)] transition-opacity duration-300 group-hover/card:opacity-95" />
+                  {project.featuredImage?.url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={project.featuredImage.url}
+                      alt={project.featuredImage.altText || project.title}
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover/card:scale-105"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-[#0a6d49] via-[#0f7a54] to-[#46a56c]">
+                      <span className="text-4xl font-bold tracking-tight text-white/90">
+                        {(project.title || "U").slice(0, 2).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
 
-                    <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#075f3f] shadow-[0_8px_18px_rgba(2,33,23,0.25)]">
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(2,33,23,0.05)_0%,rgba(2,33,23,0.15)_38%,rgba(6,95,70,0.62)_70%,rgba(2,33,23,0.92)_100%)] transition-opacity duration-500 group-hover/card:opacity-100"
+                  />
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover/card:opacity-100 bg-[linear-gradient(180deg,rgba(2,33,23,0)_30%,rgba(2,33,23,0.18)_55%,rgba(2,33,23,0.35)_100%)]"
+                  />
+
+                  <div className="relative z-10 flex h-full w-full flex-col justify-between p-5 sm:p-6">
+                    <span className="inline-flex w-fit items-center rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#075f3f] shadow-[0_8px_18px_rgba(2,33,23,0.3)] backdrop-blur-sm">
                       {groupLabel}
                     </span>
 
-                    <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
-                      <h3 className="text-balance text-lg font-bold leading-snug text-white sm:text-xl">
+                    <div className="space-y-3">
+                      <h3 className="text-balance text-xl font-bold leading-snug text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] sm:text-2xl">
                         {project.title}
                       </h3>
                       {project.excerpt ? (
-                        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-emerald-50/90">
+                        <p className="line-clamp-2 text-sm leading-relaxed text-emerald-50/95 drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]">
                           {project.excerpt}
                         </p>
                       ) : null}
+                      {metaItems.length ? (
+                        <ul className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-emerald-100/90">
+                          {metaItems.map((item, mIdx) => (
+                            <li
+                              key={`${project.id}-meta-${mIdx}`}
+                              className="flex items-center gap-2"
+                            >
+                              {mIdx > 0 ? (
+                                <span
+                                  aria-hidden
+                                  className="h-1 w-1 rounded-full bg-emerald-200/70"
+                                />
+                              ) : null}
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      <Link
+                        href={`/projects/${project.slug}`}
+                        aria-label={`View details for ${project.title}`}
+                        className="group/cta mt-2 inline-flex h-11 w-fit items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-[#075f3f] shadow-[0_12px_24px_rgba(2,33,23,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-50"
+                      >
+                        View Details
+                        <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/cta:translate-x-1" />
+                      </Link>
                     </div>
-                  </div>
-
-                  <div className="flex flex-col gap-3 p-5 sm:p-6">
-                    {meta ? (
-                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-emerald-200/80">
-                        {meta}
-                      </p>
-                    ) : null}
-                    <Link
-                      href={`/projects/${project.slug}`}
-                      aria-label={`View details for ${project.title}`}
-                      className="group/cta inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-[#075f3f] shadow-[0_12px_24px_rgba(2,33,23,0.25)] transition-all hover:-translate-y-0.5 hover:bg-emerald-50"
-                    >
-                      View Details
-                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/cta:translate-x-1" />
-                    </Link>
                   </div>
                 </article>
               );
