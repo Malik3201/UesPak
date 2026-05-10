@@ -74,7 +74,7 @@ export default function HomeHero({ hero }: HomeHeroProps) {
           ) : null}
           <span className="block h-px w-24 bg-gradient-to-r from-transparent via-white/60 to-transparent" />
           {hero.description ? (
-            <p className="mx-auto max-w-2xl text-pretty text-justify text-sm leading-relaxed text-emerald-50/95 md:text-base lg:text-lg [text-align-last:center]">
+            <p className="mx-auto max-w-[760px] text-center text-sm font-medium leading-7 text-emerald-50/95 sm:text-base sm:leading-8 lg:text-lg lg:leading-9">
               {hero.description}
             </p>
           ) : null}

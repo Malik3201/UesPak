@@ -59,8 +59,8 @@ export const DEFAULT_HOME_PAGE_CONTENT: HomePageContent = {
     isActive: true,
   },
   visionMission: {
-    eyebrow: "Our Direction",
-    title: "Vision, Mission, and Values",
+    eyebrow: "Our Purpose",
+    title: "Guided by Vision, Driven by Mission",
     visionTitle: "Vision",
     visionDescription:
       "To be a trusted leader in engineering, automation, and agriculture solutions.",
@@ -70,6 +70,9 @@ export const DEFAULT_HOME_PAGE_CONTENT: HomePageContent = {
     valuesTitle: "Values",
     valuesDescription:
       "Integrity, safety, quality, innovation, and client-focused execution.",
+    videoTitle: "Watch UESPAK Overview",
+    videoDescription:
+      "A short look at how UESPAK delivers engineering, automation and agriculture solutions for modern industries.",
     isActive: true,
   },
   stats: {
@@ -84,10 +87,11 @@ export const DEFAULT_HOME_PAGE_CONTENT: HomePageContent = {
     isActive: true,
   },
   featuredProjects: {
-    title: "Featured Projects",
+    eyebrow: "Featured Projects",
+    title: "Engineering, Agriculture & Automation Projects",
     subtitle: "Execution Across Industries",
     description:
-      "Selected projects from engineering, agriculture, and industrial automation workstreams.",
+      "Explore selected UESPAK projects across engineering, agriculture, facility systems, and industrial automation.",
     projectIds: [],
     isActive: true,
   },

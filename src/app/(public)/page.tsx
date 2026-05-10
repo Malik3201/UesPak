@@ -7,9 +7,10 @@ import HomeHero from "@/components/public/home/HomeHero";
 import OurStorySection from "@/components/public/home/OurStorySection";
 import FeaturedServicesSection from "@/components/public/home/FeaturedServicesSection";
 import ServicesOverviewSection from "@/components/public/home/ServicesOverviewSection";
+import VisionMissionSection from "@/components/public/home/VisionMissionSection";
+import FeaturedProjectsSection from "@/components/public/home/FeaturedProjectsSection";
 import { getPublicHomePage } from "@/lib/home-page";
 import { getPublicSiteSettings } from "@/lib/site-settings";
-import { getProjectGroupLabel } from "@/types/project";
 
 export async function generateMetadata(): Promise<Metadata> {
   const home = await getPublicHomePage();
@@ -115,36 +116,11 @@ export default async function HomePage() {
             <ServicesOverviewSection section={home.servicesOverview} />
           ) : null}
 
-          {home.whyChooseUs.isActive && whyChooseItems.length ? (
-            <section className="space-y-6">
-              <div className="max-w-3xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#075f3f]">
-                  Why UESPAK
-                </p>
-                <h2 className="mt-2 text-3xl font-bold text-foreground md:text-4xl">
-                {home.whyChooseUs.title || "Why Choose UESPAK"}
-              </h2>
-                {home.whyChooseUs.description ? (
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
-                    {home.whyChooseUs.description}
-                  </p>
-                ) : null}
-              </div>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {whyChooseItems.map((item, idx) => (
-                  <article
-                    key={`why-item-${idx}`}
-                    className="rounded-2xl bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.08)] ring-1 ring-black/5"
-                  >
-                    <span className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#e7f4ed] text-[#075f3f]">
-                      <CheckCircle2 className="h-5 w-5" />
-                    </span>
-                      <h3 className="font-semibold text-foreground">{item.title}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
+          {home.featuredProjects.isActive && home.featuredProjectsResolved.length ? (
+            <FeaturedProjectsSection
+              section={home.featuredProjects}
+              projects={home.featuredProjectsResolved}
+            />
           ) : null}
 
           {home.aboutPreview.isActive ? (
@@ -197,40 +173,7 @@ export default async function HomePage() {
           ) : null}
 
           {home.visionMission.isActive ? (
-            <section className="space-y-6">
-              <h2 className="text-3xl font-bold text-foreground md:text-4xl">
-                {home.visionMission.title || "Vision, Mission & Values"}
-              </h2>
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-2xl bg-white p-5 shadow-[0_8px_22px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[#075f3f]">Vision</span>
-                  <h3 className="font-semibold text-foreground">
-                    {home.visionMission.visionTitle || "Vision"}
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {home.visionMission.visionDescription}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-white p-5 shadow-[0_8px_22px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[#075f3f]">Mission</span>
-                  <h3 className="font-semibold text-foreground">
-                    {home.visionMission.missionTitle || "Mission"}
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {home.visionMission.missionDescription}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-white p-5 shadow-[0_8px_22px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[#075f3f]">Values</span>
-                  <h3 className="font-semibold text-foreground">
-                    {home.visionMission.valuesTitle || "Values"}
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {home.visionMission.valuesDescription}
-                  </p>
-                </div>
-              </div>
-            </section>
+            <VisionMissionSection section={home.visionMission} />
           ) : null}
 
           {home.stats.isActive && statItems.length ? (
@@ -256,59 +199,32 @@ export default async function HomePage() {
             </section>
           ) : null}
 
-          {home.featuredProjects.isActive && home.featuredProjectsResolved.length ? (
-            <section className="space-y-7">
-              <div className="flex flex-wrap items-end justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#075f3f]">
-                    Project Showcase
-                  </p>
-                  <h2 className="mt-2 text-3xl font-bold text-foreground md:text-4xl">
-                  {home.featuredProjects.title || "Featured Projects"}
+          {home.whyChooseUs.isActive && whyChooseItems.length ? (
+            <section className="space-y-6">
+              <div className="max-w-3xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#075f3f]">
+                  Why UESPAK
+                </p>
+                <h2 className="mt-2 text-3xl font-bold text-foreground md:text-4xl">
+                  {home.whyChooseUs.title || "Why Choose UESPAK"}
                 </h2>
-                </div>
-                <Link href="/projects" className="text-sm font-semibold text-emerald-700 hover:underline">
-                  View all projects
-                </Link>
+                {home.whyChooseUs.description ? (
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
+                    {home.whyChooseUs.description}
+                  </p>
+                ) : null}
               </div>
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {home.featuredProjectsResolved.slice(0, 3).map((project) => (
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {whyChooseItems.map((item, idx) => (
                   <article
-                    key={project.id}
-                    className="group overflow-hidden rounded-2xl bg-white shadow-[0_14px_32px_rgba(15,23,42,0.1)] ring-1 ring-black/5 transition-all hover:-translate-y-1 hover:shadow-[0_22px_46px_rgba(15,23,42,0.15)]"
+                    key={`why-item-${idx}`}
+                    className="rounded-2xl bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.08)] ring-1 ring-black/5"
                   >
-                    {project.featuredImage?.url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={project.featuredImage.url}
-                        alt={project.featuredImage.altText || project.title}
-                        className="h-56 w-full object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="h-56 w-full bg-gradient-to-br from-[#0f7a54] to-[#3b9f68]" />
-                    )}
-                    <div className="space-y-3 p-5">
-                      <p className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#075f3f]">
-                        {getProjectGroupLabel(project.projectGroup || "engineering")}
-                      </p>
-                      <h3 className="text-lg font-semibold text-foreground">{project.title}</h3>
-                      <p className="line-clamp-2 text-sm text-muted-foreground">
-                        {project.excerpt || "Explore this project by UESPAK."}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {[project.client, project.location, project.discipline]
-                          .filter(Boolean)
-                          .join(" • ") || "Engineering and technical execution details available."}
-                      </p>
-                      <Link
-                        href={`/projects/${project.slug}`}
-                        className="inline-flex items-center gap-1 text-sm font-semibold text-[#075f3f] transition-colors group-hover:text-[#03452e]"
-                      >
-                        View Details
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </div>
+                    <span className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#e7f4ed] text-[#075f3f]">
+                      <CheckCircle2 className="h-5 w-5" />
+                    </span>
+                    <h3 className="font-semibold text-foreground">{item.title}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
                   </article>
                 ))}
               </div>

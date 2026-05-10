@@ -86,6 +86,10 @@ export interface HomePageContent {
     valuesTitle?: string;
     valuesDescription?: string;
     image?: MediaObject;
+    video?: MediaObject;
+    videoPoster?: MediaObject;
+    videoTitle?: string;
+    videoDescription?: string;
     isActive: boolean;
   };
   stats: {
@@ -95,10 +99,12 @@ export interface HomePageContent {
     isActive: boolean;
   };
   featuredProjects: {
+    eyebrow?: string;
     title?: string;
     subtitle?: string;
     description?: string;
     projectIds: string[];
+    backgroundImage?: MediaObject;
     isActive: boolean;
   };
   industries: {

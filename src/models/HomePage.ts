@@ -63,6 +63,10 @@ export interface IHomePage extends Document {
     valuesTitle?: string;
     valuesDescription?: string;
     image?: MediaObject;
+    video?: MediaObject;
+    videoPoster?: MediaObject;
+    videoTitle?: string;
+    videoDescription?: string;
     isActive: boolean;
   };
   stats: {
@@ -78,10 +82,12 @@ export interface IHomePage extends Document {
     isActive: boolean;
   };
   featuredProjects: {
+    eyebrow?: string;
     title?: string;
     subtitle?: string;
     description?: string;
     projectIds: mongoose.Types.ObjectId[];
+    backgroundImage?: MediaObject;
     isActive: boolean;
   };
   industries: {
@@ -270,6 +276,10 @@ const homePageSchema = new Schema<IHomePage>(
           valuesTitle: { type: String, trim: true },
           valuesDescription: { type: String, trim: true },
           image: mediaSchema,
+          video: mediaSchema,
+          videoPoster: mediaSchema,
+          videoTitle: { type: String, trim: true },
+          videoDescription: { type: String, trim: true },
           isActive: { type: Boolean, default: true },
         },
         { _id: false }
@@ -305,10 +315,12 @@ const homePageSchema = new Schema<IHomePage>(
     featuredProjects: {
       type: new Schema(
         {
+          eyebrow: { type: String, trim: true },
           title: { type: String, trim: true },
           subtitle: { type: String, trim: true },
           description: { type: String, trim: true },
           projectIds: { type: [{ type: Schema.Types.ObjectId, ref: "Project" }], default: [] },
+          backgroundImage: mediaSchema,
           isActive: { type: Boolean, default: true },
         },
         { _id: false }
@@ -413,6 +425,17 @@ const homePageSchema = new Schema<IHomePage>(
 homePageSchema.index({ status: 1 });
 homePageSchema.index({ createdAt: -1 });
 
-export const HomePage: Model<IHomePage> =
-  mongoose.models.HomePage ?? mongoose.model<IHomePage>("HomePage", homePageSchema);
+// IMPORTANT: in Next.js dev/HMR the previous compiled module may have already
+// registered the `HomePage` model on `mongoose.models` against an OLDER schema
+// instance. Reusing it would silently strip fields newly added to the schema
+// (e.g. `visionMission.video`) on writes (Mongoose default `strict: true`).
+// Force re-registration so the newest schema is always the active one.
+if (mongoose.models.HomePage) {
+  mongoose.deleteModel("HomePage");
+}
+
+export const HomePage: Model<IHomePage> = mongoose.model<IHomePage>(
+  "HomePage",
+  homePageSchema
+);
 

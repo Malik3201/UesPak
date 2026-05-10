@@ -11,14 +11,22 @@ export const ALLOWED_IMAGE_MIME_TYPES = [
 
 export const ALLOWED_PDF_MIME_TYPES = ["application/pdf"] as const;
 
+export const ALLOWED_VIDEO_MIME_TYPES = [
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+] as const;
+
 export const ALLOWED_MIME_TYPES = [
   ...ALLOWED_IMAGE_MIME_TYPES,
   ...ALLOWED_PDF_MIME_TYPES,
+  ...ALLOWED_VIDEO_MIME_TYPES,
 ] as const;
 
 // ─── Size limits ───────────────────────────────────────────────────────────────
 export const IMAGE_MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 export const PDF_MAX_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
+export const VIDEO_MAX_SIZE_BYTES = 50 * 1024 * 1024; // 50 MB
 
 // ─── Validators ───────────────────────────────────────────────────────────────
 export const mediaUploadValidator = z.object({
@@ -42,6 +50,9 @@ export function validateFileSize(
   sizeBytes: number,
   mimeType: string
 ): { valid: boolean; maxMB: number } {
+  if ((ALLOWED_VIDEO_MIME_TYPES as readonly string[]).includes(mimeType)) {
+    return { valid: sizeBytes <= VIDEO_MAX_SIZE_BYTES, maxMB: 50 };
+  }
   const isPdf = mimeType === "application/pdf";
   const maxBytes = isPdf ? PDF_MAX_SIZE_BYTES : IMAGE_MAX_SIZE_BYTES;
   const maxMB = isPdf ? 20 : 5;
@@ -50,10 +61,13 @@ export function validateFileSize(
 
 export function resolveMediaType(
   mimeType: string
-): "image" | "pdf" | "document" | "other" {
+): "image" | "pdf" | "document" | "video" | "other" {
   if ((ALLOWED_IMAGE_MIME_TYPES as readonly string[]).includes(mimeType))
     return "image";
   if (mimeType === "application/pdf") return "pdf";
+  if ((ALLOWED_VIDEO_MIME_TYPES as readonly string[]).includes(mimeType))
+    return "video";
+  if (mimeType.startsWith("video/")) return "video";
   if (mimeType.startsWith("application/")) return "document";
   return "other";
 }

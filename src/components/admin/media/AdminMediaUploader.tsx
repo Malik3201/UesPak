@@ -13,7 +13,7 @@ export interface AdminMediaUploaderProps {
   usage?: string;
   accept?: string;
   maxSizeMB?: number;
-  mediaType?: "image" | "pdf" | "any";
+  mediaType?: "image" | "pdf" | "video" | "any";
   helperText?: string;
   showPreview?: boolean;
   className?: string;
@@ -63,12 +63,16 @@ export default function AdminMediaUploader({
   const defaultAccept =
     mediaType === "pdf"
       ? "application/pdf"
-      : mediaType === "any"
-        ? "image/jpeg,image/png,image/webp,image/svg+xml,application/pdf"
-        : "image/jpeg,image/png,image/webp,image/svg+xml";
+      : mediaType === "video"
+        ? "video/mp4,video/webm,video/quicktime"
+        : mediaType === "any"
+          ? "image/jpeg,image/png,image/webp,image/svg+xml,application/pdf,video/mp4,video/webm,video/quicktime"
+          : "image/jpeg,image/png,image/webp,image/svg+xml";
 
   const resolvedAccept = accept ?? defaultAccept;
-  const maxBytes = (maxSizeMB ?? (mediaType === "pdf" ? 20 : 5)) * 1024 * 1024;
+  const defaultMaxMB =
+    mediaType === "pdf" ? 20 : mediaType === "video" ? 50 : 5;
+  const maxBytes = (maxSizeMB ?? defaultMaxMB) * 1024 * 1024;
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
@@ -80,7 +84,7 @@ export default function AdminMediaUploader({
     }
     if (file.size > maxBytes) {
       const mb = Math.round(file.size / 1024 / 1024 * 10) / 10;
-      const maxMB = maxSizeMB ?? (mediaType === "pdf" ? 20 : 5);
+      const maxMB = maxSizeMB ?? defaultMaxMB;
       setError(`File is too large (${mb}MB). Maximum is ${maxMB}MB.`);
       setSelectedFile(null);
       e.target.value = "";
@@ -157,11 +161,13 @@ export default function AdminMediaUploader({
     onChange(null);
   }
 
+  const url = displayAsset?.url ?? "";
+  const isVideoUrl = /\.(mp4|webm|mov)(\?|$)/i.test(url);
+  const isVideo = mediaType === "video" || (mediaType === "any" && isVideoUrl);
   const isImage =
-    mediaType === "image" ||
-    (mediaType === "any" &&
-      displayAsset?.url != null &&
-      !displayAsset.url.endsWith(".pdf"));
+    !isVideo &&
+    (mediaType === "image" ||
+      (mediaType === "any" && Boolean(url) && !url.endsWith(".pdf")));
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
@@ -229,7 +235,16 @@ export default function AdminMediaUploader({
       {/* Preview */}
       {showPreview && displayAsset?.url ? (
         <div className="mt-1 flex items-start gap-3">
-          {isImage ? (
+          {isVideo ? (
+            <video
+              src={displayAsset.url}
+              controls
+              preload="metadata"
+              className="h-24 w-auto max-w-[220px] rounded-md border border-border bg-black"
+            >
+              Your browser does not support embedded video.
+            </video>
+          ) : isImage ? (
             <div className="relative overflow-hidden rounded-md border border-border bg-muted/30">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -245,7 +260,7 @@ export default function AdminMediaUploader({
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/30 px-3 py-1.5 text-xs text-foreground hover:bg-accent"
             >
-              Open PDF
+              Open file
             </a>
           )}
 

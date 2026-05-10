@@ -186,6 +186,22 @@ export default function HomePageForm() {
             .filter(Boolean),
         },
       };
+
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          "[VISION VIDEO DEBUG] SAVE payload.visionMission.video:",
+          payload?.visionMission?.video
+        );
+        console.log(
+          "[VISION VIDEO DEBUG] SAVE payload.visionMission.videoPoster:",
+          payload?.visionMission?.videoPoster
+        );
+        console.log(
+          "[VISION VIDEO DEBUG] SAVE payload.visionMission.image:",
+          payload?.visionMission?.image
+        );
+      }
+
       const res = await fetch("/api/admin/home", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -474,7 +490,58 @@ export default function HomePageForm() {
         <Textarea label="Mission description" rows={2} value={form.visionMission.missionDescription || ""} onChange={(e) => updateNested("visionMission", { missionDescription: e.target.value })} />
         <Input label="Values title" value={form.visionMission.valuesTitle || ""} onChange={(e) => updateNested("visionMission", { valuesTitle: e.target.value })} />
         <Textarea label="Values description" rows={2} value={form.visionMission.valuesDescription || ""} onChange={(e) => updateNested("visionMission", { valuesDescription: e.target.value })} />
-        <AdminMediaUploader label="Section image" value={form.visionMission.image} folder={MEDIA_UPLOAD_FOLDERS.general.replace("/general", "/home")} usage="home-vision-mission" mediaType="image" onChange={(asset) => updateNested("visionMission", { image: normalizeMediaAsset(asset) })} />
+
+        <div className="grid gap-3 rounded-lg border border-dashed border-border p-4 sm:grid-cols-2">
+          <Input
+            label="Video title"
+            value={form.visionMission.videoTitle || ""}
+            onChange={(e) => updateNested("visionMission", { videoTitle: e.target.value })}
+          />
+          <Input
+            label="Video description"
+            value={form.visionMission.videoDescription || ""}
+            onChange={(e) => updateNested("visionMission", { videoDescription: e.target.value })}
+          />
+          <div className="sm:col-span-2">
+            <AdminMediaUploader
+              label="Overview Video"
+              value={form.visionMission.video}
+              folder={MEDIA_UPLOAD_FOLDERS.home}
+              usage="home-vision-video"
+              mediaType="video"
+              maxSizeMB={50}
+              helperText="Upload a short UESPAK overview video for the homepage Vision & Mission section."
+              onChange={(asset) =>
+                updateNested("visionMission", { video: normalizeMediaAsset(asset) })
+              }
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <AdminMediaUploader
+              label="Video Poster Image"
+              value={form.visionMission.videoPoster}
+              folder={MEDIA_UPLOAD_FOLDERS.home}
+              usage="home-vision-video-poster"
+              mediaType="image"
+              helperText="Optional thumbnail image shown before the video plays."
+              onChange={(asset) =>
+                updateNested("visionMission", { videoPoster: normalizeMediaAsset(asset) })
+              }
+            />
+          </div>
+        </div>
+
+        <AdminMediaUploader
+          label="Fallback Image"
+          value={form.visionMission.image}
+          folder={MEDIA_UPLOAD_FOLDERS.home}
+          usage="home-vision-mission"
+          mediaType="image"
+          helperText="Used as a static visual when no video or poster is uploaded."
+          onChange={(asset) =>
+            updateNested("visionMission", { image: normalizeMediaAsset(asset) })
+          }
+        />
       </section>
 
       <section className="space-y-4 rounded-xl border border-border bg-card p-5">
@@ -529,6 +596,7 @@ export default function HomePageForm() {
       <section className="space-y-4 rounded-xl border border-border bg-card p-5">
         <h2 className="text-base font-semibold text-foreground">Featured Projects</h2>
         <label className="flex items-center gap-2 text-sm text-muted-foreground"><input type="checkbox" checked={Boolean(form.featuredProjects.isActive)} onChange={(e) => updateNested("featuredProjects", { isActive: e.target.checked })} />Section active</label>
+        <Input label="Eyebrow" value={form.featuredProjects.eyebrow || ""} onChange={(e) => updateNested("featuredProjects", { eyebrow: e.target.value })} />
         <Input label="Title" value={form.featuredProjects.title || ""} onChange={(e) => updateNested("featuredProjects", { title: e.target.value })} />
         <Input label="Subtitle" value={form.featuredProjects.subtitle || ""} onChange={(e) => updateNested("featuredProjects", { subtitle: e.target.value })} />
         <Textarea label="Description" rows={3} value={form.featuredProjects.description || ""} onChange={(e) => updateNested("featuredProjects", { description: e.target.value })} />
@@ -551,6 +619,19 @@ export default function HomePageForm() {
             ))}
           </select>
         </label>
+        <AdminMediaUploader
+          label="Projects Section Background Image"
+          value={form.featuredProjects.backgroundImage}
+          folder={MEDIA_UPLOAD_FOLDERS.home}
+          usage="home-featured-projects-background"
+          mediaType="image"
+          helperText="Used behind the homepage featured projects carousel section."
+          onChange={(asset) =>
+            updateNested("featuredProjects", {
+              backgroundImage: normalizeMediaAsset(asset),
+            })
+          }
+        />
       </section>
 
       <section className="space-y-4 rounded-xl border border-border bg-card p-5">

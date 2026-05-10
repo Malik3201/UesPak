@@ -1,7 +1,7 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 import type { MediaObject } from "@/types/media";
 
-export type MediaAssetType = "image" | "pdf" | "document" | "other";
+export type MediaAssetType = "image" | "pdf" | "document" | "video" | "other";
 export type MediaAssetStatus = "active" | "archived";
 
 export interface IMediaAsset extends Document {
@@ -43,7 +43,7 @@ const mediaAssetSchema = new Schema<IMediaAsset>(
     },
     type: {
       type: String,
-      enum: ["image", "pdf", "document", "other"],
+      enum: ["image", "pdf", "document", "video", "other"],
       required: true,
       default: "image",
     },

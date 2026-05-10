@@ -89,6 +89,19 @@ export async function GET() {
 
     const serializable = toSerializable(merged as unknown as Record<string, unknown>);
 
+    if (process.env.NODE_ENV === "development") {
+      const vm = (serializable as { visionMission?: Record<string, unknown> })
+        .visionMission;
+      console.log(
+        "[VISION VIDEO DEBUG] API GET visionMission.video:",
+        vm?.video
+      );
+      console.log(
+        "[VISION VIDEO DEBUG] API GET visionMission.videoPoster:",
+        vm?.videoPoster
+      );
+    }
+
     return successResponse("Home page loaded successfully.", {
       homePage: serializable,
       persisted: true,
@@ -111,6 +124,23 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = json as Record<string, unknown>;
+
+    if (process.env.NODE_ENV === "development") {
+      const incomingVm = (body as { visionMission?: Record<string, unknown> })
+        .visionMission;
+      console.log(
+        "[VISION VIDEO DEBUG] API incoming body.visionMission.video:",
+        incomingVm?.video
+      );
+      console.log(
+        "[VISION VIDEO DEBUG] API incoming body.visionMission.videoPoster:",
+        incomingVm?.videoPoster
+      );
+      console.log(
+        "[VISION VIDEO DEBUG] API incoming body.visionMission.image:",
+        incomingVm?.image
+      );
+    }
 
     const existing = await HomePage.findOne({ key: HOME_PAGE_KEY }).lean();
     const defaults = getDefaultHomePageContent();
@@ -149,8 +179,29 @@ export async function PATCH(request: NextRequest) {
         $set: updatePayload,
         $setOnInsert: { createdBy: new mongoose.Types.ObjectId(admin.id) },
       },
-      { upsert: true, new: true, runValidators: true }
+      {
+        upsert: true,
+        new: true,
+        runValidators: true,
+        // strict:false guards against any stale Mongoose model cache (e.g. across
+        // Next.js HMR) silently stripping nested paths that exist in the latest
+        // schema but not in the cached model instance.
+        strict: false,
+      }
     ).lean();
+
+    if (process.env.NODE_ENV === "development") {
+      const savedVm = (updated as { visionMission?: Record<string, unknown> } | null)
+        ?.visionMission;
+      console.log(
+        "[VISION VIDEO DEBUG] API saved homePage.visionMission.video:",
+        savedVm?.video
+      );
+      console.log(
+        "[VISION VIDEO DEBUG] API saved homePage.visionMission.videoPoster:",
+        savedVm?.videoPoster
+      );
+    }
 
     revalidatePath("/");
 

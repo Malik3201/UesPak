@@ -154,6 +154,10 @@ export const homePageSchema = z.object({
       valuesTitle: trimToOptional(120),
       valuesDescription: trimToOptional(600),
       image: mediaObjectSchema.optional(),
+      video: mediaObjectSchema.optional(),
+      videoPoster: mediaObjectSchema.optional(),
+      videoTitle: trimToOptional(160),
+      videoDescription: trimToOptional(400),
       isActive: z.boolean().default(true),
     })
     .default({ isActive: true }),
@@ -167,10 +171,12 @@ export const homePageSchema = z.object({
     .default({ items: [], isActive: true }),
   featuredProjects: z
     .object({
+      eyebrow: trimToOptional(120),
       title: trimToOptional(140),
       subtitle: trimToOptional(180),
       description: trimToOptional(800),
       projectIds: z.array(objectIdString).default([]),
+      backgroundImage: mediaObjectSchema.optional(),
       isActive: z.boolean().default(true),
     })
     .default({ projectIds: [], isActive: true }),

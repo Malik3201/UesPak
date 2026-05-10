@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     const mimeType = file.type || "";
     if (!validateMimeType(mimeType)) {
       return errorResponse(
-        `File type "${mimeType}" is not allowed. Allowed types: JPEG, PNG, WebP, SVG, PDF.`,
+        `File type "${mimeType}" is not allowed. Allowed types: JPEG, PNG, WebP, SVG, PDF, MP4, WebM, MOV.`,
         400
       );
     }

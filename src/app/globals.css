@@ -230,6 +230,62 @@
       transform: none;
     }
   }
+
+  .vision-mission-fade-up {
+    animation: visionMissionFadeUp 720ms ease-out both;
+  }
+
+  .vision-mission-slide-left {
+    animation: visionMissionSlideLeft 760ms ease-out 140ms both;
+  }
+
+  .vision-mission-slide-right {
+    animation: visionMissionSlideRight 760ms ease-out 200ms both;
+  }
+
+  .vision-mission-card {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: visionMissionCardUp 640ms ease-out forwards;
+  }
+
+  .vision-play-pulse {
+    animation: visionPlayPulse 2.4s ease-in-out infinite;
+  }
+
+  .vision-modal-fade {
+    animation: visionModalFade 280ms ease-out both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vision-mission-fade-up,
+    .vision-mission-slide-left,
+    .vision-mission-slide-right,
+    .vision-mission-card,
+    .vision-play-pulse,
+    .vision-modal-fade {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .featured-projects-fade-up {
+    animation: featuredProjectsFadeUp 760ms ease-out both;
+  }
+
+  .featured-projects-card {
+    animation: featuredProjectsCardUp 620ms ease-out both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .featured-projects-fade-up,
+    .featured-projects-card {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 @keyframes heroFadeUp {
@@ -294,5 +350,94 @@
   }
   50% {
     transform: translateY(-8px);
+  }
+}
+
+@keyframes visionMissionFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes visionMissionSlideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes visionMissionSlideRight {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes visionMissionCardUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes visionPlayPulse {
+  0%,
+  100% {
+    box-shadow: 0 18px 42px rgba(2, 33, 23, 0.32),
+      0 0 0 0 rgba(7, 95, 63, 0.55);
+  }
+  50% {
+    box-shadow: 0 18px 42px rgba(2, 33, 23, 0.32),
+      0 0 0 18px rgba(7, 95, 63, 0);
+  }
+}
+
+@keyframes visionModalFade {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes featuredProjectsFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes featuredProjectsCardUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

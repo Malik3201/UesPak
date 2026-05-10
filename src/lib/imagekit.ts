@@ -18,7 +18,7 @@ export interface ImageKitUploadResultNormalized {
   fileId: string;
   filename: string;
   originalFilename: string;
-  type: "image" | "pdf" | "document" | "other";
+  type: "image" | "pdf" | "document" | "video" | "other";
   resourceType: "image" | "raw";
   folder: string;
   format: string;
