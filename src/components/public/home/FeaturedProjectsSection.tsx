@@ -69,7 +69,7 @@ export default function FeaturedProjectsSection({
     section.backgroundImage?.altText || "UESPAK featured projects background";
 
   return (
-    <section className="featured-projects-fade-up relative isolate overflow-hidden rounded-[2rem] bg-[#063e2b] py-16 text-white shadow-[0_30px_80px_rgba(2,33,23,0.22)] ring-1 ring-white/10 sm:py-20 lg:py-24">
+    <section className="featured-projects-fade-up relative isolate w-full overflow-hidden bg-[#063e2b] py-16 text-white sm:py-20 lg:py-24">
       {bgUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -83,14 +83,14 @@ export default function FeaturedProjectsSection({
       )}
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(4,46,32,0.94)_0%,rgba(7,95,63,0.78)_55%,rgba(11,111,75,0.55)_100%)]"
+        className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(4,46,32,0.95)_0%,rgba(7,95,63,0.82)_55%,rgba(11,111,75,0.6)_100%)]"
       />
       <div
         aria-hidden
         className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:62px_62px] opacity-25"
       />
 
-      <div className="relative px-5 sm:px-8 lg:px-12">
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.32em] text-emerald-200/95">

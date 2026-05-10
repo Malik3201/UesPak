@@ -115,14 +115,18 @@ export default async function HomePage() {
           {home.servicesOverview.isActive ? (
             <ServicesOverviewSection section={home.servicesOverview} />
           ) : null}
+        </Container>
+      </section>
 
-          {home.featuredProjects.isActive && home.featuredProjectsResolved.length ? (
-            <FeaturedProjectsSection
-              section={home.featuredProjects}
-              projects={home.featuredProjectsResolved}
-            />
-          ) : null}
+      {home.featuredProjects.isActive && home.featuredProjectsResolved.length ? (
+        <FeaturedProjectsSection
+          section={home.featuredProjects}
+          projects={home.featuredProjectsResolved}
+        />
+      ) : null}
 
+      <section className="section-py bg-[linear-gradient(to_bottom,#f7fbf8_0%,#ffffff_100%)]">
+        <Container className="space-y-16">
           {home.aboutPreview.isActive ? (
             <section className="grid gap-7 rounded-3xl bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:grid-cols-2 md:p-8">
               <div className="space-y-4">
