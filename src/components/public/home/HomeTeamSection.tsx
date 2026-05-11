@@ -70,7 +70,7 @@ export default function HomeTeamSection({
     "A qualified team of engineers and specialists driving reliable project performance.";
 
   return (
-    <section className="section-py bg-white">
+    <section className="bg-white py-10 md:py-14 lg:py-16">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[#075f3f]">
@@ -85,7 +85,7 @@ export default function HomeTeamSection({
         </div>
 
         <div
-          className="relative mt-12"
+          className="relative mt-8 md:mt-10"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
