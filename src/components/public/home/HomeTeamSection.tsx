@@ -74,16 +74,13 @@ export default function HomeTeamSection({
             ref={trackRef}
             className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-6 overflow-x-auto px-1 pb-4"
           >
-            {visible.map((member, idx) => (
+            {visible.map((member) => (
               <div
                 key={member.id}
                 data-team-card
-                className="shrink-0 basis-full snap-start sm:basis-[calc((100%-1.5rem)/2)] lg:basis-[calc((100%-3rem)/3)] xl:basis-[calc((100%-4.5rem)/4)]"
+                className="shrink-0 basis-[18rem] snap-start sm:basis-[calc((100%-1.5rem)/2)] lg:basis-[calc((100%-3rem)/3)] xl:basis-[calc((100%-4.5rem)/4)]"
               >
-                <TeamMemberCard
-                  member={member}
-                  variant={idx % 4 === 1 ? "highlight" : "default"}
-                />
+                <TeamMemberCard member={member} variant="default" />
               </div>
             ))}
           </div>

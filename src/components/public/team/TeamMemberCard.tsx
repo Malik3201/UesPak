@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExternalLink, Mail, Phone } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { TeamMemberDto } from "@/types/team";
 
 interface TeamMemberCardProps {
@@ -12,173 +12,78 @@ export default function TeamMemberCard({
   variant = "default",
 }: TeamMemberCardProps) {
   const isHighlight = variant === "highlight";
+  const initials = member.name.slice(0, 2).toUpperCase();
 
   return (
     <article
       className={[
-        "team-card group/team relative flex h-full flex-col overflow-hidden rounded-2xl border transition-all duration-500",
+        "team-card group/team relative flex h-full flex-col items-center rounded-2xl px-6 pb-6 pt-10 text-center transition-all duration-300",
         isHighlight
-          ? "border-transparent bg-[#075f3f] text-white shadow-[0_24px_50px_rgba(2,33,23,0.35)]"
-          : "border-black/5 bg-white text-foreground shadow-[0_14px_30px_rgba(15,23,42,0.08)] hover:-translate-y-1.5 hover:border-emerald-200 hover:shadow-[0_24px_50px_rgba(2,33,23,0.18)] hover:bg-[#075f3f] hover:text-white",
+          ? "bg-white shadow-[0_18px_38px_rgba(7,95,63,0.18)] ring-1 ring-emerald-100"
+          : "bg-[#f5f7f6] shadow-[0_8px_22px_rgba(15,23,42,0.06)] ring-1 ring-black/[0.04] hover:-translate-y-1 hover:bg-white hover:shadow-[0_18px_38px_rgba(7,95,63,0.18)] hover:ring-emerald-100",
       ].join(" ")}
     >
-      <div className="relative overflow-hidden rounded-t-2xl">
+      {/* Green ring portrait frame */}
+      <div className="relative">
         <div
           className={[
-            "relative aspect-[4/5] w-full overflow-hidden",
+            "relative h-32 w-32 rounded-full p-[3px] transition-all duration-300 sm:h-36 sm:w-36",
             isHighlight
-              ? "bg-[#03452e]"
-              : "bg-emerald-50 transition-colors duration-500 group-hover/team:bg-[#03452e]",
+              ? "bg-[#075f3f]"
+              : "bg-[#0c8b59]/40 group-hover/team:bg-[#075f3f]",
           ].join(" ")}
         >
-          {member.image?.url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={member.image.url}
-              alt={member.image.altText || member.name}
-              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover/team:scale-[1.05]"
-              loading="lazy"
-            />
-          ) : (
-            <div className="grid h-full w-full place-items-center">
-              <span
-                className={[
-                  "text-4xl font-extrabold",
-                  isHighlight ? "text-white/85" : "text-[#075f3f]/80",
-                ].join(" ")}
-              >
-                {member.name.slice(0, 2).toUpperCase()}
-              </span>
+          <div className="h-full w-full overflow-hidden rounded-full bg-white p-[3px]">
+            <div className="relative h-full w-full overflow-hidden rounded-full bg-emerald-50">
+              {member.image?.url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={member.image.url}
+                  alt={member.image.altText || member.name}
+                  className="h-full w-full rounded-full object-cover transition-transform duration-500 group-hover/team:scale-[1.04]"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="grid h-full w-full place-items-center rounded-full">
+                  <span className="text-2xl font-extrabold text-[#075f3f]">
+                    {initials}
+                  </span>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </div>
-
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <div className="space-y-1">
-          <h3
-            className={[
-              "text-lg font-bold leading-snug",
-              isHighlight
-                ? "text-white"
-                : "text-foreground transition-colors group-hover/team:text-white",
-            ].join(" ")}
-          >
-            {member.name}
-          </h3>
-          <p
-            className={[
-              "text-xs font-semibold uppercase tracking-[0.18em]",
-              isHighlight
-                ? "text-emerald-100/90"
-                : "text-[#075f3f] transition-colors group-hover/team:text-emerald-100/90",
-            ].join(" ")}
-          >
-            {member.designation}
-          </p>
-          {member.department ? (
-            <p
-              className={[
-                "text-xs",
-                isHighlight
-                  ? "text-emerald-100/75"
-                  : "text-muted-foreground transition-colors group-hover/team:text-emerald-100/80",
-              ].join(" ")}
-            >
-              {member.department}
-            </p>
-          ) : null}
-        </div>
-
-        {member.shortBio ? (
-          <p
-            className={[
-              "line-clamp-3 text-sm leading-relaxed",
-              isHighlight
-                ? "text-emerald-50/90"
-                : "text-muted-foreground transition-colors group-hover/team:text-emerald-50/90",
-            ].join(" ")}
-          >
-            {member.shortBio}
-          </p>
-        ) : null}
-
-        {member.expertise?.length ? (
-          <ul className="mt-auto flex flex-wrap gap-1.5">
-            {member.expertise.slice(0, 3).map((skill) => (
-              <li
-                key={`${member.id}-${skill}`}
-                className={[
-                  "rounded-full px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-wide",
-                  isHighlight
-                    ? "bg-white/10 text-emerald-50"
-                    : "bg-emerald-50 text-[#075f3f] transition-colors group-hover/team:bg-white/10 group-hover/team:text-emerald-50",
-                ].join(" ")}
-              >
-                {skill}
-              </li>
-            ))}
-          </ul>
-        ) : null}
-
-        <div
-          className={[
-            "mt-3 flex items-center justify-between gap-2 border-t pt-3 text-xs",
-            isHighlight
-              ? "border-white/15 text-emerald-100/85"
-              : "border-black/5 text-muted-foreground transition-colors group-hover/team:border-white/15 group-hover/team:text-emerald-100/85",
-          ].join(" ")}
-        >
-          <div className="flex items-center gap-3">
-            {member.linkedinUrl ? (
-              <Link
-                href={member.linkedinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${member.name} on LinkedIn`}
-                className="transition-colors hover:opacity-80"
-              >
-                <ExternalLink className="h-4 w-4" />
-              </Link>
-            ) : null}
-            {member.email ? (
-              <a
-                href={`mailto:${member.email}`}
-                aria-label={`Email ${member.name}`}
-                className="transition-colors hover:opacity-80"
-              >
-                <Mail className="h-4 w-4" />
-              </a>
-            ) : null}
-            {member.phone ? (
-              <a
-                href={`tel:${member.phone.replace(/\s+/g, "")}`}
-                aria-label={`Call ${member.name}`}
-                className="transition-colors hover:opacity-80"
-              >
-                <Phone className="h-4 w-4" />
-              </a>
-            ) : null}
           </div>
-          {member.experienceYears ? (
-            <span className="font-semibold">
-              {member.experienceYears}+ yrs
-            </span>
-          ) : null}
         </div>
-
-        <Link
-          href={`/team/${member.slug}`}
-          className={[
-            "mt-1 inline-flex h-9 items-center justify-center rounded-full text-xs font-semibold transition-all",
-            isHighlight
-              ? "bg-white text-[#075f3f] hover:bg-emerald-50"
-              : "bg-[#075f3f] text-white hover:bg-[#03452e] group-hover/team:bg-white group-hover/team:text-[#075f3f]",
-          ].join(" ")}
-        >
-          View Profile
-        </Link>
       </div>
+
+      {/* Name + designation */}
+      <div className="mt-5 w-full space-y-1">
+        <h3 className="text-base font-extrabold uppercase tracking-wide text-foreground sm:text-lg">
+          {member.name}
+        </h3>
+        <p className="text-xs font-semibold lowercase tracking-wide text-[#075f3f] sm:text-sm">
+          {member.designation}
+        </p>
+      </div>
+
+      {/* Optional short summary, 2-line max */}
+      {member.shortBio ? (
+        <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+          {member.shortBio}
+        </p>
+      ) : null}
+
+      {/* View Profile CTA */}
+      <Link
+        href={`/team/${member.slug}`}
+        aria-label={`View ${member.name}'s profile`}
+        className={[
+          "group/cta mt-5 inline-flex h-10 items-center justify-center gap-2 rounded-full px-5 text-xs font-semibold transition-all duration-300",
+          "bg-[#075f3f] text-white shadow-[0_10px_22px_rgba(7,95,63,0.25)] hover:bg-[#03452e] hover:shadow-[0_14px_28px_rgba(7,95,63,0.35)]",
+        ].join(" ")}
+      >
+        View Profile
+        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/cta:translate-x-0.5" />
+      </Link>
     </article>
   );
 }

@@ -26,12 +26,8 @@ export default function CareersTeamSection({ members }: CareersTeamSectionProps)
         </div>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {members.map((member, idx) => (
-            <TeamMemberCard
-              key={member.id}
-              member={member}
-              variant={idx === 1 ? "highlight" : "default"}
-            />
+          {members.map((member) => (
+            <TeamMemberCard key={member.id} member={member} variant="default" />
           ))}
         </div>
       </div>
