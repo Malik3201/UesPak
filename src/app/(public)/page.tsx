@@ -9,8 +9,10 @@ import FeaturedServicesSection from "@/components/public/home/FeaturedServicesSe
 import ServicesOverviewSection from "@/components/public/home/ServicesOverviewSection";
 import VisionMissionSection from "@/components/public/home/VisionMissionSection";
 import FeaturedProjectsSection from "@/components/public/home/FeaturedProjectsSection";
+import HomeTeamSection from "@/components/public/home/HomeTeamSection";
 import { getPublicHomePage } from "@/lib/home-page";
 import { getPublicSiteSettings } from "@/lib/site-settings";
+import { getFeaturedTeamMembers } from "@/lib/team";
 
 export async function generateMetadata(): Promise<Metadata> {
   const home = await getPublicHomePage();
@@ -61,9 +63,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [home, settings] = await Promise.all([
+  const [home, settings, featuredTeam] = await Promise.all([
     getPublicHomePage(),
     getPublicSiteSettings(),
+    getFeaturedTeamMembers(),
   ]);
 
   const whyChooseItems = [...(home.whyChooseUs.items || [])]
@@ -259,17 +262,6 @@ export default async function HomePage() {
             </section>
           ) : null}
 
-          {home.teamPreview.isActive ? (
-            <section className="rounded-2xl border border-dashed border-[#8dbca3] bg-[#f5faf7] p-7 text-center">
-              <h2 className="text-xl font-semibold text-foreground">
-                {home.teamPreview.title || "Our Experts"}
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {home.teamPreview.description ||
-                  "Team showcase module can be expanded as Team CMS evolves."}
-              </p>
-            </section>
-          ) : null}
 
           {home.clients.isActive && clientLogos.length ? (
             <section className="space-y-5">
@@ -340,6 +332,13 @@ export default async function HomePage() {
           ) : null}
         </Container>
       </section>
+
+      {home.teamPreview.isActive && featuredTeam.length ? (
+        <HomeTeamSection
+          section={home.teamPreview}
+          members={featuredTeam}
+        />
+      ) : null}
 
       <script
         type="application/ld+json"

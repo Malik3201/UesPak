@@ -8,6 +8,7 @@ export interface MediaObject {
   height?: number;
   format?: string;
   size?: number;
+  mimeType?: string;
 }
 
 // ─── File upload state ─────────────────────────────────────────────────────────
