@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import TeamMemberCard from "@/components/public/team/TeamMemberCard";
 import type { HomePageContent } from "@/types/home-page";
 import type { TeamMemberDto } from "@/types/team";
@@ -18,9 +18,28 @@ export default function HomeTeamSection({
 }: HomeTeamSectionProps) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [isTouch, setIsTouch] = useState(false);
 
   const visible = useMemo(() => members.slice(0, MAX_VISIBLE), [members]);
   const enableAuto = visible.length > 1;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(pointer: coarse)");
+    const update = () => setIsTouch(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  const handleCardActivate = useCallback(
+    (id: string) => {
+      if (!isTouch) return;
+      setActiveId((prev) => (prev === id ? null : id));
+    },
+    [isTouch],
+  );
 
   function getStep(track: HTMLDivElement) {
     const card = track.querySelector<HTMLElement>("[data-team-card]");
@@ -29,7 +48,7 @@ export default function HomeTeamSection({
   }
 
   useEffect(() => {
-    if (!enableAuto || isPaused) return;
+    if (!enableAuto || isPaused || activeId) return;
     const track = trackRef.current;
     if (!track) return;
     const id = window.setInterval(() => {
@@ -41,7 +60,7 @@ export default function HomeTeamSection({
       }
     }, 4500);
     return () => window.clearInterval(id);
-  }, [enableAuto, isPaused, visible.length]);
+  }, [enableAuto, isPaused, activeId, visible.length]);
 
   if (!visible.length) return null;
 
@@ -72,15 +91,20 @@ export default function HomeTeamSection({
         >
           <div
             ref={trackRef}
-            className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-6 overflow-x-auto px-1 pb-4"
+            className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4"
           >
             {visible.map((member) => (
               <div
                 key={member.id}
                 data-team-card
-                className="shrink-0 basis-[18rem] snap-start sm:basis-[calc((100%-1.5rem)/2)] lg:basis-[calc((100%-3rem)/3)] xl:basis-[calc((100%-4.5rem)/4)]"
+                className="shrink-0 basis-full snap-start sm:basis-[calc((100%-1.5rem)/2)] lg:basis-[calc((100%-3rem)/3)] xl:basis-[calc((100%-4.5rem)/4)]"
               >
-                <TeamMemberCard member={member} variant="default" />
+                <TeamMemberCard
+                  member={member}
+                  variant="default"
+                  isRevealed={activeId === member.id}
+                  onCardActivate={handleCardActivate}
+                />
               </div>
             ))}
           </div>

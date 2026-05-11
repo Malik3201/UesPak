@@ -1,3 +1,6 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
 import TeamMemberCard from "@/components/public/team/TeamMemberCard";
 import type { TeamMemberDto } from "@/types/team";
 
@@ -6,6 +9,26 @@ interface CareersTeamSectionProps {
 }
 
 export default function CareersTeamSection({ members }: CareersTeamSectionProps) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [isTouch, setIsTouch] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(pointer: coarse)");
+    const update = () => setIsTouch(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  const handleCardActivate = useCallback(
+    (id: string) => {
+      if (!isTouch) return;
+      setActiveId((prev) => (prev === id ? null : id));
+    },
+    [isTouch],
+  );
+
   if (!members.length) return null;
 
   return (
@@ -27,7 +50,13 @@ export default function CareersTeamSection({ members }: CareersTeamSectionProps)
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {members.map((member) => (
-            <TeamMemberCard key={member.id} member={member} variant="default" />
+            <TeamMemberCard
+              key={member.id}
+              member={member}
+              variant="default"
+              isRevealed={activeId === member.id}
+              onCardActivate={handleCardActivate}
+            />
           ))}
         </div>
       </div>
