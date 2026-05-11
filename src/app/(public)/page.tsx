@@ -237,7 +237,18 @@ export default async function HomePage() {
               </div>
             </section>
           ) : null}
+        </Container>
+      </section>
 
+      {home.teamPreview.isActive && featuredTeam.length ? (
+        <HomeTeamSection
+          section={home.teamPreview}
+          members={featuredTeam}
+        />
+      ) : null}
+
+      <section className="section-py bg-white">
+        <Container className="space-y-16">
           {home.industries.isActive && industryItems.length ? (
             <section className="space-y-6 rounded-3xl bg-[#edf7f1] p-6 md:p-8">
               <h2 className="text-3xl font-bold text-foreground">
@@ -332,13 +343,6 @@ export default async function HomePage() {
           ) : null}
         </Container>
       </section>
-
-      {home.teamPreview.isActive && featuredTeam.length ? (
-        <HomeTeamSection
-          section={home.teamPreview}
-          members={featuredTeam}
-        />
-      ) : null}
 
       <script
         type="application/ld+json"
