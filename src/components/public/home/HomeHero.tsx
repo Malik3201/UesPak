@@ -32,7 +32,7 @@ export default function HomeHero({ hero }: HomeHeroProps) {
   }, [images.length]);
 
   return (
-    <section className="-mt-16 relative overflow-hidden bg-gradient-to-br from-[#063e2b] via-[#075f3f] to-[#0b6f4b] pt-16 text-white md:-mt-24 md:pt-24">
+    <section className="relative -mt-16 overflow-hidden bg-gradient-to-br from-[#063e2b] via-[#075f3f] to-[#0b6f4b] pt-16 text-white md:-mt-[7.25rem] md:pt-[7.25rem]">
       <div className="absolute inset-0">
         {images.length ? (
           images.map((image, idx) => (
