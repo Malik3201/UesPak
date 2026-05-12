@@ -1,6 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  Clock3,
+  Cpu,
+  Download,
+  Factory,
+  FlaskConical,
+  HeartPulse,
+  Leaf,
+  Settings2,
+  ShieldCheck,
+  Store,
+  TrendingUp,
+  UsersRound,
+  Wheat,
+  Zap,
+} from "lucide-react";
 import { SITE_URL, buildOrganizationJsonLd, buildMetadata } from "@/lib/seo";
 import Container from "@/components/shared/Container";
 import HomeHero from "@/components/public/home/HomeHero";
@@ -13,6 +30,30 @@ import HomeTeamSection from "@/components/public/home/HomeTeamSection";
 import { getPublicHomePage } from "@/lib/home-page";
 import { getPublicSiteSettings } from "@/lib/site-settings";
 import { getFeaturedTeamMembers } from "@/lib/team";
+
+const whyIcons = [
+  ShieldCheck,
+  Clock3,
+  Settings2,
+  Leaf,
+  UsersRound,
+  TrendingUp,
+];
+
+function getIndustryIcon(name: string) {
+  const value = name.toLowerCase();
+
+  if (value.includes("health")) return HeartPulse;
+  if (value.includes("pharma")) return FlaskConical;
+  if (value.includes("industrial") || value.includes("facility")) return Factory;
+  if (value.includes("commercial") || value.includes("building")) return Building2;
+  if (value.includes("agri")) return Wheat;
+  if (value.includes("energy") || value.includes("utilit")) return Zap;
+  if (value.includes("automation") || value.includes("control")) return Cpu;
+  if (value.includes("fmcg") || value.includes("retail")) return Store;
+
+  return Building2;
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const home = await getPublicHomePage();
@@ -182,63 +223,131 @@ export default async function HomePage() {
           {home.visionMission.isActive ? (
             <VisionMissionSection section={home.visionMission} />
           ) : null}
+        </Container>
+      </section>
 
-          {home.stats.isActive && statItems.length ? (
-            <section className="space-y-5 rounded-3xl bg-[#072f21] p-6 text-white md:p-8">
-              <h2 className="text-3xl font-bold text-white">{home.stats.title || "Stats"}</h2>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {home.stats.isActive && statItems.length ? (
+        <section className="homepage-section-reveal relative overflow-hidden bg-[#052f21] py-14 text-white md:py-[4.5rem] lg:py-20">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 opacity-[0.18]"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px)",
+              backgroundSize: "44px 44px",
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute -left-24 top-8 h-64 w-64 rounded-full bg-emerald-400/20 blur-3xl"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-[#d7b56d]/15 blur-3xl"
+          />
+          <Container className="relative">
+            <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
+              <div className="max-w-2xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.32em] text-emerald-200">
+                  Performance Snapshot
+                </p>
+                <h2 className="mt-3 text-balance text-3xl font-extrabold leading-tight text-white md:text-4xl">
+                  {home.stats.title || "Achievements Built on Reliable Delivery"}
+                </h2>
+                {home.stats.description ? (
+                  <p className="mt-4 text-sm leading-relaxed text-emerald-50/85 md:text-base">
+                    {home.stats.description}
+                  </p>
+                ) : (
+                  <p className="mt-4 text-sm leading-relaxed text-emerald-50/85 md:text-base">
+                    Focused engineering, automation and agriculture capabilities
+                    supported by disciplined execution and long-term client trust.
+                  </p>
+                )}
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
                 {statItems.map((item, idx) => (
                   <article
                     key={`stat-${idx}`}
-                    className="rounded-2xl border border-white/15 bg-white/10 p-5 text-center backdrop-blur-sm"
+                    className="homepage-card-rise group rounded-3xl border border-white/15 bg-white/[0.08] p-5 shadow-[0_18px_42px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200/45 hover:bg-white/[0.12]"
+                    style={{ animationDelay: `${idx * 90}ms` }}
                   >
-                      <p className="text-3xl font-bold text-white">
+                    <p className="text-4xl font-extrabold tracking-tight text-white md:text-5xl">
                       {item.value}
                       {item.suffix || ""}
                     </p>
-                      <p className="mt-1 text-sm font-medium text-emerald-50">{item.label}</p>
-                      {item.description ? (
-                      <p className="mt-1 text-xs text-emerald-100/85">{item.description}</p>
-                      ) : null}
+                    <p className="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-emerald-100">
+                      {item.label}
+                    </p>
+                    {item.description ? (
+                      <p className="mt-2 text-sm leading-relaxed text-emerald-50/80">
+                        {item.description}
+                      </p>
+                    ) : null}
                   </article>
                 ))}
               </div>
-            </section>
-          ) : null}
+            </div>
+          </Container>
+        </section>
+      ) : null}
 
-          {home.whyChooseUs.isActive && whyChooseItems.length ? (
-            <section className="space-y-6">
-              <div className="max-w-3xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#075f3f]">
-                  Why UESPAK
+      {home.whyChooseUs.isActive && whyChooseItems.length ? (
+        <section className="homepage-section-reveal bg-[linear-gradient(180deg,#ffffff_0%,#f4fbf7_100%)] py-14 md:py-20 lg:py-24">
+          <Container>
+            <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+              <div className="max-w-2xl lg:sticky lg:top-28">
+                <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[#075f3f]">
+                  {home.whyChooseUs.eyebrow || "Why Choose UESPAK"}
                 </p>
-                <h2 className="mt-2 text-3xl font-bold text-foreground md:text-4xl">
-                  {home.whyChooseUs.title || "Why Choose UESPAK"}
+                <h2 className="mt-3 text-balance text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
+                  {home.whyChooseUs.title ||
+                    "Reliable Engineering Support for Modern Sectors"}
                 </h2>
                 {home.whyChooseUs.description ? (
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
+                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground md:text-base">
                     {home.whyChooseUs.description}
                   </p>
-                ) : null}
+                ) : (
+                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground md:text-base">
+                    Practical technical capability, responsible delivery and
+                    responsive support across complex operational environments.
+                  </p>
+                )}
               </div>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {whyChooseItems.map((item, idx) => (
-                  <article
-                    key={`why-item-${idx}`}
-                    className="rounded-2xl bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.08)] ring-1 ring-black/5"
-                  >
-                    <span className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#e7f4ed] text-[#075f3f]">
-                      <CheckCircle2 className="h-5 w-5" />
-                    </span>
-                    <h3 className="font-semibold text-foreground">{item.title}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
-                  </article>
-                ))}
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                {whyChooseItems.map((item, idx) => {
+                  const Icon = whyIcons[idx % whyIcons.length];
+
+                  return (
+                    <article
+                      key={`why-item-${idx}`}
+                      className="homepage-card-rise group relative overflow-hidden rounded-3xl border border-emerald-900/5 bg-white p-5 shadow-[0_14px_32px_rgba(15,23,42,0.07)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-[0_24px_46px_rgba(7,95,63,0.16)]"
+                      style={{ animationDelay: `${idx * 80}ms` }}
+                    >
+                      <div
+                        aria-hidden="true"
+                        className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-emerald-100/70 transition-transform duration-500 group-hover:scale-125"
+                      />
+                      <span className="relative mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#e7f4ed] text-[#075f3f] transition-all duration-300 group-hover:scale-105 group-hover:bg-[#075f3f] group-hover:text-white">
+                        <Icon className="h-5 w-5" aria-hidden="true" />
+                      </span>
+                      <h3 className="relative text-base font-bold text-foreground">
+                        {item.title}
+                      </h3>
+                      <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">
+                        {item.description}
+                      </p>
+                    </article>
+                  );
+                })}
               </div>
-            </section>
-          ) : null}
-        </Container>
-      </section>
+            </div>
+          </Container>
+        </section>
+      ) : null}
 
       {home.teamPreview.isActive && featuredTeam.length ? (
         <HomeTeamSection
@@ -247,102 +356,206 @@ export default async function HomePage() {
         />
       ) : null}
 
-      <section className="section-py bg-white">
-        <Container className="space-y-16">
-          {home.industries.isActive && industryItems.length ? (
-            <section className="space-y-6 rounded-3xl bg-[#edf7f1] p-6 md:p-8">
-              <h2 className="text-3xl font-bold text-foreground">
+      {home.industries.isActive && industryItems.length ? (
+        <section className="homepage-section-reveal bg-white py-14 md:py-20 lg:py-24">
+          <Container>
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[#075f3f]">
+                Sector Coverage
+              </p>
+              <h2 className="mt-3 text-balance text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
                 {home.industries.title || "Industries We Serve"}
               </h2>
-              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {industryItems.map((item, idx) => (
+              {home.industries.description ? (
+                <p className="mt-4 text-sm leading-relaxed text-muted-foreground md:text-base">
+                  {home.industries.description}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {industryItems.map((item, idx) => {
+                const IndustryIcon = getIndustryIcon(item.name);
+
+                return (
                   <article
                     key={`industry-${idx}`}
-                    className="group rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/5 transition-all hover:-translate-y-0.5 hover:shadow-md"
+                    className="homepage-card-rise group relative overflow-hidden rounded-3xl border border-emerald-900/5 bg-[#f7fbf8] p-5 shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300 hover:bg-white hover:shadow-[0_22px_42px_rgba(7,95,63,0.14)]"
+                    style={{ animationDelay: `${idx * 65}ms` }}
                   >
-                      <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#e2f2e8] text-xs font-semibold text-[#075f3f]">
-                        {(item.name || "I").slice(0, 1).toUpperCase()}
-                      </div>
-                      <h3 className="font-semibold text-foreground">{item.name}</h3>
-                      {item.description ? (
-                      <p className="mt-1 text-xs text-muted-foreground">{item.description}</p>
-                      ) : null}
+                    <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#075f3f] shadow-sm ring-1 ring-emerald-900/5 transition-all duration-300 group-hover:bg-[#075f3f] group-hover:text-white">
+                      {item.icon ? (
+                        <span className="text-sm font-extrabold" aria-hidden="true">
+                          {item.icon.slice(0, 2).toUpperCase()}
+                        </span>
+                      ) : (
+                        <IndustryIcon className="h-5 w-5" aria-hidden="true" />
+                      )}
+                    </div>
+                    <h3 className="font-bold text-foreground">{item.name}</h3>
+                    {item.description ? (
+                      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                        {item.description}
+                      </p>
+                    ) : (
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        Integrated technical support for sector-specific
+                        operational needs.
+                      </p>
+                    )}
                   </article>
-                ))}
+                );
+              })}
+            </div>
+          </Container>
+        </section>
+      ) : null}
+
+      {home.clients.isActive && clientLogos.length ? (
+        <section className="homepage-section-reveal bg-[#f7fbf8] py-12 md:py-16 lg:py-20">
+          <Container>
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div className="max-w-2xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[#075f3f]">
+                  Client Confidence
+                </p>
+                <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
+                  {home.clients.title || "Trusted By"}
+                </h2>
+                {home.clients.description ? (
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
+                    {home.clients.description}
+                  </p>
+                ) : null}
               </div>
-            </section>
-          ) : null}
+              <p className="text-sm font-medium text-muted-foreground">
+                Partners and clients across modern technical sectors.
+              </p>
+            </div>
 
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+              {clientLogos.map((client, idx) => {
+                const content = client.logo?.url ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={client.logo.url}
+                      alt={client.logo.altText || client.name}
+                      className="mx-auto h-14 w-auto object-contain grayscale transition duration-300 group-hover:scale-105 group-hover:grayscale-0"
+                      loading="lazy"
+                    />
+                  </>
+                ) : (
+                  <p className="text-center text-sm font-bold text-foreground">
+                    {client.name}
+                  </p>
+                );
 
-          {home.clients.isActive && clientLogos.length ? (
-            <section className="space-y-5">
-              <h2 className="text-3xl font-bold text-foreground">
-                {home.clients.title || "Trusted By"}
-              </h2>
-              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-                {clientLogos.map((client, idx) => (
+                return client.url ? (
+                  <a
+                    key={`client-${idx}`}
+                    href={client.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="homepage-card-rise group grid min-h-24 place-items-center rounded-2xl border border-emerald-900/5 bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-[0_18px_34px_rgba(7,95,63,0.12)]"
+                    style={{ animationDelay: `${idx * 60}ms` }}
+                    aria-label={`Visit ${client.name}`}
+                  >
+                    {content}
+                  </a>
+                ) : (
                   <article
                     key={`client-${idx}`}
-                    className="group rounded-xl bg-white p-5 shadow-sm ring-1 ring-black/5 transition-all hover:shadow-md"
+                    className="homepage-card-rise group grid min-h-24 place-items-center rounded-2xl border border-emerald-900/5 bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-[0_18px_34px_rgba(7,95,63,0.12)]"
+                    style={{ animationDelay: `${idx * 60}ms` }}
                   >
-                      {client.logo?.url ? (
-                        <>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={client.logo.url}
-                          alt={client.logo.altText || client.name}
-                          className="mx-auto h-14 w-auto object-contain grayscale transition group-hover:grayscale-0"
-                          loading="lazy"
-                        />
-                        </>
-                      ) : (
-                        <p className="text-center text-sm font-semibold text-foreground">{client.name}</p>
-                      )}
+                    {content}
                   </article>
-                ))}
-              </div>
-            </section>
-          ) : null}
+                );
+              })}
+            </div>
+          </Container>
+        </section>
+      ) : null}
 
-          {home.profileCTA.isActive || home.contactCTA.isActive ? (
-            <section className="grid gap-4 md:grid-cols-2">
+      {home.profileCTA.isActive || home.contactCTA.isActive ? (
+        <section className="homepage-section-reveal relative overflow-hidden bg-[#052f21] py-14 text-white md:py-[4.5rem] lg:py-20">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 opacity-[0.12]"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.65) 1px, transparent 0)",
+              backgroundSize: "28px 28px",
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute -right-20 top-0 h-80 w-80 rounded-full bg-emerald-400/20 blur-3xl"
+          />
+          <Container className="relative">
+            <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
               {home.profileCTA.isActive ? (
-                <div className="rounded-2xl bg-white p-6 shadow-[0_10px_24px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#075f3f]">
+                <article className="rounded-3xl border border-white/15 bg-white/[0.08] p-6 shadow-[0_18px_42px_rgba(0,0,0,0.18)] backdrop-blur-sm md:p-8">
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-200">
                     {home.profileCTA.eyebrow || "Company Profile"}
                   </p>
-                  <h3 className="mt-2 text-xl font-semibold text-foreground">{home.profileCTA.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{home.profileCTA.description}</p>
+                  <h2 className="mt-3 text-2xl font-extrabold leading-tight text-white md:text-3xl">
+                    {home.profileCTA.title || "Download the UESPAK Profile"}
+                  </h2>
+                  {home.profileCTA.description ? (
+                    <p className="mt-3 text-sm leading-relaxed text-emerald-50/85">
+                      {home.profileCTA.description}
+                    </p>
+                  ) : null}
                   {settings.profilePdfUrl ? (
                     <a
                       href={settings.profilePdfUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-4 inline-flex items-center gap-1 rounded-lg bg-[#075f3f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#03452e] transition-colors"
+                      className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#075f3f] shadow-[0_12px_24px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-50"
                     >
-                      {home.profileCTA.buttonText || settings.profileButtonText || "Download Profile"}
-                      <ArrowRight className="h-4 w-4" />
+                      <Download className="h-4 w-4" aria-hidden="true" />
+                      {home.profileCTA.buttonText ||
+                        settings.profileButtonText ||
+                        "Download Profile"}
                     </a>
                   ) : null}
-                </div>
+                </article>
               ) : null}
+
               {home.contactCTA.isActive ? (
-                <div className="rounded-2xl bg-gradient-to-br from-[#075f3f] to-[#0c704b] p-6 text-white shadow-[0_16px_36px_rgba(3,69,46,0.35)]">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-100">
-                    {home.contactCTA.eyebrow || "Let's Work Together"}
-                  </p>
-                  <h3 className="text-xl font-semibold">{home.contactCTA.title}</h3>
-                  <p className="mt-2 text-sm text-emerald-50">{home.contactCTA.description}</p>
-                  <Link href={home.contactCTA.buttonUrl || "/contact-us"} className="mt-4 inline-flex items-center gap-1 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#075f3f] hover:bg-emerald-50 transition-colors">
-                    {home.contactCTA.buttonText || "Contact Us"}
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
+                <article className="relative overflow-hidden rounded-3xl bg-white p-6 text-foreground shadow-[0_24px_54px_rgba(0,0,0,0.22)] md:p-8">
+                  <div
+                    aria-hidden="true"
+                    className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-emerald-100"
+                  />
+                  <div className="relative">
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#075f3f]">
+                      {home.contactCTA.eyebrow || "Let's Work Together"}
+                    </p>
+                    <h2 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
+                      {home.contactCTA.title ||
+                        "Need a Reliable Technical Partner?"}
+                    </h2>
+                    <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
+                      {home.contactCTA.description ||
+                        "Share your requirements and our team will get back with the right approach."}
+                    </p>
+                    <Link
+                      href={home.contactCTA.buttonUrl || "/contact-us"}
+                      className="mt-7 inline-flex items-center gap-2 rounded-full bg-[#075f3f] px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(7,95,63,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#03452e]"
+                    >
+                      {home.contactCTA.buttonText || "Contact Us"}
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </Link>
+                  </div>
+                </article>
               ) : null}
-            </section>
-          ) : null}
-        </Container>
-      </section>
+            </div>
+          </Container>
+        </section>
+      ) : null}
 
       <script
         type="application/ld+json"
