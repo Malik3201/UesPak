@@ -31,6 +31,8 @@ import VisionMissionSection from "@/components/public/home/VisionMissionSection"
 import FeaturedProjectsSection from "@/components/public/home/FeaturedProjectsSection";
 import HomeTeamSection from "@/components/public/home/HomeTeamSection";
 import HomeLocationSection from "@/components/public/home/HomeLocationSection";
+import IndustriesMobileCarousel from "@/components/public/home/IndustriesMobileCarousel";
+import ClientsMobileMarquee from "@/components/public/home/ClientsMobileMarquee";
 import { getPublicHomePage } from "@/lib/home-page";
 import { getPublicSiteSettings } from "@/lib/site-settings";
 import { getFeaturedTeamMembers } from "@/lib/team";
@@ -463,15 +465,14 @@ export default async function HomePage() {
               ) : null}
             </div>
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {industryItems.map((item, idx) => {
+            {(() => {
+              const industryCards = industryItems.map((item, idx) => {
                 const IndustryIcon = getIndustryIcon(item.name);
-
                 return (
                   <article
                     key={`industry-${idx}`}
                     className={[
-                      "homepage-card-rise group relative overflow-hidden rounded-3xl p-5 transition-all duration-300 hover:-translate-y-1",
+                      "homepage-card-rise group relative h-full overflow-hidden rounded-3xl p-5 transition-all duration-300 hover:-translate-y-1",
                       industriesBackgroundUrl
                         ? "border border-white/15 bg-white/[0.12] text-white shadow-[0_18px_42px_rgba(0,0,0,0.18)] backdrop-blur-sm hover:border-emerald-100/45 hover:bg-white/[0.16]"
                         : "border border-emerald-900/5 bg-[#f7fbf8] shadow-[0_10px_24px_rgba(15,23,42,0.05)] hover:border-emerald-300 hover:bg-white hover:shadow-[0_22px_42px_rgba(7,95,63,0.14)]",
@@ -529,8 +530,19 @@ export default async function HomePage() {
                     )}
                   </article>
                 );
-              })}
-            </div>
+              });
+
+              return (
+                <>
+                  <IndustriesMobileCarousel className="mt-10 sm:hidden">
+                    {industryCards}
+                  </IndustriesMobileCarousel>
+                  <div className="mt-10 hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-4">
+                    {industryCards}
+                  </div>
+                </>
+              );
+            })()}
           </Container>
         </section>
       ) : null}
@@ -557,7 +569,11 @@ export default async function HomePage() {
               </p>
             </div>
 
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+            <div className="mt-8 sm:hidden">
+              <ClientsMobileMarquee logos={clientLogos} />
+            </div>
+
+            <div className="mt-8 hidden gap-4 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
               {clientLogos.map((client, idx) => {
                 const content = client.logo?.url ? (
                   <>
@@ -565,7 +581,7 @@ export default async function HomePage() {
                     <img
                       src={client.logo.url}
                       alt={client.logo.altText || client.name}
-                      className="mx-auto h-14 w-auto object-contain grayscale transition duration-300 group-hover:scale-105 group-hover:grayscale-0"
+                      className="mx-auto h-14 w-auto object-contain transition duration-300 group-hover:scale-105"
                       loading="lazy"
                     />
                   </>

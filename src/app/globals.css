@@ -286,6 +286,16 @@
     animation: homepageCardRise 640ms ease-out both;
   }
 
+  .homepage-marquee-track {
+    animation: homepageMarqueeSlide var(--marquee-duration, 22s) linear infinite;
+    width: max-content;
+    will-change: transform;
+  }
+
+  .homepage-marquee-track:hover {
+    animation-play-state: paused;
+  }
+
   @supports (animation-timeline: view()) {
     .homepage-section-reveal {
       animation-timeline: view();
@@ -297,7 +307,8 @@
     .featured-projects-fade-up,
     .featured-projects-card,
     .homepage-section-reveal,
-    .homepage-card-rise {
+    .homepage-card-rise,
+    .homepage-marquee-track {
       animation: none;
       opacity: 1;
       transform: none;
@@ -478,5 +489,14 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes homepageMarqueeSlide {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
   }
 }
