@@ -30,6 +30,7 @@ import ServicesOverviewSection from "@/components/public/home/ServicesOverviewSe
 import VisionMissionSection from "@/components/public/home/VisionMissionSection";
 import FeaturedProjectsSection from "@/components/public/home/FeaturedProjectsSection";
 import HomeTeamSection from "@/components/public/home/HomeTeamSection";
+import HomeLocationSection from "@/components/public/home/HomeLocationSection";
 import { getPublicHomePage } from "@/lib/home-page";
 import { getPublicSiteSettings } from "@/lib/site-settings";
 import { getFeaturedTeamMembers } from "@/lib/team";
@@ -765,6 +766,8 @@ export default async function HomePage() {
           </Container>
         </section>
       ) : null}
+
+      <HomeLocationSection settings={settings} />
 
       <script
         type="application/ld+json"
