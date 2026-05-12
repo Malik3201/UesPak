@@ -34,9 +34,9 @@ export default function Footer({ settings }: FooterProps) {
 
   return (
     <footer className="bg-primary text-primary-foreground mt-auto">
-      <Container className="py-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
+      <Container className="py-12 md:py-14">
+        <div className="grid grid-cols-1 gap-y-10 gap-x-10 sm:grid-cols-2 md:grid-cols-[1.6fr_1fr_1.2fr] md:gap-x-12 lg:gap-x-16">
+          <div className="sm:col-span-2 md:col-span-1 md:max-w-md">
             <Link
               href="/"
               aria-label={`${siteName} home`}
@@ -58,22 +58,22 @@ export default function Footer({ settings }: FooterProps) {
               )}
             </Link>
             {settings.footerText?.trim() ? (
-              <p className="mt-2 text-sm font-medium text-primary-foreground/85">
+              <p className="mt-3 text-sm font-medium text-primary-foreground/85">
                 {settings.footerText}
               </p>
             ) : null}
-            <p className="mt-2 text-sm text-primary-foreground/70 leading-relaxed">
+            <p className="mt-3 max-w-sm text-sm leading-relaxed text-primary-foreground/70">
               {footerDesc}
             </p>
             {socialRows.length ? (
-              <div className="mt-4 flex flex-wrap gap-3">
+              <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2">
                 {socialRows.map((s) => (
                   <a
                     key={`${s.platform}-${s.url}`}
                     href={s.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-semibold uppercase tracking-wide text-primary-foreground/80 hover:text-primary-foreground"
+                    className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-foreground/80 transition-colors hover:text-primary-foreground"
                   >
                     {s.platform}
                   </a>
@@ -82,17 +82,21 @@ export default function Footer({ settings }: FooterProps) {
             ) : null}
           </div>
 
-          <nav aria-label="Footer navigation">
-            <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary-foreground/50">
+          <nav aria-label="Footer navigation" className="min-w-0">
+            <h3 className="mb-4 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-primary-foreground/55">
               Quick Links
             </h3>
-            <ul className="space-y-2 list-none p-0 m-0">
+            <ul className="m-0 list-none space-y-2.5 p-0">
               {footerLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                    className="group/foot-link inline-flex items-center gap-1.5 text-sm text-primary-foreground/80 transition-all duration-200 hover:translate-x-0.5 hover:text-primary-foreground"
                   >
+                    <span
+                      aria-hidden="true"
+                      className="h-px w-0 bg-current opacity-0 transition-all duration-200 group-hover/foot-link:w-3 group-hover/foot-link:opacity-100"
+                    />
                     {link.label}
                   </Link>
                 </li>
@@ -100,14 +104,17 @@ export default function Footer({ settings }: FooterProps) {
             </ul>
           </nav>
 
-          <div>
-            <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary-foreground/50">
+          <div className="min-w-0">
+            <h3 className="mb-4 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-primary-foreground/55">
               Contact
             </h3>
-            <address className="not-italic text-sm text-primary-foreground/80 space-y-1">
+            <address className="space-y-2 not-italic text-sm leading-relaxed text-primary-foreground/80">
               {email ? (
-                <p>
-                  <a href={`mailto:${encodeURIComponent(email)}`} className="hover:underline">
+                <p className="break-all">
+                  <a
+                    href={`mailto:${encodeURIComponent(email)}`}
+                    className="transition-colors hover:text-primary-foreground hover:underline"
+                  >
                     {email}
                   </a>
                 </p>
@@ -116,18 +123,18 @@ export default function Footer({ settings }: FooterProps) {
                 <p>
                   <a
                     href={`tel:${phone.replace(/\s+/g, "")}`}
-                    className="hover:underline"
+                    className="transition-colors hover:text-primary-foreground hover:underline"
                   >
                     {phone}
                   </a>
                 </p>
               ) : null}
-              {addr ? <p>{addr}</p> : null}
+              {addr ? <p className="max-w-xs">{addr}</p> : null}
             </address>
           </div>
         </div>
 
-        <div className="mt-8 border-t border-primary-foreground/20 pt-6 text-center text-xs text-primary-foreground/50">
+        <div className="mt-10 border-t border-primary-foreground/15 pt-6 text-center text-xs text-primary-foreground/55">
           {copy}
         </div>
       </Container>
