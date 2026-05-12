@@ -197,9 +197,12 @@ export async function PATCH(request: NextRequest) {
     ]);
     preserveNestedSectionFields(mergedRaw, defaultsRecord, existingRecord, body, "profileCTA", [
       "backgroundImage",
+      "profilePdf",
     ]);
     preserveNestedSectionFields(mergedRaw, defaultsRecord, existingRecord, body, "contactCTA", [
       "backgroundImage",
+      "cardBackgroundImage",
+      "cardOverlayOpacity",
       "overlayOpacity",
     ]);
 

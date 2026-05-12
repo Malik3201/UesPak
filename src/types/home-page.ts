@@ -139,6 +139,7 @@ export interface HomePageContent {
     description?: string;
     buttonText?: string;
     backgroundImage?: MediaObject;
+    profilePdf?: MediaObject;
     isActive: boolean;
   };
   contactCTA: {
@@ -148,6 +149,8 @@ export interface HomePageContent {
     buttonText?: string;
     buttonUrl?: string;
     backgroundImage?: MediaObject;
+    cardBackgroundImage?: MediaObject;
+    cardOverlayOpacity?: number;
     overlayOpacity?: number;
     isActive: boolean;
   };

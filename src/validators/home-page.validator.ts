@@ -215,6 +215,7 @@ export const homePageSchema = z.object({
       description: trimToOptional(600),
       buttonText: trimToOptional(80),
       backgroundImage: mediaObjectSchema.optional(),
+      profilePdf: mediaObjectSchema.optional(),
       isActive: z.boolean().default(true),
     })
     .default({ isActive: true }),
@@ -226,10 +227,12 @@ export const homePageSchema = z.object({
       buttonText: trimToOptional(80),
       buttonUrl: trimToOptional(2048),
       backgroundImage: mediaObjectSchema.optional(),
+      cardBackgroundImage: mediaObjectSchema.optional(),
+      cardOverlayOpacity: z.coerce.number().min(0).max(1).default(0.72),
       overlayOpacity: z.coerce.number().min(0).max(1).default(0.8),
       isActive: z.boolean().default(true),
     })
-    .default({ isActive: true, overlayOpacity: 0.8 }),
+    .default({ isActive: true, overlayOpacity: 0.8, cardOverlayOpacity: 0.72 }),
   seo: seoSchema.default({
     schemaType: "WebSite",
     robots: { index: true, follow: true },

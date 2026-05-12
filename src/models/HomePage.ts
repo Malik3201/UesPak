@@ -117,6 +117,7 @@ export interface IHomePage extends Document {
     description?: string;
     buttonText?: string;
     backgroundImage?: MediaObject;
+    profilePdf?: MediaObject;
     isActive: boolean;
   };
   contactCTA: {
@@ -126,6 +127,8 @@ export interface IHomePage extends Document {
     buttonText?: string;
     buttonUrl?: string;
     backgroundImage?: MediaObject;
+    cardBackgroundImage?: MediaObject;
+    cardOverlayOpacity?: number;
     overlayOpacity?: number;
     isActive: boolean;
   };
@@ -408,6 +411,7 @@ const homePageSchema = new Schema<IHomePage>(
           description: { type: String, trim: true },
           buttonText: { type: String, trim: true },
           backgroundImage: mediaSchema,
+          profilePdf: mediaSchema,
           isActive: { type: Boolean, default: true },
         },
         { _id: false }
@@ -423,12 +427,14 @@ const homePageSchema = new Schema<IHomePage>(
           buttonText: { type: String, trim: true },
           buttonUrl: { type: String, trim: true },
           backgroundImage: mediaSchema,
+          cardBackgroundImage: mediaSchema,
+          cardOverlayOpacity: { type: Number, min: 0, max: 1, default: 0.72 },
           overlayOpacity: { type: Number, min: 0, max: 1, default: 0.8 },
           isActive: { type: Boolean, default: true },
         },
         { _id: false }
       ),
-      default: { isActive: true, overlayOpacity: 0.8 },
+      default: { isActive: true, overlayOpacity: 0.8, cardOverlayOpacity: 0.72 },
     },
     seo: seoSchema,
     createdBy: { type: Schema.Types.ObjectId, ref: "AdminUser" },

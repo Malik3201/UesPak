@@ -8,11 +8,13 @@ import {
   Cpu,
   Download,
   Factory,
+  FileText,
   FlaskConical,
   HeartPulse,
   Leaf,
   Settings2,
   ShieldCheck,
+  Sparkles,
   Store,
   TrendingUp,
   UsersRound,
@@ -159,12 +161,18 @@ export default async function HomePage() {
     home.industries.backgroundImage?.url?.trim() || undefined;
   const industriesOverlayOpacity = clampOverlay(home.industries.overlayOpacity, 0.72);
   const ctaBackgroundUrl =
-    home.contactCTA.backgroundImage?.url?.trim() ||
-    home.profileCTA.backgroundImage?.url?.trim() ||
-    undefined;
+    home.contactCTA.backgroundImage?.url?.trim() || undefined;
   const ctaOverlayOpacity = clampOverlay(home.contactCTA.overlayOpacity, 0.8);
-  const profileCardBackgroundUrl =
-    home.profileCTA.backgroundImage?.url?.trim() || undefined;
+  const contactCardBackgroundUrl =
+    home.contactCTA.cardBackgroundImage?.url?.trim() || undefined;
+  const contactCardOverlayOpacity = clampOverlay(
+    home.contactCTA.cardOverlayOpacity,
+    0.72
+  );
+  const profilePdfUrl =
+    home.profileCTA.profilePdf?.url?.trim() ||
+    settings.profilePdfUrl?.trim() ||
+    undefined;
 
   const websiteJsonLd = {
     "@context": "https://schema.org",
@@ -619,86 +627,136 @@ export default async function HomePage() {
           <Container className="relative">
             <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
               {home.profileCTA.isActive ? (
-                <article className="relative flex min-h-[22rem] overflow-hidden rounded-3xl border border-white/15 bg-white/[0.08] p-6 shadow-[0_18px_42px_rgba(0,0,0,0.18)] backdrop-blur-sm md:p-8">
-                  {profileCardBackgroundUrl ? (
-                    <>
-                      <div
-                        aria-hidden="true"
-                        className="absolute inset-0 bg-cover bg-center"
-                        style={{
-                          backgroundImage: `linear-gradient(135deg, rgba(3,39,28,0.78), rgba(5,47,33,0.88)), url("${profileCardBackgroundUrl}")`,
-                        }}
-                      />
-                      <div
-                        aria-hidden="true"
-                        className="absolute inset-0 bg-gradient-to-tr from-[#052f21]/80 via-[#052f21]/30 to-transparent"
-                      />
-                    </>
-                  ) : null}
-                  <div className="relative flex h-full flex-col justify-between">
+                <article className="group relative flex min-h-[22rem] overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-[#06382a] via-[#075f3f] to-[#03261c] p-6 text-white shadow-[0_24px_48px_rgba(0,0,0,0.28)] transition-transform duration-500 hover:-translate-y-1 md:p-9">
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 opacity-[0.18]"
+                    style={{
+                      backgroundImage:
+                        "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.55) 1px, transparent 0)",
+                      backgroundSize: "22px 22px",
+                    }}
+                  />
+                  <div
+                    aria-hidden="true"
+                    className="absolute -left-16 -top-16 h-48 w-48 rounded-full bg-emerald-300/15 blur-2xl"
+                  />
+                  <div
+                    aria-hidden="true"
+                    className="absolute -bottom-20 -right-12 h-56 w-56 rounded-full bg-emerald-400/15 blur-3xl"
+                  />
+                  <div className="relative flex h-full w-full flex-col justify-between gap-8">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-200">
+                      <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-emerald-100 backdrop-blur-sm">
+                        <FileText className="h-3.5 w-3.5" aria-hidden="true" />
                         {home.profileCTA.eyebrow || "Company Profile"}
-                      </p>
-                      <h2 className="mt-3 text-2xl font-extrabold leading-tight text-white md:text-3xl">
-                        {home.profileCTA.title || "Download the UESPAK Profile"}
+                      </span>
+                      <h2 className="mt-5 text-3xl font-extrabold leading-tight text-white md:text-[2.05rem]">
+                        {home.profileCTA.title ||
+                          "Download the UESPAK Company Profile"}
                       </h2>
-                      <p className="mt-3 text-sm leading-relaxed text-emerald-50/85">
+                      <p className="mt-4 max-w-md text-sm leading-relaxed text-emerald-50/85 md:text-base">
                         {home.profileCTA.description ||
-                          "Access our capability overview, service scope, and technical strengths."}
+                          "Access our capability overview, service scope, and technical strengths in one curated PDF."}
                       </p>
                     </div>
-                    <div className="pt-7">
-                      {settings.profilePdfUrl ? (
+                    <div className="flex flex-wrap items-center gap-4">
+                      {profilePdfUrl ? (
                         <a
-                          href={settings.profilePdfUrl}
+                          href={profilePdfUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#075f3f] shadow-[0_12px_24px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-50"
+                          className="group/btn inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#075f3f] shadow-[0_14px_28px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-50"
                         >
-                          <Download className="h-4 w-4" aria-hidden="true" />
+                          <Download
+                            className="h-4 w-4 transition-transform duration-300 group-hover/btn:-translate-y-0.5"
+                            aria-hidden="true"
+                          />
                           {home.profileCTA.buttonText ||
                             settings.profileButtonText ||
                             "Download Profile"}
                         </a>
                       ) : (
-                        <p className="text-sm font-medium text-emerald-100">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-5 py-3 text-sm font-medium text-emerald-50/90">
                           Company profile will be available soon.
-                        </p>
+                        </span>
                       )}
+                      <span className="text-xs uppercase tracking-[0.22em] text-emerald-100/70">
+                        PDF&nbsp;&middot;&nbsp;Updated regularly
+                      </span>
                     </div>
                   </div>
                 </article>
               ) : null}
 
               {home.contactCTA.isActive ? (
-                <article className="relative flex min-h-[22rem] overflow-hidden rounded-3xl bg-white p-6 text-foreground shadow-[0_24px_54px_rgba(0,0,0,0.22)] md:p-8">
+                <article className="group relative flex min-h-[22rem] overflow-hidden rounded-3xl shadow-[0_28px_56px_rgba(0,0,0,0.28)] transition-transform duration-500 hover:-translate-y-1">
+                  {contactCardBackgroundUrl ? (
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-[1.04]"
+                      style={{
+                        backgroundImage: `url("${contactCardBackgroundUrl}")`,
+                      }}
+                    />
+                  ) : (
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-0"
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(135deg,#075f3f 0%,#0a8456 55%,#052f21 100%)",
+                      }}
+                    />
+                  )}
                   <div
                     aria-hidden="true"
-                    className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-emerald-100"
+                    className="absolute inset-0"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(135deg, rgba(3,39,28,0.86) 0%, rgba(5,47,33,0.78) 45%, rgba(7,95,63,0.62) 100%)",
+                      opacity: contactCardBackgroundUrl
+                        ? contactCardOverlayOpacity
+                        : 0.88,
+                    }}
                   />
-                  <div className="relative flex h-full flex-col justify-between">
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent"
+                  />
+                  <div
+                    aria-hidden="true"
+                    className="absolute -right-20 -top-10 h-56 w-56 rounded-full bg-emerald-300/15 blur-3xl"
+                  />
+                  <div className="relative flex h-full w-full flex-col justify-between gap-8 p-6 text-white md:p-9">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#075f3f]">
+                      <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-emerald-100 backdrop-blur-sm">
+                        <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
                         {home.contactCTA.eyebrow || "Let's Work Together"}
-                      </p>
-                      <h2 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
+                      </span>
+                      <h2 className="mt-5 text-3xl font-extrabold leading-tight tracking-tight text-white md:text-[2.15rem]">
                         {home.contactCTA.title ||
-                          "Need a Reliable Technical Partner?"}
+                          "Need a reliable technical partner?"}
                       </h2>
-                      <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
+                      <p className="mt-4 max-w-xl text-sm leading-relaxed text-emerald-50/90 md:text-base">
                         {home.contactCTA.description ||
-                          "Share your requirements and our team will get back with the right approach."}
+                          "Share your requirements and our team will get back with the right approach for your project."}
                       </p>
                     </div>
-                    <div className="pt-7">
+                    <div className="flex flex-wrap items-center gap-4">
                       <Link
                         href={home.contactCTA.buttonUrl || "/contact-us"}
-                        className="inline-flex items-center gap-2 rounded-full bg-[#075f3f] px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(7,95,63,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#03452e]"
+                        className="group/btn inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#075f3f] shadow-[0_14px_28px_rgba(0,0,0,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-50"
                       >
                         {home.contactCTA.buttonText || "Contact Us"}
-                        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                        <ArrowRight
+                          className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1"
+                          aria-hidden="true"
+                        />
                       </Link>
+                      <span className="text-xs uppercase tracking-[0.22em] text-emerald-100/80">
+                        Engineering &middot; Automation &middot; Agriculture
+                      </span>
                     </div>
                   </div>
                 </article>

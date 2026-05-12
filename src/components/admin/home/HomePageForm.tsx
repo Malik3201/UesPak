@@ -790,58 +790,109 @@ export default function HomePageForm() {
       </section>
 
       <section className="space-y-4 rounded-xl border border-border bg-card p-5">
-        <h2 className="text-base font-semibold text-foreground">Profile CTA</h2>
+        <h2 className="text-base font-semibold text-foreground">Profile CTA &mdash; Company Profile card</h2>
+        <p className="text-xs text-muted-foreground">
+          Text-first card on the homepage CTA strip. The Download Profile button uses
+          the PDF uploaded below; if no PDF is present, the button is replaced with a
+          friendly &ldquo;coming soon&rdquo; message.
+        </p>
         <label className="flex items-center gap-2 text-sm text-muted-foreground"><input type="checkbox" checked={Boolean(form.profileCTA.isActive)} onChange={(e) => updateNested("profileCTA", { isActive: e.target.checked })} />Section active</label>
         <Input label="Eyebrow" value={form.profileCTA.eyebrow || ""} onChange={(e) => updateNested("profileCTA", { eyebrow: e.target.value })} />
         <Input label="Title" value={form.profileCTA.title || ""} onChange={(e) => updateNested("profileCTA", { title: e.target.value })} />
         <Textarea label="Description" rows={2} value={form.profileCTA.description || ""} onChange={(e) => updateNested("profileCTA", { description: e.target.value })} />
         <Input label="Button text" value={form.profileCTA.buttonText || ""} onChange={(e) => updateNested("profileCTA", { buttonText: e.target.value })} />
         <AdminMediaUploader
-          label="Profile CTA Background Image"
-          value={form.profileCTA.backgroundImage}
-          folder={MEDIA_UPLOAD_FOLDERS.home}
-          usage="home-profile-cta-background"
-          mediaType="image"
-          helperText="Optional visual used by the Company Profile CTA card."
+          label="Company Profile PDF"
+          value={form.profileCTA.profilePdf}
+          folder="/uespak/profile"
+          usage="company-profile-pdf"
+          mediaType="pdf"
+          helperText="Upload the latest company profile (PDF). The Download Profile button on the homepage will link to this file."
           onChange={(asset) =>
-            updateNested("profileCTA", { backgroundImage: normalizeMediaAsset(asset) })
+            updateNested("profileCTA", { profilePdf: normalizeMediaAsset(asset) })
           }
         />
       </section>
 
       <section className="space-y-4 rounded-xl border border-border bg-card p-5">
-        <h2 className="text-base font-semibold text-foreground">Contact CTA</h2>
+        <h2 className="text-base font-semibold text-foreground">Contact CTA &mdash; Let&apos;s Work Together card</h2>
+        <p className="text-xs text-muted-foreground">
+          Controls the rich card on the right side of the homepage CTA strip. The
+          card uses its own dedicated background image with an overlay, separate
+          from the full CTA section background.
+        </p>
         <label className="flex items-center gap-2 text-sm text-muted-foreground"><input type="checkbox" checked={Boolean(form.contactCTA.isActive)} onChange={(e) => updateNested("contactCTA", { isActive: e.target.checked })} />Section active</label>
         <Input label="Eyebrow" value={form.contactCTA.eyebrow || ""} onChange={(e) => updateNested("contactCTA", { eyebrow: e.target.value })} />
         <Input label="Title" value={form.contactCTA.title || ""} onChange={(e) => updateNested("contactCTA", { title: e.target.value })} />
         <Textarea label="Description" rows={2} value={form.contactCTA.description || ""} onChange={(e) => updateNested("contactCTA", { description: e.target.value })} />
         <Input label="Button text" value={form.contactCTA.buttonText || ""} onChange={(e) => updateNested("contactCTA", { buttonText: e.target.value })} />
         <Input label="Button URL" value={form.contactCTA.buttonUrl || ""} onChange={(e) => updateNested("contactCTA", { buttonUrl: e.target.value })} />
-        <div className="grid gap-4 sm:grid-cols-[1fr_12rem]">
-          <AdminMediaUploader
-            label="Contact CTA Background Image"
-            value={form.contactCTA.backgroundImage}
-            folder={MEDIA_UPLOAD_FOLDERS.home}
-            usage="home-contact-cta-background"
-            mediaType="image"
-            helperText="Used behind the Let's Work Together / Contact CTA section."
-            onChange={(asset) =>
-              updateNested("contactCTA", { backgroundImage: normalizeMediaAsset(asset) })
-            }
-          />
-          <Input
-            label="Overlay opacity"
-            type="number"
-            min="0"
-            max="1"
-            step="0.05"
-            value={String(form.contactCTA.overlayOpacity ?? 0.8)}
-            onChange={(e) =>
-              updateNested("contactCTA", {
-                overlayOpacity: Number(e.target.value || 0.8),
-              })
-            }
-          />
+
+        <div className="space-y-2 rounded-lg border border-dashed border-border/70 bg-background/50 p-4">
+          <h3 className="text-sm font-semibold text-foreground">Full CTA section background</h3>
+          <p className="text-xs text-muted-foreground">
+            Edge-to-edge image used behind both cards (Company Profile + Let&apos;s Work Together).
+          </p>
+          <div className="grid gap-4 sm:grid-cols-[1fr_12rem]">
+            <AdminMediaUploader
+              label="CTA section background image"
+              value={form.contactCTA.backgroundImage}
+              folder={MEDIA_UPLOAD_FOLDERS.home}
+              usage="home-cta-section-background"
+              mediaType="image"
+              helperText="Full-width image behind the entire CTA section. Optional; a dark green fallback is used if omitted."
+              onChange={(asset) =>
+                updateNested("contactCTA", { backgroundImage: normalizeMediaAsset(asset) })
+              }
+            />
+            <Input
+              label="Section overlay opacity"
+              type="number"
+              min="0"
+              max="1"
+              step="0.05"
+              value={String(form.contactCTA.overlayOpacity ?? 0.8)}
+              onChange={(e) =>
+                updateNested("contactCTA", {
+                  overlayOpacity: Number(e.target.value || 0.8),
+                })
+              }
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2 rounded-lg border border-dashed border-border/70 bg-background/50 p-4">
+          <h3 className="text-sm font-semibold text-foreground">Let&apos;s Work Together card image</h3>
+          <p className="text-xs text-muted-foreground">
+            Background image displayed inside the Let&apos;s Work Together card itself
+            (sits on top of the section background). A dark green overlay is rendered above it for readability.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-[1fr_12rem]">
+            <AdminMediaUploader
+              label="Card background image"
+              value={form.contactCTA.cardBackgroundImage}
+              folder={MEDIA_UPLOAD_FOLDERS.home}
+              usage="home-contact-cta-card-background"
+              mediaType="image"
+              helperText="Optional. Recommended ~1600x1200 photo of teamwork, engineering, or industrial visuals."
+              onChange={(asset) =>
+                updateNested("contactCTA", { cardBackgroundImage: normalizeMediaAsset(asset) })
+              }
+            />
+            <Input
+              label="Card overlay opacity"
+              type="number"
+              min="0"
+              max="1"
+              step="0.05"
+              value={String(form.contactCTA.cardOverlayOpacity ?? 0.72)}
+              onChange={(e) =>
+                updateNested("contactCTA", {
+                  cardOverlayOpacity: Number(e.target.value || 0.72),
+                })
+              }
+            />
+          </div>
         </div>
       </section>
 

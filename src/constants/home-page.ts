@@ -142,6 +142,7 @@ export const DEFAULT_HOME_PAGE_CONTENT: HomePageContent = {
     buttonText: "Contact Us",
     buttonUrl: "/contact-us",
     overlayOpacity: 0.8,
+    cardOverlayOpacity: 0.72,
     isActive: true,
   },
   seo: {
