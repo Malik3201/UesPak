@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -53,6 +54,30 @@ function getIndustryIcon(name: string) {
   if (value.includes("fmcg") || value.includes("retail")) return Store;
 
   return Building2;
+}
+
+function clampOverlay(value: number | undefined, fallback: number) {
+  if (typeof value !== "number" || Number.isNaN(value)) return fallback;
+  return Math.min(0.95, Math.max(0.25, value));
+}
+
+function sectionBackgroundStyle(
+  imageUrl: string | undefined,
+  overlayOpacity: number,
+  fallbackGradient: string
+): CSSProperties {
+  if (!imageUrl) {
+    return { backgroundImage: fallbackGradient };
+  }
+
+  return {
+    backgroundImage: `linear-gradient(135deg, rgba(3, 39, 28, ${overlayOpacity}), rgba(5, 47, 33, ${Math.min(
+      0.96,
+      overlayOpacity + 0.12
+    )})), url("${imageUrl}")`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  };
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -128,6 +153,18 @@ export default async function HomePage() {
   const clientLogos = [...(home.clients.logos || [])].sort(
     (a, b) => (a.order ?? 0) - (b.order ?? 0)
   );
+  const statsBackgroundUrl = home.stats.backgroundImage?.url?.trim() || undefined;
+  const statsOverlayOpacity = clampOverlay(home.stats.overlayOpacity, 0.78);
+  const industriesBackgroundUrl =
+    home.industries.backgroundImage?.url?.trim() || undefined;
+  const industriesOverlayOpacity = clampOverlay(home.industries.overlayOpacity, 0.72);
+  const ctaBackgroundUrl =
+    home.contactCTA.backgroundImage?.url?.trim() ||
+    home.profileCTA.backgroundImage?.url?.trim() ||
+    undefined;
+  const ctaOverlayOpacity = clampOverlay(home.contactCTA.overlayOpacity, 0.8);
+  const profileCardBackgroundUrl =
+    home.profileCTA.backgroundImage?.url?.trim() || undefined;
 
   const websiteJsonLd = {
     "@context": "https://schema.org",
@@ -227,10 +264,21 @@ export default async function HomePage() {
       </section>
 
       {home.stats.isActive && statItems.length ? (
-        <section className="homepage-section-reveal relative overflow-hidden bg-[#052f21] py-14 text-white md:py-[4.5rem] lg:py-20">
+        <section
+          className="homepage-section-reveal relative overflow-hidden bg-[#052f21] py-14 text-white md:py-[4.5rem] lg:py-20"
+          style={sectionBackgroundStyle(
+            statsBackgroundUrl,
+            statsOverlayOpacity,
+            "linear-gradient(135deg,#052f21 0%,#075f3f 52%,#03271c 100%)"
+          )}
+        >
           <div
             aria-hidden="true"
-            className="absolute inset-0 opacity-[0.18]"
+            className="absolute inset-0 bg-[#052f21]/20"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 opacity-[0.16]"
             style={{
               backgroundImage:
                 "linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px)",
@@ -357,17 +405,50 @@ export default async function HomePage() {
       ) : null}
 
       {home.industries.isActive && industryItems.length ? (
-        <section className="homepage-section-reveal bg-white py-14 md:py-20 lg:py-24">
+        <section
+          className={[
+            "homepage-section-reveal relative overflow-hidden py-14 md:py-20 lg:py-24",
+            industriesBackgroundUrl ? "bg-[#052f21] text-white" : "bg-white",
+          ].join(" ")}
+          style={sectionBackgroundStyle(
+            industriesBackgroundUrl,
+            industriesOverlayOpacity,
+            "linear-gradient(180deg,#ffffff 0%,#f7fbf8 100%)"
+          )}
+        >
+          {industriesBackgroundUrl ? (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-b from-[#052f21]/20 via-[#052f21]/35 to-[#052f21]/65"
+            />
+          ) : null}
           <Container>
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[#075f3f]">
+            <div className="relative mx-auto max-w-3xl text-center">
+              <p
+                className={[
+                  "text-xs font-semibold uppercase tracking-[0.32em]",
+                  industriesBackgroundUrl ? "text-emerald-100" : "text-[#075f3f]",
+                ].join(" ")}
+              >
                 Sector Coverage
               </p>
-              <h2 className="mt-3 text-balance text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
+              <h2
+                className={[
+                  "mt-3 text-balance text-3xl font-extrabold leading-tight tracking-tight md:text-4xl",
+                  industriesBackgroundUrl ? "text-white" : "text-foreground",
+                ].join(" ")}
+              >
                 {home.industries.title || "Industries We Serve"}
               </h2>
               {home.industries.description ? (
-                <p className="mt-4 text-sm leading-relaxed text-muted-foreground md:text-base">
+                <p
+                  className={[
+                    "mt-4 text-sm leading-relaxed md:text-base",
+                    industriesBackgroundUrl
+                      ? "text-emerald-50/85"
+                      : "text-muted-foreground",
+                  ].join(" ")}
+                >
                   {home.industries.description}
                 </p>
               ) : null}
@@ -380,10 +461,22 @@ export default async function HomePage() {
                 return (
                   <article
                     key={`industry-${idx}`}
-                    className="homepage-card-rise group relative overflow-hidden rounded-3xl border border-emerald-900/5 bg-[#f7fbf8] p-5 shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300 hover:bg-white hover:shadow-[0_22px_42px_rgba(7,95,63,0.14)]"
+                    className={[
+                      "homepage-card-rise group relative overflow-hidden rounded-3xl p-5 transition-all duration-300 hover:-translate-y-1",
+                      industriesBackgroundUrl
+                        ? "border border-white/15 bg-white/[0.12] text-white shadow-[0_18px_42px_rgba(0,0,0,0.18)] backdrop-blur-sm hover:border-emerald-100/45 hover:bg-white/[0.16]"
+                        : "border border-emerald-900/5 bg-[#f7fbf8] shadow-[0_10px_24px_rgba(15,23,42,0.05)] hover:border-emerald-300 hover:bg-white hover:shadow-[0_22px_42px_rgba(7,95,63,0.14)]",
+                    ].join(" ")}
                     style={{ animationDelay: `${idx * 65}ms` }}
                   >
-                    <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#075f3f] shadow-sm ring-1 ring-emerald-900/5 transition-all duration-300 group-hover:bg-[#075f3f] group-hover:text-white">
+                    <div
+                      className={[
+                        "mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm transition-all duration-300 group-hover:scale-105",
+                        industriesBackgroundUrl
+                          ? "bg-white text-[#075f3f] ring-1 ring-white/20 group-hover:bg-emerald-100"
+                          : "bg-white text-[#075f3f] ring-1 ring-emerald-900/5 group-hover:bg-[#075f3f] group-hover:text-white",
+                      ].join(" ")}
+                    >
                       {item.icon ? (
                         <span className="text-sm font-extrabold" aria-hidden="true">
                           {item.icon.slice(0, 2).toUpperCase()}
@@ -392,13 +485,35 @@ export default async function HomePage() {
                         <IndustryIcon className="h-5 w-5" aria-hidden="true" />
                       )}
                     </div>
-                    <h3 className="font-bold text-foreground">{item.name}</h3>
+                    <h3
+                      className={
+                        industriesBackgroundUrl
+                          ? "font-bold text-white"
+                          : "font-bold text-foreground"
+                      }
+                    >
+                      {item.name}
+                    </h3>
                     {item.description ? (
-                      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                      <p
+                        className={[
+                          "mt-2 line-clamp-3 text-sm leading-relaxed",
+                          industriesBackgroundUrl
+                            ? "text-emerald-50/82"
+                            : "text-muted-foreground",
+                        ].join(" ")}
+                      >
                         {item.description}
                       </p>
                     ) : (
-                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      <p
+                        className={[
+                          "mt-2 text-sm leading-relaxed",
+                          industriesBackgroundUrl
+                            ? "text-emerald-50/82"
+                            : "text-muted-foreground",
+                        ].join(" ")}
+                      >
                         Integrated technical support for sector-specific
                         operational needs.
                       </p>
@@ -479,7 +594,15 @@ export default async function HomePage() {
       ) : null}
 
       {home.profileCTA.isActive || home.contactCTA.isActive ? (
-        <section className="homepage-section-reveal relative overflow-hidden bg-[#052f21] py-14 text-white md:py-[4.5rem] lg:py-20">
+        <section
+          className="homepage-section-reveal relative overflow-hidden bg-[#052f21] py-14 text-white md:py-[4.5rem] lg:py-20"
+          style={sectionBackgroundStyle(
+            ctaBackgroundUrl,
+            ctaOverlayOpacity,
+            "linear-gradient(135deg,#052f21 0%,#075f3f 58%,#03271c 100%)"
+          )}
+        >
+          <div aria-hidden="true" className="absolute inset-0 bg-[#052f21]/15" />
           <div
             aria-hidden="true"
             className="absolute inset-0 opacity-[0.12]"
@@ -496,59 +619,87 @@ export default async function HomePage() {
           <Container className="relative">
             <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
               {home.profileCTA.isActive ? (
-                <article className="rounded-3xl border border-white/15 bg-white/[0.08] p-6 shadow-[0_18px_42px_rgba(0,0,0,0.18)] backdrop-blur-sm md:p-8">
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-200">
-                    {home.profileCTA.eyebrow || "Company Profile"}
-                  </p>
-                  <h2 className="mt-3 text-2xl font-extrabold leading-tight text-white md:text-3xl">
-                    {home.profileCTA.title || "Download the UESPAK Profile"}
-                  </h2>
-                  {home.profileCTA.description ? (
-                    <p className="mt-3 text-sm leading-relaxed text-emerald-50/85">
-                      {home.profileCTA.description}
-                    </p>
+                <article className="relative flex min-h-[22rem] overflow-hidden rounded-3xl border border-white/15 bg-white/[0.08] p-6 shadow-[0_18px_42px_rgba(0,0,0,0.18)] backdrop-blur-sm md:p-8">
+                  {profileCardBackgroundUrl ? (
+                    <>
+                      <div
+                        aria-hidden="true"
+                        className="absolute inset-0 bg-cover bg-center"
+                        style={{
+                          backgroundImage: `linear-gradient(135deg, rgba(3,39,28,0.78), rgba(5,47,33,0.88)), url("${profileCardBackgroundUrl}")`,
+                        }}
+                      />
+                      <div
+                        aria-hidden="true"
+                        className="absolute inset-0 bg-gradient-to-tr from-[#052f21]/80 via-[#052f21]/30 to-transparent"
+                      />
+                    </>
                   ) : null}
-                  {settings.profilePdfUrl ? (
-                    <a
-                      href={settings.profilePdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#075f3f] shadow-[0_12px_24px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-50"
-                    >
-                      <Download className="h-4 w-4" aria-hidden="true" />
-                      {home.profileCTA.buttonText ||
-                        settings.profileButtonText ||
-                        "Download Profile"}
-                    </a>
-                  ) : null}
+                  <div className="relative flex h-full flex-col justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-200">
+                        {home.profileCTA.eyebrow || "Company Profile"}
+                      </p>
+                      <h2 className="mt-3 text-2xl font-extrabold leading-tight text-white md:text-3xl">
+                        {home.profileCTA.title || "Download the UESPAK Profile"}
+                      </h2>
+                      <p className="mt-3 text-sm leading-relaxed text-emerald-50/85">
+                        {home.profileCTA.description ||
+                          "Access our capability overview, service scope, and technical strengths."}
+                      </p>
+                    </div>
+                    <div className="pt-7">
+                      {settings.profilePdfUrl ? (
+                        <a
+                          href={settings.profilePdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#075f3f] shadow-[0_12px_24px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-50"
+                        >
+                          <Download className="h-4 w-4" aria-hidden="true" />
+                          {home.profileCTA.buttonText ||
+                            settings.profileButtonText ||
+                            "Download Profile"}
+                        </a>
+                      ) : (
+                        <p className="text-sm font-medium text-emerald-100">
+                          Company profile will be available soon.
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </article>
               ) : null}
 
               {home.contactCTA.isActive ? (
-                <article className="relative overflow-hidden rounded-3xl bg-white p-6 text-foreground shadow-[0_24px_54px_rgba(0,0,0,0.22)] md:p-8">
+                <article className="relative flex min-h-[22rem] overflow-hidden rounded-3xl bg-white p-6 text-foreground shadow-[0_24px_54px_rgba(0,0,0,0.22)] md:p-8">
                   <div
                     aria-hidden="true"
                     className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-emerald-100"
                   />
-                  <div className="relative">
-                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#075f3f]">
-                      {home.contactCTA.eyebrow || "Let's Work Together"}
-                    </p>
-                    <h2 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
-                      {home.contactCTA.title ||
-                        "Need a Reliable Technical Partner?"}
-                    </h2>
-                    <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-                      {home.contactCTA.description ||
-                        "Share your requirements and our team will get back with the right approach."}
-                    </p>
-                    <Link
-                      href={home.contactCTA.buttonUrl || "/contact-us"}
-                      className="mt-7 inline-flex items-center gap-2 rounded-full bg-[#075f3f] px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(7,95,63,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#03452e]"
-                    >
-                      {home.contactCTA.buttonText || "Contact Us"}
-                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                    </Link>
+                  <div className="relative flex h-full flex-col justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#075f3f]">
+                        {home.contactCTA.eyebrow || "Let's Work Together"}
+                      </p>
+                      <h2 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
+                        {home.contactCTA.title ||
+                          "Need a Reliable Technical Partner?"}
+                      </h2>
+                      <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
+                        {home.contactCTA.description ||
+                          "Share your requirements and our team will get back with the right approach."}
+                      </p>
+                    </div>
+                    <div className="pt-7">
+                      <Link
+                        href={home.contactCTA.buttonUrl || "/contact-us"}
+                        className="inline-flex items-center gap-2 rounded-full bg-[#075f3f] px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(7,95,63,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#03452e]"
+                      >
+                        {home.contactCTA.buttonText || "Contact Us"}
+                        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                      </Link>
+                    </div>
                   </div>
                 </article>
               ) : null}

@@ -72,6 +72,8 @@ export interface IHomePage extends Document {
   stats: {
     title?: string;
     description?: string;
+    backgroundImage?: MediaObject;
+    overlayOpacity?: number;
     items: Array<{
       label: string;
       value: string;
@@ -93,6 +95,8 @@ export interface IHomePage extends Document {
   industries: {
     title?: string;
     description?: string;
+    backgroundImage?: MediaObject;
+    overlayOpacity?: number;
     items: Array<{ name: string; description?: string; icon?: string; order?: number }>;
     isActive: boolean;
   };
@@ -112,6 +116,7 @@ export interface IHomePage extends Document {
     title?: string;
     description?: string;
     buttonText?: string;
+    backgroundImage?: MediaObject;
     isActive: boolean;
   };
   contactCTA: {
@@ -120,6 +125,8 @@ export interface IHomePage extends Document {
     description?: string;
     buttonText?: string;
     buttonUrl?: string;
+    backgroundImage?: MediaObject;
+    overlayOpacity?: number;
     isActive: boolean;
   };
   seo?: SeoData;
@@ -139,6 +146,7 @@ const mediaSchema = new Schema<MediaObject>(
     height: { type: Number },
     format: { type: String, trim: true },
     size: { type: Number },
+    mimeType: { type: String, trim: true },
   },
   { _id: false }
 );
@@ -229,6 +237,8 @@ const homePageSchema = new Schema<IHomePage>(
           eyebrow: { type: String, trim: true },
           title: { type: String, trim: true },
           description: { type: String, trim: true },
+          backgroundImage: mediaSchema,
+          overlayOpacity: { type: Number, min: 0, max: 1, default: 0.78 },
           items: {
             type: [
               new Schema(
@@ -247,7 +257,7 @@ const homePageSchema = new Schema<IHomePage>(
         },
         { _id: false }
       ),
-      default: { isActive: true, items: [] },
+      default: { isActive: true, items: [], overlayOpacity: 0.78 },
     },
     aboutPreview: {
       type: new Schema(
@@ -291,6 +301,8 @@ const homePageSchema = new Schema<IHomePage>(
         {
           title: { type: String, trim: true },
           description: { type: String, trim: true },
+          backgroundImage: mediaSchema,
+          overlayOpacity: { type: Number, min: 0, max: 1, default: 0.72 },
           items: {
             type: [
               new Schema(
@@ -310,7 +322,7 @@ const homePageSchema = new Schema<IHomePage>(
         },
         { _id: false }
       ),
-      default: { isActive: true, items: [] },
+      default: { isActive: true, items: [], overlayOpacity: 0.72 },
     },
     featuredProjects: {
       type: new Schema(
@@ -395,6 +407,7 @@ const homePageSchema = new Schema<IHomePage>(
           title: { type: String, trim: true },
           description: { type: String, trim: true },
           buttonText: { type: String, trim: true },
+          backgroundImage: mediaSchema,
           isActive: { type: Boolean, default: true },
         },
         { _id: false }
@@ -409,11 +422,13 @@ const homePageSchema = new Schema<IHomePage>(
           description: { type: String, trim: true },
           buttonText: { type: String, trim: true },
           buttonUrl: { type: String, trim: true },
+          backgroundImage: mediaSchema,
+          overlayOpacity: { type: Number, min: 0, max: 1, default: 0.8 },
           isActive: { type: Boolean, default: true },
         },
         { _id: false }
       ),
-      default: { isActive: true },
+      default: { isActive: true, overlayOpacity: 0.8 },
     },
     seo: seoSchema,
     createdBy: { type: Schema.Types.ObjectId, ref: "AdminUser" },

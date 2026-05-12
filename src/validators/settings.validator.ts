@@ -47,10 +47,12 @@ const mediaInputSchema = z
       url: z.string().optional(),
       altText: z.string().optional(),
       publicId: z.string().optional(),
+      fileId: z.string().optional(),
       width: z.number().optional(),
       height: z.number().optional(),
       format: z.string().optional(),
       size: z.number().optional(),
+      mimeType: z.string().optional(),
     }),
     z.literal(null),
     z.undefined(),
@@ -73,20 +75,26 @@ const mediaInputSchema = z
     const out: {
       url: string;
       publicId: string;
+      fileId?: string;
       altText?: string;
       width?: number;
       height?: number;
       format?: string;
       size?: number;
+      mimeType?: string;
     } = {
       url: raw,
       publicId: pub,
+      ...(typeof input.fileId === "string" &&
+        input.fileId.trim() !== "" && { fileId: input.fileId.trim() }),
       ...(altRaw ? { altText: altRaw } : {}),
       ...(input.width !== undefined && { width: input.width }),
       ...(input.height !== undefined && { height: input.height }),
       ...(typeof input.format === "string" &&
         input.format.trim() !== "" && { format: input.format.trim() }),
       ...(input.size !== undefined && { size: input.size }),
+      ...(typeof input.mimeType === "string" &&
+        input.mimeType.trim() !== "" && { mimeType: input.mimeType.trim() }),
     };
     return out;
   });

@@ -138,6 +138,7 @@ export default function AdminMediaUploader({
         height: payload.height,
         format: payload.format,
         size: payload.size,
+        mimeType: payload.mimeType,
       };
 
       setLocalAsset(mediaObj);

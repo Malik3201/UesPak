@@ -27,11 +27,13 @@ export const mediaSchema = new Schema<MediaObject>(
   {
     url: { type: String, required: true },
     publicId: { type: String, required: true },
+    fileId: { type: String, trim: true },
     altText: { type: String, trim: true },
     width: { type: Number },
     height: { type: Number },
     format: { type: String },
     size: { type: Number },
+    mimeType: { type: String, trim: true },
   },
   { _id: false }
 );

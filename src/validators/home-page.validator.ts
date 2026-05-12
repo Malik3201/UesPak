@@ -29,6 +29,7 @@ const mediaObjectSchema = z
     height: z.number().optional(),
     format: z.string().trim().max(50).optional(),
     size: z.number().optional(),
+    mimeType: z.string().trim().max(120).optional(),
   })
   .transform((m) => {
     const pid =
@@ -165,10 +166,12 @@ export const homePageSchema = z.object({
     .object({
       title: trimToOptional(140),
       description: trimToOptional(600),
+      backgroundImage: mediaObjectSchema.optional(),
+      overlayOpacity: z.coerce.number().min(0).max(1).default(0.78),
       items: z.array(statItemSchema).default([]),
       isActive: z.boolean().default(true),
     })
-    .default({ items: [], isActive: true }),
+    .default({ items: [], isActive: true, overlayOpacity: 0.78 }),
   featuredProjects: z
     .object({
       eyebrow: trimToOptional(120),
@@ -184,10 +187,12 @@ export const homePageSchema = z.object({
     .object({
       title: trimToOptional(140),
       description: trimToOptional(600),
+      backgroundImage: mediaObjectSchema.optional(),
+      overlayOpacity: z.coerce.number().min(0).max(1).default(0.72),
       items: z.array(industryItemSchema).default([]),
       isActive: z.boolean().default(true),
     })
-    .default({ items: [], isActive: true }),
+    .default({ items: [], isActive: true, overlayOpacity: 0.72 }),
   teamPreview: z
     .object({
       title: trimToOptional(140),
@@ -209,6 +214,7 @@ export const homePageSchema = z.object({
       title: trimToOptional(200),
       description: trimToOptional(600),
       buttonText: trimToOptional(80),
+      backgroundImage: mediaObjectSchema.optional(),
       isActive: z.boolean().default(true),
     })
     .default({ isActive: true }),
@@ -219,9 +225,11 @@ export const homePageSchema = z.object({
       description: trimToOptional(600),
       buttonText: trimToOptional(80),
       buttonUrl: trimToOptional(2048),
+      backgroundImage: mediaObjectSchema.optional(),
+      overlayOpacity: z.coerce.number().min(0).max(1).default(0.8),
       isActive: z.boolean().default(true),
     })
-    .default({ isActive: true }),
+    .default({ isActive: true, overlayOpacity: 0.8 }),
   seo: seoSchema.default({
     schemaType: "WebSite",
     robots: { index: true, follow: true },

@@ -35,6 +35,7 @@ function normalizeMediaAsset(asset?: MediaAssetInput | null): MediaObject | unde
     height: asset.height,
     format: asset.format,
     size: asset.size,
+    mimeType: asset.mimeType,
   };
 }
 
@@ -549,6 +550,32 @@ export default function HomePageForm() {
         <label className="flex items-center gap-2 text-sm text-muted-foreground"><input type="checkbox" checked={Boolean(form.stats.isActive)} onChange={(e) => updateNested("stats", { isActive: e.target.checked })} />Section active</label>
         <Input label="Title" value={form.stats.title || ""} onChange={(e) => updateNested("stats", { title: e.target.value })} />
         <Textarea label="Description" rows={2} value={form.stats.description || ""} onChange={(e) => updateNested("stats", { description: e.target.value })} />
+        <div className="grid gap-4 sm:grid-cols-[1fr_12rem]">
+          <AdminMediaUploader
+            label="Achievements Section Background Image"
+            value={form.stats.backgroundImage}
+            folder={MEDIA_UPLOAD_FOLDERS.home}
+            usage="home-achievements-background"
+            mediaType="image"
+            helperText="Used behind the homepage Achievements section."
+            onChange={(asset) =>
+              updateNested("stats", { backgroundImage: normalizeMediaAsset(asset) })
+            }
+          />
+          <Input
+            label="Overlay opacity"
+            type="number"
+            min="0"
+            max="1"
+            step="0.05"
+            value={String(form.stats.overlayOpacity ?? 0.78)}
+            onChange={(e) =>
+              updateNested("stats", {
+                overlayOpacity: Number(e.target.value || 0.78),
+              })
+            }
+          />
+        </div>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold">Stat items</h3>
@@ -639,6 +666,32 @@ export default function HomePageForm() {
         <label className="flex items-center gap-2 text-sm text-muted-foreground"><input type="checkbox" checked={Boolean(form.industries.isActive)} onChange={(e) => updateNested("industries", { isActive: e.target.checked })} />Section active</label>
         <Input label="Title" value={form.industries.title || ""} onChange={(e) => updateNested("industries", { title: e.target.value })} />
         <Textarea label="Description" rows={3} value={form.industries.description || ""} onChange={(e) => updateNested("industries", { description: e.target.value })} />
+        <div className="grid gap-4 sm:grid-cols-[1fr_12rem]">
+          <AdminMediaUploader
+            label="Industries Section Background Image"
+            value={form.industries.backgroundImage}
+            folder={MEDIA_UPLOAD_FOLDERS.home}
+            usage="home-industries-background"
+            mediaType="image"
+            helperText="Used behind the homepage Industries We Serve section."
+            onChange={(asset) =>
+              updateNested("industries", { backgroundImage: normalizeMediaAsset(asset) })
+            }
+          />
+          <Input
+            label="Overlay opacity"
+            type="number"
+            min="0"
+            max="1"
+            step="0.05"
+            value={String(form.industries.overlayOpacity ?? 0.72)}
+            onChange={(e) =>
+              updateNested("industries", {
+                overlayOpacity: Number(e.target.value || 0.72),
+              })
+            }
+          />
+        </div>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold">Industry items</h3>
@@ -743,6 +796,17 @@ export default function HomePageForm() {
         <Input label="Title" value={form.profileCTA.title || ""} onChange={(e) => updateNested("profileCTA", { title: e.target.value })} />
         <Textarea label="Description" rows={2} value={form.profileCTA.description || ""} onChange={(e) => updateNested("profileCTA", { description: e.target.value })} />
         <Input label="Button text" value={form.profileCTA.buttonText || ""} onChange={(e) => updateNested("profileCTA", { buttonText: e.target.value })} />
+        <AdminMediaUploader
+          label="Profile CTA Background Image"
+          value={form.profileCTA.backgroundImage}
+          folder={MEDIA_UPLOAD_FOLDERS.home}
+          usage="home-profile-cta-background"
+          mediaType="image"
+          helperText="Optional visual used by the Company Profile CTA card."
+          onChange={(asset) =>
+            updateNested("profileCTA", { backgroundImage: normalizeMediaAsset(asset) })
+          }
+        />
       </section>
 
       <section className="space-y-4 rounded-xl border border-border bg-card p-5">
@@ -753,6 +817,32 @@ export default function HomePageForm() {
         <Textarea label="Description" rows={2} value={form.contactCTA.description || ""} onChange={(e) => updateNested("contactCTA", { description: e.target.value })} />
         <Input label="Button text" value={form.contactCTA.buttonText || ""} onChange={(e) => updateNested("contactCTA", { buttonText: e.target.value })} />
         <Input label="Button URL" value={form.contactCTA.buttonUrl || ""} onChange={(e) => updateNested("contactCTA", { buttonUrl: e.target.value })} />
+        <div className="grid gap-4 sm:grid-cols-[1fr_12rem]">
+          <AdminMediaUploader
+            label="Contact CTA Background Image"
+            value={form.contactCTA.backgroundImage}
+            folder={MEDIA_UPLOAD_FOLDERS.home}
+            usage="home-contact-cta-background"
+            mediaType="image"
+            helperText="Used behind the Let's Work Together / Contact CTA section."
+            onChange={(asset) =>
+              updateNested("contactCTA", { backgroundImage: normalizeMediaAsset(asset) })
+            }
+          />
+          <Input
+            label="Overlay opacity"
+            type="number"
+            min="0"
+            max="1"
+            step="0.05"
+            value={String(form.contactCTA.overlayOpacity ?? 0.8)}
+            onChange={(e) =>
+              updateNested("contactCTA", {
+                overlayOpacity: Number(e.target.value || 0.8),
+              })
+            }
+          />
+        </div>
       </section>
 
       <section className="space-y-4 rounded-xl border border-border bg-card p-5">

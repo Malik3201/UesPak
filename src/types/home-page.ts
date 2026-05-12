@@ -95,6 +95,8 @@ export interface HomePageContent {
   stats: {
     title?: string;
     description?: string;
+    backgroundImage?: MediaObject;
+    overlayOpacity?: number;
     items: HomePageStatItem[];
     isActive: boolean;
   };
@@ -110,6 +112,8 @@ export interface HomePageContent {
   industries: {
     title?: string;
     description?: string;
+    backgroundImage?: MediaObject;
+    overlayOpacity?: number;
     items: Array<{
       name: string;
       description?: string;
@@ -134,6 +138,7 @@ export interface HomePageContent {
     title?: string;
     description?: string;
     buttonText?: string;
+    backgroundImage?: MediaObject;
     isActive: boolean;
   };
   contactCTA: {
@@ -142,6 +147,8 @@ export interface HomePageContent {
     description?: string;
     buttonText?: string;
     buttonUrl?: string;
+    backgroundImage?: MediaObject;
+    overlayOpacity?: number;
     isActive: boolean;
   };
   seo: SeoData;

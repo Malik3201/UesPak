@@ -545,7 +545,7 @@ export default function SiteSettingsForm() {
 
       <Section
         title="Profile PDF"
-        description="Adds a downloadable profile button in the public navbar."
+        description="Upload the UESPAK company profile PDF used by the homepage download button."
       >
         <Input label="PDF URL (HTTPS)" {...register("profilePdf.url")} />
         <Input
@@ -554,9 +554,9 @@ export default function SiteSettingsForm() {
           hint='Default: "Download Profile"'
         />
         <AdminMediaUploader
-          label="Upload company profile PDF"
-          folder={MEDIA_UPLOAD_FOLDERS.profilePdf}
-          usage="profilePdf"
+          label="Company Profile PDF"
+          folder="/uespak/profile"
+          usage="company-profile-pdf"
           mediaType="pdf"
           maxSizeMB={20}
           showPreview
@@ -568,7 +568,7 @@ export default function SiteSettingsForm() {
               setValue("profilePdf", undefined, { shouldDirty: true });
             }
           }}
-          helperText="Upload a PDF to replace the manual URL above (max 20MB). After upload, click Save settings."
+          helperText="Upload the UESPAK company profile PDF used by the homepage download button (max 20MB). After upload, click Save settings."
         />
       </Section>
 

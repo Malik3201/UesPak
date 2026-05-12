@@ -78,6 +78,7 @@ export const DEFAULT_HOME_PAGE_CONTENT: HomePageContent = {
   stats: {
     title: "Achievements",
     description: "A capability-focused snapshot of UESPAK.",
+    overlayOpacity: 0.78,
     items: [
       { label: "Service Areas", value: "10", suffix: "+" },
       { label: "Sector Coverage", value: "Multi-Sector" },
@@ -99,6 +100,7 @@ export const DEFAULT_HOME_PAGE_CONTENT: HomePageContent = {
     title: "Industries We Serve",
     description:
       "UESPAK supports technical and operational requirements across diverse sectors.",
+    overlayOpacity: 0.72,
     items: [
       { name: "Healthcare" },
       { name: "Pharmaceuticals" },
@@ -139,6 +141,7 @@ export const DEFAULT_HOME_PAGE_CONTENT: HomePageContent = {
       "Share your requirements and our team will get back with the right approach.",
     buttonText: "Contact Us",
     buttonUrl: "/contact-us",
+    overlayOpacity: 0.8,
     isActive: true,
   },
   seo: {

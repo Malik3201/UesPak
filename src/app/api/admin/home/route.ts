@@ -42,6 +42,42 @@ function isPresentMediaItem(item: Record<string, unknown>) {
   return Boolean(url);
 }
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function hasOwn(value: Record<string, unknown>, key: string) {
+  return Object.prototype.hasOwnProperty.call(value, key);
+}
+
+function preserveNestedSectionFields(
+  merged: Record<string, unknown>,
+  defaults: Record<string, unknown>,
+  existing: Record<string, unknown>,
+  incoming: Record<string, unknown>,
+  sectionKey: string,
+  fields: string[]
+) {
+  const mergedSection = asRecord(merged[sectionKey]);
+  const defaultSection = asRecord(defaults[sectionKey]);
+  const existingSection = asRecord(existing[sectionKey]);
+  const incomingSection = asRecord(incoming[sectionKey]);
+
+  for (const field of fields) {
+    if (hasOwn(incomingSection, field)) {
+      mergedSection[field] = incomingSection[field];
+    } else if (hasOwn(existingSection, field)) {
+      mergedSection[field] = existingSection[field];
+    } else if (hasOwn(defaultSection, field)) {
+      mergedSection[field] = defaultSection[field];
+    }
+  }
+
+  merged[sectionKey] = mergedSection;
+}
+
 function toSerializable(homePage: Record<string, unknown>) {
   const { _id, ...rest } = homePage;
   const hero = (rest.hero as Record<string, unknown>) || {};
@@ -147,7 +183,25 @@ export async function PATCH(request: NextRequest) {
     const mergedRaw = mergeDeep(
       mergeDeep(defaults, existing || {}),
       body
-    );
+    ) as unknown as Record<string, unknown>;
+
+    const existingRecord = asRecord(existing);
+    const defaultsRecord = defaults as unknown as Record<string, unknown>;
+    preserveNestedSectionFields(mergedRaw, defaultsRecord, existingRecord, body, "stats", [
+      "backgroundImage",
+      "overlayOpacity",
+    ]);
+    preserveNestedSectionFields(mergedRaw, defaultsRecord, existingRecord, body, "industries", [
+      "backgroundImage",
+      "overlayOpacity",
+    ]);
+    preserveNestedSectionFields(mergedRaw, defaultsRecord, existingRecord, body, "profileCTA", [
+      "backgroundImage",
+    ]);
+    preserveNestedSectionFields(mergedRaw, defaultsRecord, existingRecord, body, "contactCTA", [
+      "backgroundImage",
+      "overlayOpacity",
+    ]);
 
     const parsed = homePageSchema.safeParse(mergedRaw);
     if (!parsed.success) {
