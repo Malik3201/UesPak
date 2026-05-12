@@ -6,9 +6,17 @@ import type { TeamMemberDto } from "@/types/team";
 
 interface CareersTeamSectionProps {
   members: TeamMemberDto[];
+  eyebrow?: string;
+  title?: string;
+  description?: string;
 }
 
-export default function CareersTeamSection({ members }: CareersTeamSectionProps) {
+export default function CareersTeamSection({
+  members,
+  eyebrow,
+  title,
+  description,
+}: CareersTeamSectionProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isTouch, setIsTouch] = useState(false);
 
@@ -36,15 +44,14 @@ export default function CareersTeamSection({ members }: CareersTeamSectionProps)
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[#075f3f]">
-            Our Team
+            {eyebrow || "Our Team"}
           </p>
           <h2 className="mt-3 text-balance text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
-            Meet Our Professionals
+            {title || "Meet Our Professionals"}
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground md:text-base">
-            A qualified team of engineers and specialists supporting reliable
-            project delivery across engineering, automation and agriculture
-            sectors.
+            {description ||
+              "A qualified team of engineers and specialists supporting reliable project delivery across engineering, automation and agriculture sectors."}
           </p>
         </div>
 

@@ -9,6 +9,12 @@ import {
   validationErrorResponse,
 } from "@/lib/api-response";
 
+function toUndef(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed === "" ? undefined : trimmed;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => null);
@@ -21,23 +27,47 @@ export async function POST(req: NextRequest) {
 
     const data = parsed.data;
 
+    // Honeypot: silent-success if a bot filled the hidden field.
+    if (data.website && data.website.length > 0) {
+      return successResponse(
+        "Thank you for your message. Our team will get back to you shortly.",
+        null,
+        201
+      );
+    }
+
     await connectDB();
 
-    // Persist submission
-    await ContactSubmission.create({
-      ...data,
-      ipAddress: req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? undefined,
+    const submission = await ContactSubmission.create({
+      name: data.name,
+      email: data.email,
+      phone: toUndef(data.phone),
+      company: toUndef(data.company),
+      subject: data.subject,
+      serviceInterest: toUndef(data.serviceInterest),
+      message: data.message,
+      consent: data.consent === true ? true : undefined,
+      source: "contact-page",
+      ipAddress:
+        req.headers.get("x-forwarded-for") ??
+        req.headers.get("x-real-ip") ??
+        undefined,
       userAgent: req.headers.get("user-agent") ?? undefined,
     });
 
-    // Send notification email (non-blocking failure)
+    // Non-blocking email notification.
     const receiverEmail =
       process.env.CONTACT_RECEIVER_EMAIL ?? "services@uespak.com";
-
     sendEmail({
       to: receiverEmail,
       subject: `New Enquiry: ${data.subject}`,
-      html: buildContactEmail(data),
+      html: buildContactEmail({
+        name: data.name,
+        email: data.email,
+        phone: toUndef(data.phone),
+        subject: data.subject,
+        message: data.message,
+      }),
       replyTo: data.email,
     }).catch((err) => {
       console.error("[Contact] Failed to send notification email:", err);
@@ -45,7 +75,7 @@ export async function POST(req: NextRequest) {
 
     return successResponse(
       "Thank you for your message. Our team will get back to you shortly.",
-      null,
+      { id: String(submission._id) },
       201
     );
   } catch (err) {
