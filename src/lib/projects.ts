@@ -108,6 +108,39 @@ export async function getAllProjectSlugs(): Promise<string[]> {
   }
 }
 
+export async function getProjectsLinkedToService(
+  serviceId: string
+): Promise<
+  Array<{
+    title: string;
+    slug: string;
+    excerpt?: string;
+    projectGroup?: IProject["projectGroup"];
+    featuredImage?: IProject["featuredImage"];
+  }>
+> {
+  try {
+    await connectDB();
+    const docs = await Project.find({
+      status: "published",
+      linkedServices: serviceId,
+    })
+      .select("title slug excerpt featuredImage projectGroup")
+      .sort({ order: 1, createdAt: -1 })
+      .limit(6)
+      .lean();
+    return docs.map((d) => ({
+      title: d.title,
+      slug: d.slug,
+      excerpt: d.excerpt,
+      projectGroup: d.projectGroup,
+      featuredImage: d.featuredImage,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export function getProjectSeoMetadata(project: IProject): Metadata {
   const url = `${SITE_URL}/projects/${project.slug}`;
   const seo = project.seo;

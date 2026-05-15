@@ -105,6 +105,47 @@ export async function getAllServiceSlugs(): Promise<string[]> {
   }
 }
 
+export function getServiceGroup(service: Pick<IService, "serviceGroup">): ServiceGroup {
+  return getServiceGroupValue(service);
+}
+
+export async function getRelatedPublishedServices(
+  group: ServiceGroup,
+  excludeSlug: string,
+  limit = 4
+): Promise<Array<{ title: string; slug: string; excerpt?: string; featuredImage?: IService["featuredImage"] }>> {
+  try {
+    await connectDB();
+    const filter: Record<string, unknown> =
+      group === "engineering"
+        ? {
+            status: "published",
+            slug: { $ne: excludeSlug },
+            $or: [{ serviceGroup: "engineering" }, { serviceGroup: { $exists: false } }],
+          }
+        : {
+            status: "published",
+            slug: { $ne: excludeSlug },
+            serviceGroup: "agriculture",
+          };
+
+    const docs = await Service.find(filter)
+      .select("title slug excerpt featuredImage")
+      .sort({ order: 1, createdAt: -1 })
+      .limit(limit)
+      .lean();
+
+    return docs.map((d) => ({
+      title: d.title,
+      slug: d.slug,
+      excerpt: d.excerpt,
+      featuredImage: d.featuredImage,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export function getServiceSeoMetadata(service: IService): Metadata {
   const serviceUrl = `${SITE_URL}/services/${service.slug}`;
   const seo = service.seo;

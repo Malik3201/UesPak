@@ -1,8 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import Container from "@/components/shared/Container";
-import { getAllServiceSlugs, getServiceBySlug, getServiceSeoMetadata } from "@/lib/services";
+import ServiceDetailView from "@/components/public/services/ServiceDetailView";
+import JsonLdScripts from "@/components/public/catalog/JsonLdScripts";
+import {
+  getAllServiceSlugs,
+  getRelatedPublishedServices,
+  getServiceBySlug,
+  getServiceGroup,
+  getServiceSeoMetadata,
+} from "@/lib/services";
+import { getProjectsLinkedToService } from "@/lib/projects";
+import { getPublicSiteSettings } from "@/lib/site-settings";
 import { SITE_URL } from "@/lib/seo";
 import { getServiceGroupLabel } from "@/types/service";
 
@@ -32,12 +40,15 @@ export default async function ServiceDetailPage({ params }: Props) {
   const service = await getServiceBySlug(slug);
   if (!service) notFound();
 
-  const serviceGroup =
-    (service as unknown as { serviceGroup?: "engineering" | "agriculture" }).serviceGroup ===
-    "agriculture"
-      ? "agriculture"
-      : "engineering";
+  const serviceGroup = getServiceGroup(service);
   const groupLabel = getServiceGroupLabel(serviceGroup);
+  const serviceId = String(service._id);
+
+  const [relatedProjects, relatedServices, settings] = await Promise.all([
+    getProjectsLinkedToService(serviceId),
+    getRelatedPublishedServices(serviceGroup, service.slug),
+    getPublicSiteSettings(),
+  ]);
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -59,11 +70,12 @@ export default async function ServiceDetailPage({ params }: Props) {
       },
     ],
   };
+
   const serviceJsonLd = {
     "@context": "https://schema.org",
     "@type": "Service",
     name: service.title,
-    description: service.excerpt || "",
+    description: service.excerpt || service.seo?.metaDescription || "",
     serviceType: service.category || service.title,
     provider: {
       "@type": "Organization",
@@ -72,117 +84,18 @@ export default async function ServiceDetailPage({ params }: Props) {
     },
     areaServed: "Pakistan",
     url: `${SITE_URL}/services/${service.slug}`,
+    image: service.featuredImage?.url || undefined,
   };
 
   return (
-    <section className="section-py">
-      <Container>
-        <nav className="mb-4 text-sm text-muted-foreground">
-          <Link href="/" className="hover:underline">
-            Home
-          </Link>{" "}
-          /{" "}
-          <Link href="/services" className="hover:underline">
-            Services
-          </Link>{" "}
-          /{" "}
-          <Link href={`/services/group/${serviceGroup}`} className="hover:underline">
-            {groupLabel}
-          </Link>{" "}
-          / <span className="text-foreground">{service.title}</span>
-        </nav>
-        <h1 className="text-3xl font-bold text-primary mb-3">{service.title}</h1>
-        {service.excerpt ? (
-          <p className="mb-6 max-w-3xl text-muted-foreground">{service.excerpt}</p>
-        ) : null}
-
-        {service.featuredImage?.url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={service.featuredImage.url}
-            alt={service.featuredImage.altText || service.title}
-            className="mb-8 h-auto w-full rounded-xl border border-border object-cover"
-          />
-        ) : null}
-
-        {service.content ? (
-          <article
-            className="prose prose-neutral mb-8 max-w-none dark:prose-invert"
-            dangerouslySetInnerHTML={{ __html: service.content }}
-          />
-        ) : null}
-
-        {service.bulletPoints?.length ? (
-          <div className="mb-8">
-            <h2 className="mb-3 text-xl font-semibold text-foreground">Key Highlights</h2>
-            <ul className="list-disc space-y-2 pl-5 text-muted-foreground">
-              {service.bulletPoints.map((point, idx) => (
-                <li key={idx}>{point}</li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-
-        {service.gallery?.length ? (
-          <div className="mb-8">
-            <h2 className="mb-3 text-xl font-semibold text-foreground">Gallery</h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {service.gallery.map((img, idx) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={`${img.publicId}-${idx}`}
-                  src={img.url}
-                  alt={img.altText || `${service.title} image ${idx + 1}`}
-                  className="h-52 w-full rounded-lg border border-border object-cover"
-                />
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {service.faqs?.length ? (
-          <div className="mb-8">
-            <h2 className="mb-3 text-xl font-semibold text-foreground">FAQs</h2>
-            <div className="space-y-3">
-              {service.faqs.map((faq, idx) => (
-                <details key={idx} className="rounded-md border border-border bg-card p-4">
-                  <summary className="cursor-pointer font-medium text-foreground">
-                    {faq.question}
-                  </summary>
-                  <p className="mt-2 text-sm text-muted-foreground">{faq.answer}</p>
-                </details>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {service.cta?.isActive ? (
-          <div className="rounded-xl border border-primary/30 bg-primary/10 p-6">
-            {service.cta.title ? (
-              <h2 className="text-xl font-semibold text-foreground">{service.cta.title}</h2>
-            ) : null}
-            {service.cta.description ? (
-              <p className="mt-2 text-sm text-muted-foreground">{service.cta.description}</p>
-            ) : null}
-            {service.cta.buttonUrl && service.cta.buttonText ? (
-              <Link
-                href={service.cta.buttonUrl}
-                className="mt-4 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-              >
-                {service.cta.buttonText}
-              </Link>
-            ) : null}
-          </div>
-        ) : null}
-      </Container>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }}
+    <>
+      <ServiceDetailView
+        service={service}
+        relatedProjects={relatedProjects}
+        relatedServices={relatedServices}
+        settings={settings}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
-    </section>
+      <JsonLdScripts data={[breadcrumbJsonLd, serviceJsonLd]} />
+    </>
   );
 }

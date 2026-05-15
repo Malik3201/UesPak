@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import CatalogHero from "@/components/public/catalog/CatalogHero";
+import CatalogBottomCta from "@/components/public/catalog/CatalogBottomCta";
+import JsonLdScripts from "@/components/public/catalog/JsonLdScripts";
+import ProjectCard from "@/components/public/projects/ProjectCard";
 import Container from "@/components/shared/Container";
-import { buildMetadata, SITE_URL } from "@/lib/seo";
 import { getPublishedProjectsByGroup } from "@/lib/projects";
+import { toProjectCardData } from "@/lib/catalog-public";
+import { buildMetadata, SITE_URL } from "@/lib/seo";
 import {
   getProjectGroupFromSlug,
   getProjectGroupLabel,
@@ -13,6 +17,15 @@ import {
 interface Props {
   params: Promise<{ group: string }>;
 }
+
+const GROUP_INTRO: Record<ProjectGroup, string> = {
+  engineering:
+    "Explore UESPAK engineering projects including HVAC-R, facility delivery, mechanical/electrical systems, and technical execution.",
+  agriculture:
+    "Explore UESPAK agriculture projects including implementation, practical farm systems, and sustainable outcomes.",
+  industrialAutomation:
+    "Explore UESPAK industrial automation projects including controls, instrumentation, and optimization delivery.",
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { group: groupSlug } = await params;
@@ -27,12 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return buildMetadata({
     title: titleMap[group],
-    description:
-      group === "agriculture"
-        ? "Explore UESPAK agriculture projects including implementation, practical farm systems, and sustainable outcomes."
-        : group === "industrialAutomation"
-          ? "Explore UESPAK industrial automation projects including controls, instrumentation, and optimization delivery."
-          : "Explore UESPAK engineering projects including HVAC-R, facility delivery, and technical execution.",
+    description: GROUP_INTRO[group],
     canonicalPath: `/projects/group/${groupSlug}`,
   });
 }
@@ -44,6 +52,7 @@ export default async function ProjectGroupPage({ params }: Props) {
 
   const title = getProjectGroupLabel(group);
   const projects = await getPublishedProjectsByGroup(group);
+  const cards = projects.map(toProjectCardData);
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -61,46 +70,34 @@ export default async function ProjectGroupPage({ params }: Props) {
   };
 
   return (
-    <section className="section-py">
-      <Container>
-        <nav className="mb-4 text-sm text-muted-foreground">
-          <Link href="/" className="hover:underline">Home</Link> /{" "}
-          <Link href="/projects" className="hover:underline">Projects</Link> /{" "}
-          <span className="text-foreground">{title}</span>
-        </nav>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">{title}</h1>
-        </div>
-        {projects.length === 0 ? (
-          <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
-            No published projects in this group yet.
-          </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {projects.map((project) => (
-              <article key={String(project._id)} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                {project.featuredImage?.url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={project.featuredImage.url} alt={project.featuredImage.altText || project.title} className="h-44 w-full object-cover" />
-                ) : (
-                  <div className="h-44 w-full bg-muted/40" />
-                )}
-                <div className="space-y-3 p-5">
-                  <h2 className="text-lg font-semibold text-foreground">{project.title}</h2>
-                  <p className="line-clamp-3 text-sm text-muted-foreground">
-                    {project.excerpt || "Explore this project by UESPAK."}
-                  </p>
-                  <Link href={`/projects/${project.slug}`} className="inline-flex text-sm font-semibold text-primary hover:underline">
-                    View Details
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </Container>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-    </section>
+    <>
+      <CatalogHero
+        eyebrow="Project Portfolio"
+        title={title}
+        description={GROUP_INTRO[group]}
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Projects", href: "/projects" },
+          { label: title },
+        ]}
+      />
+      <section className="homepage-section-reveal w-full bg-white py-14 md:py-20 lg:py-24">
+        <Container>
+          {cards.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-emerald-900/15 bg-[#f7fbf8] p-10 text-center text-slate-600">
+              No published projects in this group yet.
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {cards.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+          )}
+        </Container>
+      </section>
+      <CatalogBottomCta />
+      <JsonLdScripts data={breadcrumbJsonLd} />
+    </>
   );
 }
-

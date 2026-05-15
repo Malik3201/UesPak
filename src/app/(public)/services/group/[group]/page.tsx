@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import CatalogHero from "@/components/public/catalog/CatalogHero";
+import CatalogBottomCta from "@/components/public/catalog/CatalogBottomCta";
+import JsonLdScripts from "@/components/public/catalog/JsonLdScripts";
+import ServiceCard from "@/components/public/services/ServiceCard";
 import Container from "@/components/shared/Container";
 import { getPublishedServicesByGroup } from "@/lib/services";
+import { toServiceCardData } from "@/lib/catalog-public";
 import { buildMetadata, SITE_URL } from "@/lib/seo";
 import type { ServiceGroup } from "@/types/service";
 import { getServiceGroupLabel } from "@/types/service";
@@ -14,6 +18,13 @@ interface Props {
 function isServiceGroup(group: string): group is ServiceGroup {
   return group === "engineering" || group === "agriculture";
 }
+
+const GROUP_INTRO: Record<ServiceGroup, string> = {
+  engineering:
+    "Engineering, compliance, optimization, and delivery—across industrial and commercial environments.",
+  agriculture:
+    "Training, regenerative practices, and practical implementation—designed for resilient production and sustainable outcomes.",
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { group } = await params;
@@ -39,6 +50,7 @@ export default async function ServiceGroupPage({ params }: Props) {
 
   const label = getServiceGroupLabel(group);
   const services = await getPublishedServicesByGroup(group);
+  const cards = services.map(toServiceCardData);
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -56,71 +68,34 @@ export default async function ServiceGroupPage({ params }: Props) {
   };
 
   return (
-    <section className="section-py">
-      <Container>
-        <nav className="mb-4 text-sm text-muted-foreground">
-          <Link href="/" className="hover:underline">
-            Home
-          </Link>{" "}
-          /{" "}
-          <Link href="/services" className="hover:underline">
-            Services
-          </Link>{" "}
-          / <span className="text-foreground">{label}</span>
-        </nav>
-
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">{label}</h1>
-          <p className="max-w-3xl text-sm text-muted-foreground">
-            {group === "agriculture"
-              ? "Training, regenerative practices, and practical implementation—designed for resilient production and sustainable outcomes."
-              : "Engineering, compliance, optimization, and delivery—across industrial and commercial environments."}
-          </p>
-        </div>
-
-        {services.length === 0 ? (
-          <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
-            No published services available in this group yet.
-          </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {services.map((service) => (
-              <article
-                key={String(service._id)}
-                className="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
-              >
-                {service.featuredImage?.url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={service.featuredImage.url}
-                    alt={service.featuredImage.altText || service.title}
-                    className="h-44 w-full object-cover"
-                  />
-                ) : (
-                  <div className="h-44 w-full bg-muted/40" />
-                )}
-                <div className="space-y-3 p-5">
-                  <h2 className="text-lg font-semibold text-foreground">{service.title}</h2>
-                  <p className="line-clamp-3 text-sm text-muted-foreground">
-                    {service.excerpt || "Learn more about this service offering."}
-                  </p>
-                  <Link
-                    href={`/services/${service.slug}`}
-                    className="inline-flex text-sm font-semibold text-primary hover:underline"
-                  >
-                    View Details
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </Container>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+    <>
+      <CatalogHero
+        eyebrow="Service Group"
+        title={label}
+        description={GROUP_INTRO[group]}
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Services", href: "/services" },
+          { label },
+        ]}
       />
-    </section>
+      <section className="homepage-section-reveal w-full bg-white py-14 md:py-20 lg:py-24">
+        <Container>
+          {cards.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-emerald-900/15 bg-[#f7fbf8] p-10 text-center text-slate-600">
+              No published services available in this group yet.
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {cards.map((service) => (
+                <ServiceCard key={service.id} service={service} />
+              ))}
+            </div>
+          )}
+        </Container>
+      </section>
+      <CatalogBottomCta />
+      <JsonLdScripts data={breadcrumbJsonLd} />
+    </>
   );
 }
-
