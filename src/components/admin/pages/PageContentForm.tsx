@@ -11,9 +11,12 @@ import type {
   AboutPageContent,
   AnyPageContent,
   CareersPageContent,
+  CatalogListingPageSections,
   ContactPageContent,
   PageKey,
   PageSimpleItem,
+  ProjectsPageContent,
+  ServicesPageContent,
 } from "@/types/page-content";
 import type { MediaObject } from "@/types/media";
 
@@ -27,7 +30,15 @@ const pageLabels: Record<PageKey, string> = {
   about: "About Page",
   careers: "Careers Page",
   contact: "Contact Page",
+  services: "Services Page",
+  projects: "Projects Page",
 };
+
+function isCatalogListingPageKey(
+  pageKey: PageKey
+): pageKey is "services" | "projects" {
+  return pageKey === "services" || pageKey === "projects";
+}
 
 function normalizeMediaAsset(asset?: MediaAssetInput | null): MediaObject | undefined {
   if (!asset?.url) return undefined;
@@ -126,6 +137,7 @@ function ItemsEditor({
 }
 
 export default function PageContentForm({ pageKey }: PageContentFormProps) {
+  const catalogListing = isCatalogListingPageKey(pageKey);
   const defaultPage = useMemo(() => getDefaultPageContent(pageKey), [pageKey]);
   const [form, setForm] = useState<AnyPageContent>(defaultPage);
   const [keywordsCsv, setKeywordsCsv] = useState(
@@ -281,20 +293,44 @@ export default function PageContentForm({ pageKey }: PageContentFormProps) {
           label="Hero background image"
           value={form.hero.backgroundImage}
           folder={MEDIA_UPLOAD_FOLDERS.pages}
-          usage={`${pageKey}-hero`}
+          usage={catalogListing ? `${pageKey}-page-hero` : `${pageKey}-hero`}
           mediaType="image"
           helperText="Large hero image used behind the dark green overlay."
           onChange={(asset) => setHero({ backgroundImage: normalizeMediaAsset(asset) })}
         />
+        {catalogListing ? (
+          <Input
+            label="Hero overlay opacity (0–100%)"
+            type="number"
+            min={0}
+            max={100}
+            value={Math.round((form.hero.overlayOpacity ?? 0.88) * 100)}
+            onChange={(e) => {
+              const pct = Math.min(100, Math.max(0, Number(e.target.value) || 0));
+              setHero({ overlayOpacity: pct / 100 });
+            }}
+            hint="Controls how strong the green overlay appears over the hero image."
+          />
+        ) : null}
         <div className="grid gap-4 md:grid-cols-2">
           <Input label="Primary button text" value={form.hero.primaryButtonText || ""} onChange={(e) => setHero({ primaryButtonText: e.target.value })} />
           <Input label="Primary button URL" value={form.hero.primaryButtonUrl || ""} onChange={(e) => setHero({ primaryButtonUrl: e.target.value })} />
-          <Input label="Secondary button text" value={form.hero.secondaryButtonText || ""} onChange={(e) => setHero({ secondaryButtonText: e.target.value })} />
-          <Input label="Secondary button URL" value={form.hero.secondaryButtonUrl || ""} onChange={(e) => setHero({ secondaryButtonUrl: e.target.value })} />
+          {!catalogListing ? (
+            <>
+              <Input label="Secondary button text" value={form.hero.secondaryButtonText || ""} onChange={(e) => setHero({ secondaryButtonText: e.target.value })} />
+              <Input label="Secondary button URL" value={form.hero.secondaryButtonUrl || ""} onChange={(e) => setHero({ secondaryButtonUrl: e.target.value })} />
+            </>
+          ) : null}
         </div>
       </section>
 
-      {pageKey === "about" ? (
+      {catalogListing ? (
+        <CatalogListingSectionsEditor
+          pageKey={pageKey}
+          sections={(form as ServicesPageContent | ProjectsPageContent).sections}
+          onChange={(sections) => setSections(sections)}
+        />
+      ) : pageKey === "about" ? (
         <AboutSectionsEditor page={form as AboutPageContent} onChange={(sections) => setSections(sections)} />
       ) : pageKey === "careers" ? (
         <CareersSectionsEditor page={form as CareersPageContent} onChange={(sections) => setSections(sections)} />
@@ -337,6 +373,96 @@ export default function PageContentForm({ pageKey }: PageContentFormProps) {
         </Button>
       </div>
     </form>
+  );
+}
+
+function CatalogListingSectionsEditor({
+  pageKey,
+  sections,
+  onChange,
+}: {
+  pageKey: "services" | "projects";
+  sections: CatalogListingPageSections;
+  onChange: (sections: CatalogListingPageSections) => void;
+}) {
+  const s = sections;
+  const update = (patch: Partial<CatalogListingPageSections>) => onChange({ ...s, ...patch });
+  const label = pageKey === "services" ? "Services" : "Projects";
+
+  return (
+    <section className="space-y-5 rounded-xl border border-border bg-card p-5">
+      <h2 className="text-base font-semibold text-foreground">{label} Listing Page</h2>
+
+      <div className="space-y-4 rounded-lg border border-border p-4">
+        <h3 className="text-sm font-semibold">Intro (above cards)</h3>
+        <Input
+          label="Title"
+          value={s.intro.title || ""}
+          onChange={(e) => update({ intro: { ...s.intro, title: e.target.value } })}
+        />
+        <Textarea
+          label="Description"
+          rows={3}
+          value={s.intro.description || ""}
+          onChange={(e) => update({ intro: { ...s.intro, description: e.target.value } })}
+        />
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={s.intro.showGroupTabs}
+            onChange={(e) =>
+              update({ intro: { ...s.intro, showGroupTabs: e.target.checked } })
+            }
+          />
+          Show group filter tabs on public listing page
+        </label>
+      </div>
+
+      <div className="space-y-4 rounded-lg border border-border p-4">
+        <h3 className="text-sm font-semibold">Bottom CTA</h3>
+        <Input
+          label="Title"
+          value={s.cta.title || ""}
+          onChange={(e) => update({ cta: { ...s.cta, title: e.target.value } })}
+        />
+        <Textarea
+          label="Description"
+          rows={3}
+          value={s.cta.description || ""}
+          onChange={(e) => update({ cta: { ...s.cta, description: e.target.value } })}
+        />
+        <div className="grid gap-4 md:grid-cols-2">
+          <Input
+            label="Button text"
+            value={s.cta.buttonText || ""}
+            onChange={(e) => update({ cta: { ...s.cta, buttonText: e.target.value } })}
+          />
+          <Input
+            label="Button URL"
+            value={s.cta.buttonUrl || ""}
+            onChange={(e) => update({ cta: { ...s.cta, buttonUrl: e.target.value } })}
+          />
+        </div>
+        <AdminMediaUploader
+          label="CTA background image (optional)"
+          value={s.cta.backgroundImage}
+          folder={MEDIA_UPLOAD_FOLDERS.pages}
+          usage={`${pageKey}-page-cta`}
+          mediaType="image"
+          onChange={(asset) =>
+            update({ cta: { ...s.cta, backgroundImage: normalizeMediaAsset(asset) } })
+          }
+        />
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={s.cta.isActive}
+            onChange={(e) => update({ cta: { ...s.cta, isActive: e.target.checked } })}
+          />
+          Show bottom CTA on public page
+        </label>
+      </div>
+    </section>
   );
 }
 

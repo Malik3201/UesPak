@@ -3,18 +3,24 @@ import type {
   CareersPageContent,
   ContactPageContent,
   PageKey,
+  ProjectsPageContent,
+  ServicesPageContent,
 } from "@/types/page-content";
 
 export const PAGE_SLUGS: Record<PageKey, string> = {
   about: "/about-us",
   careers: "/careers",
   contact: "/contact-us",
+  services: "/services",
+  projects: "/projects",
 };
 
 export const PAGE_FALLBACK_TITLES: Record<PageKey, string> = {
   about: "About UESPAK",
   careers: "Careers at UESPAK",
   contact: "Contact UESPAK",
+  services: "Engineering & Agriculture Services",
+  projects: "Engineering, Agriculture & Automation Projects",
 };
 
 export const PAGE_SEO_FALLBACKS: Record<
@@ -38,6 +44,18 @@ export const PAGE_SEO_FALLBACKS: Record<
     description:
       "Get in touch with UESPAK for engineering, automation, HVAC-R, facility management and agriculture-focused project enquiries.",
     schemaType: "ContactPage",
+  },
+  services: {
+    title: "Engineering & Agriculture Services | UESPAK",
+    description:
+      "Explore UESPAK services across engineering, HVAC-R, facility management, industrial automation and agriculture-focused solutions.",
+    schemaType: "CollectionPage",
+  },
+  projects: {
+    title: "Engineering, Agriculture & Automation Projects | UESPAK",
+    description:
+      "Explore UESPAK projects across engineering, agriculture, facility systems and industrial automation.",
+    schemaType: "CollectionPage",
   },
 };
 
@@ -422,8 +440,19 @@ export function getDefaultPageContent(
   pageKey: "contact"
 ): ContactPageContent;
 export function getDefaultPageContent(
+  pageKey: "services"
+): ServicesPageContent;
+export function getDefaultPageContent(
+  pageKey: "projects"
+): ProjectsPageContent;
+export function getDefaultPageContent(
   pageKey: PageKey
-): AboutPageContent | CareersPageContent | ContactPageContent;
+):
+  | AboutPageContent
+  | CareersPageContent
+  | ContactPageContent
+  | ServicesPageContent
+  | ProjectsPageContent;
 export function getDefaultPageContent(pageKey: PageKey) {
   switch (pageKey) {
     case "about":
@@ -432,5 +461,100 @@ export function getDefaultPageContent(pageKey: PageKey) {
       return structuredClone(DEFAULT_CAREERS_PAGE);
     case "contact":
       return structuredClone(DEFAULT_CONTACT_PAGE);
+    case "services":
+      return structuredClone(DEFAULT_SERVICES_PAGE);
+    case "projects":
+      return structuredClone(DEFAULT_PROJECTS_PAGE);
   }
 }
+
+export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
+  pageKey: "services",
+  title: "Services Page",
+  slug: "/services",
+  isActive: true,
+  hero: {
+    eyebrow: "SERVICES",
+    title: "Engineering & Agriculture Services",
+    description:
+      "Explore UESPAK services across engineering, HVAC-R, facility management, industrial automation and agriculture-focused solutions.",
+    overlayOpacity: 0.88,
+    primaryButtonText: "Discuss Your Requirements",
+    primaryButtonUrl: "/contact-us",
+  },
+  sections: {
+    intro: {
+      title: "Our Services",
+      description:
+        "Professional technical services designed for reliability, efficiency and long-term operational value.",
+      showGroupTabs: true,
+      isActive: true,
+    },
+    cta: {
+      title: "Need reliable technical support?",
+      description:
+        "Share your requirements and our team will guide you with the right service approach.",
+      buttonText: "Contact Us",
+      buttonUrl: "/contact-us",
+      isActive: true,
+    },
+  },
+  seo: {
+    metaTitle: PAGE_SEO_FALLBACKS.services.title,
+    metaDescription: PAGE_SEO_FALLBACKS.services.description,
+    keywords: [
+      "engineering services Pakistan",
+      "HVAC-R",
+      "industrial automation",
+      "facility management",
+      "agriculture services Pakistan",
+    ],
+    schemaType: PAGE_SEO_FALLBACKS.services.schemaType,
+    robots: { index: true, follow: true },
+  },
+};
+
+export const DEFAULT_PROJECTS_PAGE: ProjectsPageContent = {
+  pageKey: "projects",
+  title: "Projects Page",
+  slug: "/projects",
+  isActive: true,
+  hero: {
+    eyebrow: "PROJECTS",
+    title: "Engineering, Agriculture & Automation Projects",
+    description:
+      "Explore selected UESPAK projects across engineering, agriculture, facility systems and industrial automation.",
+    overlayOpacity: 0.88,
+    primaryButtonText: "Discuss Your Project",
+    primaryButtonUrl: "/contact-us",
+  },
+  sections: {
+    intro: {
+      title: "Featured Project Work",
+      description:
+        "A selection of projects showing UESPAK’s technical support across multiple sectors.",
+      showGroupTabs: true,
+      isActive: true,
+    },
+    cta: {
+      title: "Planning a technical project?",
+      description:
+        "Connect with UESPAK to discuss your project requirements and execution support.",
+      buttonText: "Contact Us",
+      buttonUrl: "/contact-us",
+      isActive: true,
+    },
+  },
+  seo: {
+    metaTitle: PAGE_SEO_FALLBACKS.projects.title,
+    metaDescription: PAGE_SEO_FALLBACKS.projects.description,
+    keywords: [
+      "engineering projects Pakistan",
+      "agriculture projects Pakistan",
+      "industrial automation projects",
+      "UESPAK projects",
+    ],
+    schemaType: PAGE_SEO_FALLBACKS.projects.schemaType,
+    robots: { index: true, follow: true },
+  },
+};

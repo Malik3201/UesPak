@@ -37,6 +37,8 @@ const navItems: NavItem[] = [
   { kind: "link", href: "/admin/pages/about", label: "About Page", icon: FileText },
   { kind: "link", href: "/admin/pages/careers", label: "Careers Page", icon: FileText },
   { kind: "link", href: "/admin/pages/contact", label: "Contact Page", icon: FileText },
+  { kind: "link", href: "/admin/pages/services", label: "Services Page", icon: FileText },
+  { kind: "link", href: "/admin/pages/projects", label: "Projects Page", icon: FileText },
   { kind: "link", href: "/admin/services", label: "Services", icon: Briefcase },
   { kind: "link", href: "/admin/project-categories", label: "Project Categories", icon: FolderTree },
   { kind: "link", href: "/admin/projects", label: "Projects", icon: FolderOpen },

@@ -4,35 +4,46 @@ import CatalogBottomCta from "@/components/public/catalog/CatalogBottomCta";
 import ServicesCatalog from "@/components/public/services/ServicesCatalog";
 import { getPublishedServices } from "@/lib/services";
 import { toServiceCardData } from "@/lib/catalog-public";
-import { buildMetadata } from "@/lib/seo";
+import { getServicesPageContent, getPageSeoMetadata } from "@/lib/page-content";
+import { getDefaultPageContent } from "@/constants/page-content";
 
-export const metadata: Metadata = buildMetadata({
-  title: "Engineering & Agriculture Services",
-  description:
-    "Explore UESPAK engineering services (HVAC-R, facility management, industrial automation) and agriculture services (regenerative farming, agricultural engineering, training) across Pakistan.",
-  keywords: [
-    "engineering services Pakistan",
-    "HVAC-R",
-    "industrial automation",
-    "facility management",
-    "agriculture services Pakistan",
-    "regenerative farming",
-    "agricultural engineering",
-  ],
-  canonicalPath: "/services",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const { pageContent } = await getServicesPageContent();
+  return getPageSeoMetadata(pageContent, {
+    fallbackImage: pageContent.hero.backgroundImage?.url,
+  });
+}
 
 export default async function ServicesPage() {
-  const services = await getPublishedServices();
+  const [{ pageContent }, services] = await Promise.all([
+    getServicesPageContent(),
+    getPublishedServices(),
+  ]);
+  const defaults = getDefaultPageContent("services");
+  const hero = pageContent.hero;
+  const intro = pageContent.sections.intro;
+  const cta = pageContent.sections.cta;
   const cards = services.map(toServiceCardData);
+
+  const heroTitle = hero.title || defaults.hero.title || "Engineering & Agriculture Services";
+  const heroDescription =
+    hero.description ||
+    defaults.hero.description ||
+    "Integrated engineering and agriculture solutions—built for performance, reliability, and long-term impact.";
 
   return (
     <>
       <CatalogHero
-        eyebrow="UESPAK Services"
-        title="Engineering & Agriculture Services"
-        description="Integrated engineering and agriculture solutions—built for performance, reliability, and long-term impact across industrial and agricultural environments."
-        primaryCta={{ label: "Discuss Your Requirements", href: "/contact-us" }}
+        eyebrow={hero.eyebrow || defaults.hero.eyebrow}
+        title={heroTitle}
+        description={heroDescription}
+        backgroundImageUrl={hero.backgroundImage?.url}
+        overlayOpacity={hero.overlayOpacity ?? defaults.hero.overlayOpacity}
+        primaryCta={
+          hero.primaryButtonText && hero.primaryButtonUrl
+            ? { label: hero.primaryButtonText, href: hero.primaryButtonUrl }
+            : undefined
+        }
       />
       {cards.length === 0 ? (
         <section className="w-full bg-white py-20">
@@ -41,9 +52,22 @@ export default async function ServicesPage() {
           </div>
         </section>
       ) : (
-        <ServicesCatalog services={cards} />
+        <ServicesCatalog
+          services={cards}
+          introTitle={intro.title || defaults.sections.intro.title}
+          introDescription={intro.description || defaults.sections.intro.description}
+          showGroupTabs={intro.showGroupTabs ?? defaults.sections.intro.showGroupTabs}
+        />
       )}
-      <CatalogBottomCta />
+      {cta.isActive !== false ? (
+        <CatalogBottomCta
+          title={cta.title || defaults.sections.cta.title}
+          description={cta.description || defaults.sections.cta.description}
+          buttonText={cta.buttonText || defaults.sections.cta.buttonText}
+          buttonHref={cta.buttonUrl || defaults.sections.cta.buttonUrl}
+          backgroundImageUrl={cta.backgroundImage?.url}
+        />
+      ) : null}
     </>
   );
 }

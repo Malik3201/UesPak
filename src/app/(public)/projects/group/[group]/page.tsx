@@ -7,6 +7,8 @@ import ProjectCard from "@/components/public/projects/ProjectCard";
 import Container from "@/components/shared/Container";
 import { getPublishedProjectsByGroup } from "@/lib/projects";
 import { toProjectCardData } from "@/lib/catalog-public";
+import { getProjectsPageContent } from "@/lib/page-content";
+import { getDefaultPageContent } from "@/constants/page-content";
 import { buildMetadata, SITE_URL } from "@/lib/seo";
 import {
   getProjectGroupFromSlug,
@@ -51,7 +53,13 @@ export default async function ProjectGroupPage({ params }: Props) {
   if (!group) notFound();
 
   const title = getProjectGroupLabel(group);
-  const projects = await getPublishedProjectsByGroup(group);
+  const [{ pageContent }, projects] = await Promise.all([
+    getProjectsPageContent(),
+    getPublishedProjectsByGroup(group),
+  ]);
+  const defaults = getDefaultPageContent("projects");
+  const hero = pageContent.hero;
+  const cta = pageContent.sections.cta;
   const cards = projects.map(toProjectCardData);
 
   const breadcrumbJsonLd = {
@@ -72,9 +80,11 @@ export default async function ProjectGroupPage({ params }: Props) {
   return (
     <>
       <CatalogHero
-        eyebrow="Project Portfolio"
+        eyebrow={hero.eyebrow || defaults.hero.eyebrow || "Project Portfolio"}
         title={title}
         description={GROUP_INTRO[group]}
+        backgroundImageUrl={hero.backgroundImage?.url}
+        overlayOpacity={hero.overlayOpacity ?? defaults.hero.overlayOpacity}
         breadcrumbs={[
           { label: "Home", href: "/" },
           { label: "Projects", href: "/projects" },
@@ -96,7 +106,15 @@ export default async function ProjectGroupPage({ params }: Props) {
           )}
         </Container>
       </section>
-      <CatalogBottomCta />
+      {cta.isActive !== false ? (
+        <CatalogBottomCta
+          title={cta.title || defaults.sections.cta.title}
+          description={cta.description || defaults.sections.cta.description}
+          buttonText={cta.buttonText || defaults.sections.cta.buttonText}
+          buttonHref={cta.buttonUrl || defaults.sections.cta.buttonUrl}
+          backgroundImageUrl={cta.backgroundImage?.url}
+        />
+      ) : null}
       <JsonLdScripts data={breadcrumbJsonLd} />
     </>
   );

@@ -1,7 +1,7 @@
 import type { MediaObject } from "@/types/media";
 import type { SeoData } from "@/types/seo";
 
-export const PAGE_KEYS = ["about", "careers", "contact"] as const;
+export const PAGE_KEYS = ["about", "careers", "contact", "services", "projects"] as const;
 export type PageKey = (typeof PAGE_KEYS)[number];
 
 export interface PageHero {
@@ -9,10 +9,30 @@ export interface PageHero {
   title?: string;
   description?: string;
   backgroundImage?: MediaObject;
+  /** 0–1 green overlay strength on catalog listing heroes */
+  overlayOpacity?: number;
   primaryButtonText?: string;
   primaryButtonUrl?: string;
   secondaryButtonText?: string;
   secondaryButtonUrl?: string;
+}
+
+/** Shared sections for Services / Projects listing pages */
+export interface CatalogListingPageSections {
+  intro: {
+    title?: string;
+    description?: string;
+    showGroupTabs: boolean;
+    isActive: boolean;
+  };
+  cta: {
+    title?: string;
+    description?: string;
+    buttonText?: string;
+    buttonUrl?: string;
+    backgroundImage?: MediaObject;
+    isActive: boolean;
+  };
 }
 
 export interface PageSimpleItem {
@@ -183,7 +203,17 @@ export type ContactPageContent = BasePageContent<ContactPageSections> & {
   pageKey: "contact";
 };
 
+export type ServicesPageContent = BasePageContent<CatalogListingPageSections> & {
+  pageKey: "services";
+};
+
+export type ProjectsPageContent = BasePageContent<CatalogListingPageSections> & {
+  pageKey: "projects";
+};
+
 export type AnyPageContent =
   | AboutPageContent
   | CareersPageContent
-  | ContactPageContent;
+  | ContactPageContent
+  | ServicesPageContent
+  | ProjectsPageContent;

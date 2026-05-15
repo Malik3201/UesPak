@@ -12,6 +12,7 @@ interface ProjectsCatalogProps {
   projects: ProjectCardData[];
   introTitle?: string;
   introDescription?: string;
+  showGroupTabs?: boolean;
 }
 
 const TABS: { id: FilterTab; label: string }[] = [
@@ -31,6 +32,7 @@ export default function ProjectsCatalog({
   projects,
   introTitle = "Delivered with precision and measurable outcomes",
   introDescription = "Explore UESPAK engineering, agriculture, and industrial automation projects—structured delivery, technical rigor, and long-term value.",
+  showGroupTabs = true,
 }: ProjectsCatalogProps) {
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
 
@@ -70,7 +72,7 @@ export default function ProjectsCatalog({
           </p>
         </div>
 
-        {visibleTabs.length > 1 ? (
+        {showGroupTabs && visibleTabs.length > 1 ? (
           <div
             className="mt-10 flex flex-wrap justify-center gap-2"
             role="tablist"

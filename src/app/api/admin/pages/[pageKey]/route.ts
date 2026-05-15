@@ -106,6 +106,8 @@ const MEDIA_FIELDS_BY_PAGE: Record<
     { section: "applyCTA", fields: ["backgroundImage"] },
   ],
   contact: [],
+  services: [{ section: "cta", fields: ["backgroundImage"] }],
+  projects: [{ section: "cta", fields: ["backgroundImage"] }],
 };
 
 function preservePageMedia(
@@ -126,6 +128,13 @@ function preservePageMedia(
     mergedHero.backgroundImage = existingHero.backgroundImage;
   } else if (hasOwn(defaultsHero, "backgroundImage")) {
     mergedHero.backgroundImage = defaultsHero.backgroundImage;
+  }
+  if (hasOwn(incomingHero, "overlayOpacity")) {
+    mergedHero.overlayOpacity = incomingHero.overlayOpacity;
+  } else if (hasOwn(existingHero, "overlayOpacity")) {
+    mergedHero.overlayOpacity = existingHero.overlayOpacity;
+  } else if (hasOwn(defaultsHero, "overlayOpacity")) {
+    mergedHero.overlayOpacity = defaultsHero.overlayOpacity;
   }
   mergedRoot.hero = mergedHero;
 

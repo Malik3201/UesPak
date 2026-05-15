@@ -12,6 +12,8 @@ interface CatalogHeroProps {
   title: string;
   description: string;
   backgroundImageUrl?: string;
+  /** 0–1 overlay strength over background image (default 0.88) */
+  overlayOpacity?: number;
   breadcrumbs?: CatalogBreadcrumb[];
   badge?: string;
   primaryCta?: { label: string; href: string };
@@ -22,23 +24,44 @@ export default function CatalogHero({
   title,
   description,
   backgroundImageUrl,
+  overlayOpacity = 0.88,
   breadcrumbs,
   badge,
   primaryCta,
 }: CatalogHeroProps) {
   const bg = backgroundImageUrl?.trim();
+  const overlay = Math.min(1, Math.max(0, overlayOpacity));
 
   return (
     <section
       className="homepage-section-reveal relative isolate min-h-[380px] overflow-hidden bg-[#052f21] py-24 text-white md:min-h-[440px] md:py-28 lg:min-h-[480px] lg:py-32"
-      style={{
-        backgroundImage: bg
-          ? `linear-gradient(135deg, rgba(3,39,28,0.9), rgba(5,47,33,0.78), rgba(2,18,14,0.88)), url("${bg}")`
-          : "linear-gradient(135deg,#052f21 0%,#075f3f 55%,#021b14 100%)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
+      style={
+        bg
+          ? undefined
+          : {
+              backgroundImage:
+                "linear-gradient(135deg,#052f21 0%,#075f3f 55%,#021b14 100%)",
+            }
+      }
     >
+      {bg ? (
+        <>
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-20 bg-cover bg-center"
+            style={{ backgroundImage: `url("${bg}")` }}
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-10 bg-[#052f21]"
+            style={{ opacity: overlay }}
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(3,39,28,0.55),rgba(5,47,33,0.35),rgba(2,18,14,0.5))]"
+          />
+        </>
+      ) : null}
       <div aria-hidden className="absolute inset-0 bg-[#052f21]/15" />
       <div
         aria-hidden

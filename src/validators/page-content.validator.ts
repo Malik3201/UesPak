@@ -63,12 +63,35 @@ const heroSchema = z
     title: trimToOptional(220),
     description: trimToOptional(800),
     backgroundImage: mediaObjectSchema.optional(),
+    overlayOpacity: z.coerce.number().min(0).max(1).optional(),
     primaryButtonText: trimToOptional(80),
     primaryButtonUrl: trimToOptional(2048),
     secondaryButtonText: trimToOptional(80),
     secondaryButtonUrl: trimToOptional(2048),
   })
   .default({});
+
+const catalogListingSectionsSchema = z
+  .object({
+    intro: z
+      .object({
+        title: trimToOptional(200),
+        description: trimToOptional(800),
+        showGroupTabs: z.boolean().default(true),
+        isActive: z.boolean().default(true),
+      })
+      .default({ showGroupTabs: true, isActive: true }),
+    cta: z
+      .object({
+        title: trimToOptional(200),
+        description: trimToOptional(800),
+        buttonText: trimToOptional(80),
+        buttonUrl: trimToOptional(2048),
+        backgroundImage: mediaObjectSchema.optional(),
+        isActive: z.boolean().default(true),
+      })
+      .default({ isActive: true }),
+  });
 
 // ─── About page ───────────────────────────────────────────────────────────────
 const aboutSectionsSchema = z
@@ -283,6 +306,34 @@ export const contactPageSchema = z.object({
   }),
 });
 
+export const servicesPageSchema = z.object({
+  pageKey: z.literal("services").default("services"),
+  title: trimToOptional(180).default("Services Page"),
+  slug: trimToOptional(220).default("/services"),
+  isActive: z.boolean().default(true),
+  hero: heroSchema,
+  sections: catalogListingSectionsSchema,
+  seo: seoSchemaBase.default({
+    schemaType: "CollectionPage",
+    robots: { index: true, follow: true },
+    keywords: [],
+  }),
+});
+
+export const projectsPageSchema = z.object({
+  pageKey: z.literal("projects").default("projects"),
+  title: trimToOptional(180).default("Projects Page"),
+  slug: trimToOptional(220).default("/projects"),
+  isActive: z.boolean().default(true),
+  hero: heroSchema,
+  sections: catalogListingSectionsSchema,
+  seo: seoSchemaBase.default({
+    schemaType: "CollectionPage",
+    robots: { index: true, follow: true },
+    keywords: [],
+  }),
+});
+
 export function getPageSchemaFor(pageKey: PageKey) {
   switch (pageKey) {
     case "about":
@@ -291,6 +342,10 @@ export function getPageSchemaFor(pageKey: PageKey) {
       return careersPageSchema;
     case "contact":
       return contactPageSchema;
+    case "services":
+      return servicesPageSchema;
+    case "projects":
+      return projectsPageSchema;
   }
 }
 
@@ -304,3 +359,5 @@ export function isValidPageKey(value: unknown): value is PageKey {
 export type AboutPageInput = z.output<typeof aboutPageSchema>;
 export type CareersPageInput = z.output<typeof careersPageSchema>;
 export type ContactPageInput = z.output<typeof contactPageSchema>;
+export type ServicesPageInput = z.output<typeof servicesPageSchema>;
+export type ProjectsPageInput = z.output<typeof projectsPageSchema>;

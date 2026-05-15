@@ -11,6 +11,8 @@ import type {
   CareersPageContent,
   ContactPageContent,
   PageKey,
+  ProjectsPageContent,
+  ServicesPageContent,
 } from "@/types/page-content";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
 
@@ -83,6 +85,14 @@ export async function getCareersPageContent() {
 
 export async function getContactPageContent() {
   return getPageContent<ContactPageContent>("contact");
+}
+
+export async function getServicesPageContent() {
+  return getPageContent<ServicesPageContent>("services");
+}
+
+export async function getProjectsPageContent() {
+  return getPageContent<ProjectsPageContent>("projects");
 }
 
 export function getDefaultAboutPage() {

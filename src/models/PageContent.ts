@@ -14,6 +14,7 @@ export interface IPageContent extends Document {
     title?: string;
     description?: string;
     backgroundImage?: MediaObject;
+    overlayOpacity?: number;
     primaryButtonText?: string;
     primaryButtonUrl?: string;
     secondaryButtonText?: string;
@@ -66,6 +67,7 @@ const heroSchema = new Schema(
     title: { type: String, trim: true },
     description: { type: String, trim: true },
     backgroundImage: mediaSchema,
+    overlayOpacity: { type: Number, min: 0, max: 1 },
     primaryButtonText: { type: String, trim: true },
     primaryButtonUrl: { type: String, trim: true },
     secondaryButtonText: { type: String, trim: true },
