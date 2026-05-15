@@ -110,6 +110,57 @@ const MEDIA_FIELDS_BY_PAGE: Record<
   projects: [{ section: "cta", fields: ["backgroundImage"] }],
 };
 
+const GROUP_HERO_MEDIA_KEYS: Partial<
+  Record<PageKey, { sectionKey: string; groupKeys: string[] }>
+> = {
+  services: { sectionKey: "serviceGroups", groupKeys: ["engineering", "agriculture"] },
+  projects: {
+    sectionKey: "projectGroups",
+    groupKeys: ["engineering", "agriculture", "industrialAutomation"],
+  },
+};
+
+function preserveNestedGroupHeroMedia(
+  mergedSections: Record<string, unknown>,
+  defaultsSections: Record<string, unknown>,
+  existingSections: Record<string, unknown>,
+  incomingSections: Record<string, unknown>,
+  sectionKey: string,
+  groupKeys: string[]
+) {
+  const mergedParent = asRecord(mergedSections[sectionKey]);
+  const defaultsParent = asRecord(defaultsSections[sectionKey]);
+  const existingParent = asRecord(existingSections[sectionKey]);
+  const incomingParent = asRecord(incomingSections[sectionKey]);
+
+  for (const groupKey of groupKeys) {
+    const merged = asRecord(mergedParent[groupKey]);
+    const defaults = asRecord(defaultsParent[groupKey]);
+    const existing = asRecord(existingParent[groupKey]);
+    const incoming = asRecord(incomingParent[groupKey]);
+
+    if (hasOwn(incoming, "backgroundImage")) {
+      merged.backgroundImage = incoming.backgroundImage;
+    } else if (hasOwn(existing, "backgroundImage")) {
+      merged.backgroundImage = existing.backgroundImage;
+    } else if (hasOwn(defaults, "backgroundImage")) {
+      merged.backgroundImage = defaults.backgroundImage;
+    }
+
+    if (hasOwn(incoming, "overlayOpacity")) {
+      merged.overlayOpacity = incoming.overlayOpacity;
+    } else if (hasOwn(existing, "overlayOpacity")) {
+      merged.overlayOpacity = existing.overlayOpacity;
+    } else if (hasOwn(defaults, "overlayOpacity")) {
+      merged.overlayOpacity = defaults.overlayOpacity;
+    }
+
+    mergedParent[groupKey] = merged;
+  }
+
+  mergedSections[sectionKey] = mergedParent;
+}
+
 function preservePageMedia(
   pageKey: PageKey,
   mergedRoot: Record<string, unknown>,
@@ -167,6 +218,19 @@ function preservePageMedia(
       fields
     );
   }
+
+  const groupMedia = GROUP_HERO_MEDIA_KEYS[pageKey];
+  if (groupMedia) {
+    preserveNestedGroupHeroMedia(
+      mergedSections,
+      defaultsSections,
+      existingSections,
+      incomingSections,
+      groupMedia.sectionKey,
+      groupMedia.groupKeys
+    );
+  }
+
   mergedRoot.sections = mergedSections;
 }
 

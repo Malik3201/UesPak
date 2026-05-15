@@ -1,17 +1,20 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Input from "@/components/shared/Input";
 import Textarea from "@/components/shared/Textarea";
 import Button from "@/components/shared/Button";
 import AdminMediaUploader from "@/components/admin/media/AdminMediaUploader";
+import {
+  ProjectsListingSectionsEditor,
+  ServicesListingSectionsEditor,
+} from "@/components/admin/pages/CatalogListingSectionsEditor";
 import { MEDIA_UPLOAD_FOLDERS } from "@/constants/media-folders";
 import { getDefaultPageContent } from "@/constants/page-content";
 import type {
   AboutPageContent,
   AnyPageContent,
   CareersPageContent,
-  CatalogListingPageSections,
   ContactPageContent,
   PageKey,
   PageSimpleItem,
@@ -149,14 +152,60 @@ export default function PageContentForm({ pageKey }: PageContentFormProps) {
   const [error, setError] = useState<string | null>(null);
 
   function hydrate(loaded?: AnyPageContent | null) {
+    let sections: typeof defaultPage.sections = {
+      ...defaultPage.sections,
+      ...((loaded?.sections || {}) as object),
+    } as typeof defaultPage.sections;
+
+    if (pageKey === "services") {
+      const def = getDefaultPageContent("services").sections;
+      const load = (loaded as ServicesPageContent | null | undefined)?.sections;
+      sections = {
+        ...def,
+        ...load,
+        intro: { ...def.intro, ...load?.intro },
+        cta: { ...def.cta, ...load?.cta },
+        serviceGroups: {
+          engineering: {
+            ...def.serviceGroups.engineering,
+            ...load?.serviceGroups?.engineering,
+          },
+          agriculture: {
+            ...def.serviceGroups.agriculture,
+            ...load?.serviceGroups?.agriculture,
+          },
+        },
+      } as typeof defaultPage.sections;
+    } else if (pageKey === "projects") {
+      const def = getDefaultPageContent("projects").sections;
+      const load = (loaded as ProjectsPageContent | null | undefined)?.sections;
+      sections = {
+        ...def,
+        ...load,
+        intro: { ...def.intro, ...load?.intro },
+        cta: { ...def.cta, ...load?.cta },
+        projectGroups: {
+          engineering: {
+            ...def.projectGroups.engineering,
+            ...load?.projectGroups?.engineering,
+          },
+          agriculture: {
+            ...def.projectGroups.agriculture,
+            ...load?.projectGroups?.agriculture,
+          },
+          industrialAutomation: {
+            ...def.projectGroups.industrialAutomation,
+            ...load?.projectGroups?.industrialAutomation,
+          },
+        },
+      } as typeof defaultPage.sections;
+    }
+
     const merged = {
       ...defaultPage,
       ...(loaded || {}),
       hero: { ...defaultPage.hero, ...(loaded?.hero || {}) },
-      sections: {
-        ...defaultPage.sections,
-        ...((loaded?.sections || {}) as object),
-      },
+      sections,
       seo: { ...defaultPage.seo, ...(loaded?.seo || {}) },
     } as AnyPageContent;
     setForm(merged);
@@ -300,7 +349,7 @@ export default function PageContentForm({ pageKey }: PageContentFormProps) {
         />
         {catalogListing ? (
           <Input
-            label="Hero overlay opacity (0–100%)"
+            label="Hero overlay opacity (0â€“100%)"
             type="number"
             min={0}
             max={100}
@@ -324,10 +373,14 @@ export default function PageContentForm({ pageKey }: PageContentFormProps) {
         </div>
       </section>
 
-      {catalogListing ? (
-        <CatalogListingSectionsEditor
-          pageKey={pageKey}
-          sections={(form as ServicesPageContent | ProjectsPageContent).sections}
+      {catalogListing && pageKey === "services" ? (
+        <ServicesListingSectionsEditor
+          sections={(form as ServicesPageContent).sections}
+          onChange={(sections) => setSections(sections)}
+        />
+      ) : catalogListing && pageKey === "projects" ? (
+        <ProjectsListingSectionsEditor
+          sections={(form as ProjectsPageContent).sections}
           onChange={(sections) => setSections(sections)}
         />
       ) : pageKey === "about" ? (
@@ -376,95 +429,6 @@ export default function PageContentForm({ pageKey }: PageContentFormProps) {
   );
 }
 
-function CatalogListingSectionsEditor({
-  pageKey,
-  sections,
-  onChange,
-}: {
-  pageKey: "services" | "projects";
-  sections: CatalogListingPageSections;
-  onChange: (sections: CatalogListingPageSections) => void;
-}) {
-  const s = sections;
-  const update = (patch: Partial<CatalogListingPageSections>) => onChange({ ...s, ...patch });
-  const label = pageKey === "services" ? "Services" : "Projects";
-
-  return (
-    <section className="space-y-5 rounded-xl border border-border bg-card p-5">
-      <h2 className="text-base font-semibold text-foreground">{label} Listing Page</h2>
-
-      <div className="space-y-4 rounded-lg border border-border p-4">
-        <h3 className="text-sm font-semibold">Intro (above cards)</h3>
-        <Input
-          label="Title"
-          value={s.intro.title || ""}
-          onChange={(e) => update({ intro: { ...s.intro, title: e.target.value } })}
-        />
-        <Textarea
-          label="Description"
-          rows={3}
-          value={s.intro.description || ""}
-          onChange={(e) => update({ intro: { ...s.intro, description: e.target.value } })}
-        />
-        <label className="flex items-center gap-2 text-sm text-muted-foreground">
-          <input
-            type="checkbox"
-            checked={s.intro.showGroupTabs}
-            onChange={(e) =>
-              update({ intro: { ...s.intro, showGroupTabs: e.target.checked } })
-            }
-          />
-          Show group filter tabs on public listing page
-        </label>
-      </div>
-
-      <div className="space-y-4 rounded-lg border border-border p-4">
-        <h3 className="text-sm font-semibold">Bottom CTA</h3>
-        <Input
-          label="Title"
-          value={s.cta.title || ""}
-          onChange={(e) => update({ cta: { ...s.cta, title: e.target.value } })}
-        />
-        <Textarea
-          label="Description"
-          rows={3}
-          value={s.cta.description || ""}
-          onChange={(e) => update({ cta: { ...s.cta, description: e.target.value } })}
-        />
-        <div className="grid gap-4 md:grid-cols-2">
-          <Input
-            label="Button text"
-            value={s.cta.buttonText || ""}
-            onChange={(e) => update({ cta: { ...s.cta, buttonText: e.target.value } })}
-          />
-          <Input
-            label="Button URL"
-            value={s.cta.buttonUrl || ""}
-            onChange={(e) => update({ cta: { ...s.cta, buttonUrl: e.target.value } })}
-          />
-        </div>
-        <AdminMediaUploader
-          label="CTA background image (optional)"
-          value={s.cta.backgroundImage}
-          folder={MEDIA_UPLOAD_FOLDERS.pages}
-          usage={`${pageKey}-page-cta`}
-          mediaType="image"
-          onChange={(asset) =>
-            update({ cta: { ...s.cta, backgroundImage: normalizeMediaAsset(asset) } })
-          }
-        />
-        <label className="flex items-center gap-2 text-sm text-muted-foreground">
-          <input
-            type="checkbox"
-            checked={s.cta.isActive}
-            onChange={(e) => update({ cta: { ...s.cta, isActive: e.target.checked } })}
-          />
-          Show bottom CTA on public page
-        </label>
-      </div>
-    </section>
-  );
-}
 
 function AboutSectionsEditor({
   page,

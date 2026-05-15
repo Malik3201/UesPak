@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Container from "@/components/shared/Container";
 import ProjectCard, { type ProjectCardData } from "@/components/public/projects/ProjectCard";
 import type { ProjectGroup } from "@/types/project";
-import { cn } from "@/lib/utils";
+import CatalogFilterTabs from "@/components/public/catalog/CatalogFilterTabs";
 
 type FilterTab = "all" | ProjectGroup;
 
@@ -15,11 +15,15 @@ interface ProjectsCatalogProps {
   showGroupTabs?: boolean;
 }
 
-const TABS: { id: FilterTab; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "engineering", label: "Engineering Projects" },
-  { id: "agriculture", label: "Agriculture Projects" },
-  { id: "industrialAutomation", label: "Industrial Automation" },
+const TABS = [
+  { id: "all" as const, label: "All", shortLabel: "All" },
+  { id: "engineering" as const, label: "Engineering Projects", shortLabel: "Engineering" },
+  { id: "agriculture" as const, label: "Agriculture Projects", shortLabel: "Agriculture" },
+  {
+    id: "industrialAutomation" as const,
+    label: "Industrial Automation",
+    shortLabel: "Automation",
+  },
 ];
 
 function matchesTab(project: ProjectCardData, tab: FilterTab): boolean {
@@ -73,30 +77,13 @@ export default function ProjectsCatalog({
         </div>
 
         {showGroupTabs && visibleTabs.length > 1 ? (
-          <div
-            className="mt-10 flex flex-wrap justify-center gap-2"
-            role="tablist"
-            aria-label="Filter projects by group"
-          >
-            {visibleTabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "rounded-full px-4 py-2 text-sm font-semibold transition-all",
-                  activeTab === tab.id
-                    ? "bg-[#075f3f] text-white shadow-[0_8px_20px_rgba(7,95,63,0.25)]"
-                    : "border border-emerald-900/10 bg-[#f7fbf8] text-slate-700 hover:border-emerald-400/50 hover:text-[#075f3f]"
-                )}
-              >
-                {tab.label}
-                <span className="ml-1.5 text-xs opacity-80">({tabCounts[tab.id]})</span>
-              </button>
-            ))}
-          </div>
+          <CatalogFilterTabs
+            tabs={visibleTabs}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            counts={tabCounts}
+            ariaLabel="Filter projects by group"
+          />
         ) : null}
 
         {filtered.length === 0 ? (

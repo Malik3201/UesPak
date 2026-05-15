@@ -17,7 +17,17 @@ export interface PageHero {
   secondaryButtonUrl?: string;
 }
 
-/** Shared sections for Services / Projects listing pages */
+/** CMS hero block for a services/projects group listing route */
+export interface GroupPageHeroSettings {
+  title?: string;
+  description?: string;
+  backgroundImage?: MediaObject;
+  overlayOpacity?: number;
+  metaTitle?: string;
+  metaDescription?: string;
+}
+
+/** Shared intro/CTA for Services / Projects main listing pages */
 export interface CatalogListingPageSections {
   intro: {
     title?: string;
@@ -32,6 +42,21 @@ export interface CatalogListingPageSections {
     buttonUrl?: string;
     backgroundImage?: MediaObject;
     isActive: boolean;
+  };
+}
+
+export interface ServicesPageSections extends CatalogListingPageSections {
+  serviceGroups: {
+    engineering: GroupPageHeroSettings;
+    agriculture: GroupPageHeroSettings;
+  };
+}
+
+export interface ProjectsPageSections extends CatalogListingPageSections {
+  projectGroups: {
+    engineering: GroupPageHeroSettings;
+    agriculture: GroupPageHeroSettings;
+    industrialAutomation: GroupPageHeroSettings;
   };
 }
 
@@ -203,11 +228,11 @@ export type ContactPageContent = BasePageContent<ContactPageSections> & {
   pageKey: "contact";
 };
 
-export type ServicesPageContent = BasePageContent<CatalogListingPageSections> & {
+export type ServicesPageContent = BasePageContent<ServicesPageSections> & {
   pageKey: "services";
 };
 
-export type ProjectsPageContent = BasePageContent<CatalogListingPageSections> & {
+export type ProjectsPageContent = BasePageContent<ProjectsPageSections> & {
   pageKey: "projects";
 };
 

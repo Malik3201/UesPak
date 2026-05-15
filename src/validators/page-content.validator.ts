@@ -71,27 +71,54 @@ const heroSchema = z
   })
   .default({});
 
-const catalogListingSectionsSchema = z
-  .object({
-    intro: z
-      .object({
-        title: trimToOptional(200),
-        description: trimToOptional(800),
-        showGroupTabs: z.boolean().default(true),
-        isActive: z.boolean().default(true),
-      })
-      .default({ showGroupTabs: true, isActive: true }),
-    cta: z
-      .object({
-        title: trimToOptional(200),
-        description: trimToOptional(800),
-        buttonText: trimToOptional(80),
-        buttonUrl: trimToOptional(2048),
-        backgroundImage: mediaObjectSchema.optional(),
-        isActive: z.boolean().default(true),
-      })
-      .default({ isActive: true }),
-  });
+const catalogListingSectionsSchema = z.object({
+  intro: z
+    .object({
+      title: trimToOptional(200),
+      description: trimToOptional(800),
+      showGroupTabs: z.boolean().default(true),
+      isActive: z.boolean().default(true),
+    })
+    .default({ showGroupTabs: true, isActive: true }),
+  cta: z
+    .object({
+      title: trimToOptional(200),
+      description: trimToOptional(800),
+      buttonText: trimToOptional(80),
+      buttonUrl: trimToOptional(2048),
+      backgroundImage: mediaObjectSchema.optional(),
+      isActive: z.boolean().default(true),
+    })
+    .default({ isActive: true }),
+});
+
+const groupPageHeroSchema = z.object({
+  title: trimToOptional(200),
+  description: trimToOptional(800),
+  backgroundImage: mediaObjectSchema.optional(),
+  overlayOpacity: z.coerce.number().min(0).max(1).optional(),
+  metaTitle: trimToOptional(70),
+  metaDescription: trimToOptional(180),
+});
+
+const servicesCatalogSectionsSchema = catalogListingSectionsSchema.extend({
+  serviceGroups: z
+    .object({
+      engineering: groupPageHeroSchema.default({}),
+      agriculture: groupPageHeroSchema.default({}),
+    })
+    .default({ engineering: {}, agriculture: {} }),
+});
+
+const projectsCatalogSectionsSchema = catalogListingSectionsSchema.extend({
+  projectGroups: z
+    .object({
+      engineering: groupPageHeroSchema.default({}),
+      agriculture: groupPageHeroSchema.default({}),
+      industrialAutomation: groupPageHeroSchema.default({}),
+    })
+    .default({ engineering: {}, agriculture: {}, industrialAutomation: {} }),
+});
 
 // ─── About page ───────────────────────────────────────────────────────────────
 const aboutSectionsSchema = z
@@ -312,7 +339,7 @@ export const servicesPageSchema = z.object({
   slug: trimToOptional(220).default("/services"),
   isActive: z.boolean().default(true),
   hero: heroSchema,
-  sections: catalogListingSectionsSchema,
+  sections: servicesCatalogSectionsSchema,
   seo: seoSchemaBase.default({
     schemaType: "CollectionPage",
     robots: { index: true, follow: true },
@@ -326,7 +353,7 @@ export const projectsPageSchema = z.object({
   slug: trimToOptional(220).default("/projects"),
   isActive: z.boolean().default(true),
   hero: heroSchema,
-  sections: catalogListingSectionsSchema,
+  sections: projectsCatalogSectionsSchema,
   seo: seoSchemaBase.default({
     schemaType: "CollectionPage",
     robots: { index: true, follow: true },

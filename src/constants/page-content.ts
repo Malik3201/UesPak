@@ -468,6 +468,36 @@ export function getDefaultPageContent(pageKey: PageKey) {
   }
 }
 
+const DEFAULT_SERVICE_GROUP_ENGINEERING = {
+  title: "Engineering Services",
+  description:
+    "Explore UESPAK engineering services including HVAC-R, facility management, mechanical, electrical and automation solutions.",
+} as const;
+
+const DEFAULT_SERVICE_GROUP_AGRICULTURE = {
+  title: "Agriculture Services",
+  description:
+    "Explore UESPAK agriculture-focused services including training, implementation support and sustainable farm solutions.",
+} as const;
+
+const DEFAULT_PROJECT_GROUP_ENGINEERING = {
+  title: "Engineering Projects",
+  description:
+    "Explore UESPAK engineering projects across healthcare, pharmaceutical, commercial and industrial environments.",
+} as const;
+
+const DEFAULT_PROJECT_GROUP_AGRICULTURE = {
+  title: "Agriculture Projects",
+  description:
+    "Explore UESPAK agriculture projects including implementation, practical farm systems and sustainable outcomes.",
+} as const;
+
+const DEFAULT_PROJECT_GROUP_INDUSTRIAL = {
+  title: "Industrial Automation Projects",
+  description:
+    "Explore UESPAK automation and control system projects designed for monitoring, reliability and operational efficiency.",
+} as const;
+
 export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
   pageKey: "services",
   title: "Services Page",
@@ -497,6 +527,10 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       buttonText: "Contact Us",
       buttonUrl: "/contact-us",
       isActive: true,
+    },
+    serviceGroups: {
+      engineering: { ...DEFAULT_SERVICE_GROUP_ENGINEERING },
+      agriculture: { ...DEFAULT_SERVICE_GROUP_AGRICULTURE },
     },
   },
   seo: {
@@ -543,6 +577,11 @@ export const DEFAULT_PROJECTS_PAGE: ProjectsPageContent = {
       buttonText: "Contact Us",
       buttonUrl: "/contact-us",
       isActive: true,
+    },
+    projectGroups: {
+      engineering: { ...DEFAULT_PROJECT_GROUP_ENGINEERING },
+      agriculture: { ...DEFAULT_PROJECT_GROUP_AGRICULTURE },
+      industrialAutomation: { ...DEFAULT_PROJECT_GROUP_INDUSTRIAL },
     },
   },
   seo: {

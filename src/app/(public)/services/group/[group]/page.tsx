@@ -9,6 +9,12 @@ import { getPublishedServicesByGroup } from "@/lib/services";
 import { toServiceCardData } from "@/lib/catalog-public";
 import { getServicesPageContent } from "@/lib/page-content";
 import { getDefaultPageContent } from "@/constants/page-content";
+import {
+  resolveGroupHeroBackgroundUrl,
+  resolveGroupHeroDescription,
+  resolveGroupHeroTitle,
+  resolveGroupOverlayOpacity,
+} from "@/lib/catalog-group-page";
 import { buildMetadata, SITE_URL } from "@/lib/seo";
 import type { ServiceGroup } from "@/types/service";
 import { getServiceGroupLabel } from "@/types/service";
@@ -21,26 +27,25 @@ function isServiceGroup(group: string): group is ServiceGroup {
   return group === "engineering" || group === "agriculture";
 }
 
-const GROUP_INTRO: Record<ServiceGroup, string> = {
-  engineering:
-    "Engineering, compliance, optimization, and delivery—across industrial and commercial environments.",
-  agriculture:
-    "Training, regenerative practices, and practical implementation—designed for resilient production and sustainable outcomes.",
-};
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { group } = await params;
   if (!isServiceGroup(group)) return buildMetadata({ title: "Services", noIndex: true });
 
+  const { pageContent } = await getServicesPageContent();
+  const defaults = getDefaultPageContent("services");
+  const groupSettings = pageContent.sections.serviceGroups?.[group];
+  const defaultGroup = defaults.sections.serviceGroups[group];
   const label = getServiceGroupLabel(group);
-  const title = `${label} | UESPAK`;
+
+  const title =
+    groupSettings?.metaTitle?.trim() ||
+    resolveGroupHeroTitle(groupSettings, defaultGroup.title || label);
   const description =
-    group === "agriculture"
-      ? "Explore UESPAK agriculture services including training, regenerative farming, agricultural engineering, and sustainable implementation across Pakistan."
-      : "Explore UESPAK engineering services including HVAC-R, facility management, industrial automation, and project planning across Pakistan.";
+    groupSettings?.metaDescription?.trim() ||
+    resolveGroupHeroDescription(groupSettings, defaultGroup.description || "");
 
   return buildMetadata({
-    title,
+    title: title.includes("UESPAK") ? title : `${title} | UESPAK`,
     description,
     canonicalPath: `/services/group/${group}`,
   });
@@ -58,7 +63,21 @@ export default async function ServiceGroupPage({ params }: Props) {
   const defaults = getDefaultPageContent("services");
   const hero = pageContent.hero;
   const cta = pageContent.sections.cta;
+  const groupSettings = pageContent.sections.serviceGroups?.[group];
+  const defaultGroup = defaults.sections.serviceGroups[group];
   const cards = services.map(toServiceCardData);
+
+  const heroTitle = resolveGroupHeroTitle(groupSettings, defaultGroup.title || label);
+  const heroDescription = resolveGroupHeroDescription(
+    groupSettings,
+    defaultGroup.description || ""
+  );
+  const backgroundImageUrl = resolveGroupHeroBackgroundUrl(groupSettings, hero);
+  const overlayOpacity = resolveGroupOverlayOpacity(
+    groupSettings,
+    hero,
+    defaults.hero.overlayOpacity ?? 0.88
+  );
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -69,7 +88,7 @@ export default async function ServiceGroupPage({ params }: Props) {
       {
         "@type": "ListItem",
         position: 3,
-        name: label,
+        name: heroTitle,
         item: `${SITE_URL}/services/group/${group}`,
       },
     ],
@@ -79,17 +98,17 @@ export default async function ServiceGroupPage({ params }: Props) {
     <>
       <CatalogHero
         eyebrow={hero.eyebrow || defaults.hero.eyebrow || "Service Group"}
-        title={label}
-        description={GROUP_INTRO[group]}
-        backgroundImageUrl={hero.backgroundImage?.url}
-        overlayOpacity={hero.overlayOpacity ?? defaults.hero.overlayOpacity}
+        title={heroTitle}
+        description={heroDescription}
+        backgroundImageUrl={backgroundImageUrl}
+        overlayOpacity={overlayOpacity}
         breadcrumbs={[
           { label: "Home", href: "/" },
           { label: "Services", href: "/services" },
-          { label },
+          { label: heroTitle },
         ]}
       />
-      <section className="homepage-section-reveal w-full bg-white py-14 md:py-20 lg:py-24">
+      <section className="homepage-section-reveal w-full bg-[linear-gradient(180deg,#f7fbf8_0%,#eef8f2_100%)] py-14 md:py-20 lg:py-24">
         <Container>
           {cards.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-emerald-900/15 bg-[#f7fbf8] p-10 text-center text-slate-600">

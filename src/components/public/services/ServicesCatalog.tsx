@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Container from "@/components/shared/Container";
 import ServiceCard, { type ServiceCardData } from "@/components/public/services/ServiceCard";
 import type { ServiceGroup } from "@/types/service";
-import { cn } from "@/lib/utils";
+import CatalogFilterTabs from "@/components/public/catalog/CatalogFilterTabs";
 
 type FilterTab = "all" | ServiceGroup;
 
@@ -15,10 +15,10 @@ interface ServicesCatalogProps {
   showGroupTabs?: boolean;
 }
 
-const TABS: { id: FilterTab; label: string }[] = [
-  { id: "all", label: "All Services" },
-  { id: "engineering", label: "Engineering Services" },
-  { id: "agriculture", label: "Agriculture Services" },
+const TABS = [
+  { id: "all" as const, label: "All Services", shortLabel: "All" },
+  { id: "engineering" as const, label: "Engineering Services", shortLabel: "Engineering" },
+  { id: "agriculture" as const, label: "Agriculture Services", shortLabel: "Agriculture" },
 ];
 
 export default function ServicesCatalog({
@@ -52,7 +52,7 @@ export default function ServicesCatalog({
 
   return (
     <>
-      <section className="homepage-section-reveal w-full bg-white py-14 md:py-20 lg:py-24">
+      <section className="homepage-section-reveal w-full bg-[linear-gradient(180deg,#f7fbf8_0%,#eef8f2_100%)] py-14 md:py-20 lg:py-24">
         <Container>
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#075f3f]">
@@ -67,32 +67,13 @@ export default function ServicesCatalog({
           </div>
 
           {showGroupTabs && visibleTabs.length > 1 ? (
-            <div
-              className="mt-10 flex flex-wrap justify-center gap-2"
-              role="tablist"
-              aria-label="Filter services by group"
-            >
-              {visibleTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    "rounded-full px-4 py-2 text-sm font-semibold transition-all",
-                    activeTab === tab.id
-                      ? "bg-[#075f3f] text-white shadow-[0_8px_20px_rgba(7,95,63,0.25)]"
-                      : "border border-emerald-900/10 bg-[#f7fbf8] text-slate-700 hover:border-emerald-400/50 hover:text-[#075f3f]"
-                  )}
-                >
-                  {tab.label}
-                  <span className="ml-1.5 text-xs opacity-80">
-                    ({tabCounts[tab.id]})
-                  </span>
-                </button>
-              ))}
-            </div>
+            <CatalogFilterTabs
+              tabs={visibleTabs}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              counts={tabCounts}
+              ariaLabel="Filter services by group"
+            />
           ) : null}
 
           {filtered.length === 0 ? (
