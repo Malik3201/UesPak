@@ -2,7 +2,12 @@ import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db";
 import { ContactSubmission } from "@/models/ContactSubmission";
 import { contactValidator } from "@/validators/contact.validator";
-import { sendEmail, buildContactEmail } from "@/lib/email";
+import {
+  sendEmail,
+  buildContactEmail,
+  resolveEmailSiteUrl,
+} from "@/lib/email";
+import { getPublicSiteSettings } from "@/lib/site-settings";
 import {
   successResponse,
   errorResponse,
@@ -58,16 +63,28 @@ export async function POST(req: NextRequest) {
     // Non-blocking email notification.
     const receiverEmail =
       process.env.CONTACT_RECEIVER_EMAIL ?? "services@uespak.com";
+    const publicSettings = await getPublicSiteSettings();
+    const logoUrl =
+      publicSettings.darkLogoUrl?.trim() || publicSettings.logoUrl?.trim();
+    const emailContent = buildContactEmail({
+      name: data.name,
+      email: data.email,
+      phone: toUndef(data.phone),
+      company: toUndef(data.company),
+      serviceInterest: toUndef(data.serviceInterest),
+      subject: data.subject,
+      message: data.message,
+      source: "contact-page",
+      submittedAt: new Date(),
+      logoUrl,
+      siteUrl: resolveEmailSiteUrl(),
+    });
+
     sendEmail({
       to: receiverEmail,
-      subject: `New Enquiry: ${data.subject}`,
-      html: buildContactEmail({
-        name: data.name,
-        email: data.email,
-        phone: toUndef(data.phone),
-        subject: data.subject,
-        message: data.message,
-      }),
+      subject: `New Website Enquiry — ${data.subject}`,
+      html: emailContent.html,
+      text: emailContent.text,
       replyTo: data.email,
     }).catch((err) => {
       console.error("[Contact] Failed to send notification email:", err);
