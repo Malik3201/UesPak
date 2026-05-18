@@ -13,6 +13,7 @@ export const MEDIA_UPLOAD_FOLDERS = {
   clients: "/uespak/clients",
   home: "/uespak/home",
   pages: "/uespak/pages",
+  jobs: "/uespak/jobs",
 } as const;
 
 export type MediaUploadFolder =

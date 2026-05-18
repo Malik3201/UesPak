@@ -43,10 +43,10 @@ const navItems: NavItem[] = [
   { kind: "link", href: "/admin/project-categories", label: "Project Categories", icon: FolderTree },
   { kind: "link", href: "/admin/projects", label: "Projects", icon: FolderOpen },
   { kind: "link", href: "/admin/team", label: "Team Members", icon: Users },
-  { kind: "placeholder", label: "Jobs", icon: ClipboardList },
+  { kind: "link", href: "/admin/jobs", label: "Jobs", icon: ClipboardList },
   { kind: "link", href: "/admin/enquiries", label: "Enquiries", icon: Mail },
   { kind: "link", href: "/admin/media", label: "Media Library", icon: Image },
-  { kind: "placeholder", label: "SEO Manager", icon: Search },
+  { kind: "link", href: "/admin/seo", label: "SEO Manager", icon: Search },
   { kind: "placeholder", label: "Redirects", icon: ArrowLeftRight },
   { kind: "placeholder", label: "Admin Users", icon: Shield },
 ];

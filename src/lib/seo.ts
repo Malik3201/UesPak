@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/site-settings";
+import { getSeoSettings } from "@/lib/seo-settings";
 
 // ─── Site defaults ─────────────────────────────────────────────────────────────
 export const SITE_NAME = "UESPAK";
@@ -53,23 +54,33 @@ export async function mergeRootSiteMetadata(
   baseline: Metadata = defaultMetadata
 ): Promise<Metadata> {
   try {
-    const settings = await getSiteSettings();
+    const [settings, seoMgr] = await Promise.all([getSiteSettings(), getSeoSettings()]);
     const seo = settings.seo;
     const merged: Metadata = { ...baseline };
 
-    if (seo.metaTitle?.trim()) {
+    const metaTitle =
+      seo.metaTitle?.trim() || seoMgr.defaultMetaTitle?.trim() || undefined;
+    const metaDescription =
+      seo.metaDescription?.trim() ||
+      seoMgr.defaultMetaDescription?.trim() ||
+      undefined;
+    const siteLabel = settings.siteName?.trim() || seoMgr.siteName?.trim() || SITE_NAME;
+
+    if (metaTitle) {
       merged.title = {
-        default: seo.metaTitle.trim(),
-        template: `%s | ${settings.siteName?.trim() || SITE_NAME}`,
+        default: metaTitle,
+        template: `%s | ${siteLabel}`,
       };
     }
 
-    if (seo.metaDescription?.trim()) {
-      merged.description = seo.metaDescription.trim();
+    if (metaDescription) {
+      merged.description = metaDescription;
     }
 
     if (seo.keywords?.length) {
       merged.keywords = [...seo.keywords];
+    } else if (seoMgr.defaultKeywords?.length) {
+      merged.keywords = [...seoMgr.defaultKeywords];
     }
 
     if (seo.canonicalUrl?.trim()) {
@@ -79,22 +90,27 @@ export async function mergeRootSiteMetadata(
       };
     }
 
-    const ogImageUrl = seo.ogImage?.url?.trim();
+    const ogImageUrl =
+      seo.ogImage?.url?.trim() || seoMgr.defaultOgImage?.url?.trim() || undefined;
     merged.openGraph = {
       ...(typeof baseline.openGraph === "object"
         ? (baseline.openGraph as Record<string, unknown>)
         : {}),
-      url: seo.canonicalUrl?.trim() ?? SITE_URL,
-      siteName: settings.siteName?.trim() ?? SITE_NAME,
+      url: seo.canonicalUrl?.trim() || seoMgr.siteUrl?.trim() || SITE_URL,
+      siteName: siteLabel,
       title:
-        seo.ogTitle?.trim() ??
-        seo.metaTitle?.trim() ??
+        seo.ogTitle?.trim() ||
+        seoMgr.defaultOgTitle?.trim() ||
+        seo.metaTitle?.trim() ||
+        metaTitle ||
         (typeof baseline.openGraph?.title === "string"
           ? baseline.openGraph.title
           : SITE_NAME),
       description:
-        seo.ogDescription?.trim() ??
-        seo.metaDescription?.trim() ??
+        seo.ogDescription?.trim() ||
+        seoMgr.defaultOgDescription?.trim() ||
+        seo.metaDescription?.trim() ||
+        metaDescription ||
         SITE_DESCRIPTION,
       ...(ogImageUrl
         ? {
@@ -112,30 +128,52 @@ export async function mergeRootSiteMetadata(
       ...(typeof baseline.twitter === "object"
         ? (baseline.twitter as Record<string, unknown>)
         : {}),
-      card: "summary_large_image",
+      card: seoMgr.twitterCard || "summary_large_image",
       title:
-        seo.ogTitle?.trim() ??
-        seo.metaTitle?.trim() ??
+        seo.ogTitle?.trim() ||
+        seoMgr.defaultOgTitle?.trim() ||
+        seo.metaTitle?.trim() ||
+        metaTitle ||
         (typeof baseline.twitter?.title === "string"
           ? baseline.twitter.title
           : SITE_NAME),
       description:
-        seo.ogDescription?.trim() ??
-        seo.metaDescription?.trim() ??
+        seo.ogDescription?.trim() ||
+        seoMgr.defaultOgDescription?.trim() ||
+        seo.metaDescription?.trim() ||
+        metaDescription ||
         SITE_DESCRIPTION,
       ...(ogImageUrl ? { images: [ogImageUrl] } : {}),
     };
 
-    merged.robots =
-      seo.robots && typeof seo.robots === "object"
-        ? {
-            ...(typeof baseline.robots === "object"
-              ? (baseline.robots as Record<string, unknown>)
-              : {}),
-            index: seo.robots.index !== false,
-            follow: seo.robots.follow !== false,
-          }
-        : baseline.robots;
+    const index =
+      (seo.robots?.index !== false) &&
+      seoMgr.robots.index !== false;
+    const follow =
+      (seo.robots?.follow !== false) &&
+      seoMgr.robots.follow !== false;
+
+    merged.robots = {
+      ...(typeof baseline.robots === "object"
+        ? (baseline.robots as Record<string, unknown>)
+        : {}),
+      index,
+      follow,
+    };
+
+    const verification: NonNullable<Metadata["verification"]> = {};
+    if (seoMgr.googleSearchConsoleVerification?.trim()) {
+      verification.google = seoMgr.googleSearchConsoleVerification.trim();
+    }
+    if (seoMgr.bingVerification?.trim()) {
+      verification.other = {
+        ...(verification.other || {}),
+        "msvalidate.01": seoMgr.bingVerification.trim(),
+      };
+    }
+    if (Object.keys(verification).length) {
+      merged.verification = verification;
+    }
 
     return merged;
   } catch {

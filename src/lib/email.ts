@@ -32,7 +32,8 @@ export interface ContactEmailData {
   message: string;
   source?: string;
   submittedAt?: Date;
-  logoUrl?: string;
+  /** UESPAK dark logo URL from site settings (for green header). */
+  darkLogoUrl?: string;
   siteUrl?: string;
 }
 
@@ -97,7 +98,7 @@ function isValidReplyToEmail(email: string): boolean {
 function detailRow(label: string, valueHtml: string): string {
   return `
     <tr>
-      <td style="padding:14px 18px;border-bottom:1px solid ${BRAND.mintBorder};vertical-align:top;">
+      <td class="detail-cell" style="padding:14px 18px;border-bottom:1px solid ${BRAND.mintBorder};vertical-align:top;">
         <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:${BRAND.muted};">${escapeHtml(label)}</p>
         <p style="margin:0;font-size:15px;line-height:1.5;color:${BRAND.text};font-weight:500;">${valueHtml}</p>
       </td>
@@ -130,8 +131,9 @@ export function buildContactEmail(data: ContactEmailData): ContactEmailContent {
   const mailtoHref = `mailto:${encodeURIComponent(data.email.trim())}`;
   const source = data.source?.trim() || "contact-page";
 
-  const logoBlock = data.logoUrl?.trim()
-    ? `<img src="${escapeHtml(data.logoUrl.trim())}" alt="UESPAK" width="140" style="display:block;width:140px;max-width:140px;height:auto;border:0;" />`
+  const darkLogo = data.darkLogoUrl?.trim();
+  const logoBlock = darkLogo
+    ? `<img src="${escapeHtml(darkLogo)}" alt="UESPAK" width="160" class="logo-img" style="display:block;width:160px;max-width:100%;height:auto;border:0;" />`
     : `<p style="margin:0;font-size:28px;font-weight:800;letter-spacing:0.04em;color:${BRAND.white};">UESPAK</p>`;
 
   const html = `<!DOCTYPE html>
@@ -139,36 +141,48 @@ export function buildContactEmail(data: ContactEmailData): ContactEmailContent {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>New Website Enquiry</title>
+  <style type="text/css">
+    body { margin: 0 !important; padding: 0 !important; width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+    a { text-decoration: none; }
+    @media only screen and (max-width: 620px) {
+      .email-shell { padding: 12px 8px !important; }
+      .email-card { border-radius: 14px !important; }
+      .email-pad { padding-left: 16px !important; padding-right: 16px !important; }
+      .header-pad { padding: 22px 16px 20px !important; }
+      .header-title { font-size: 20px !important; }
+      .logo-img { width: 130px !important; max-width: 130px !important; }
+      .detail-cell { padding: 12px 14px !important; }
+      .message-pad { padding: 0 16px 20px !important; }
+      .actions-pad { padding: 0 16px 24px !important; }
+      .btn-row .btn-col-left { padding-right: 4px !important; width: 50% !important; }
+      .btn-row .btn-col-right { padding-left: 4px !important; width: 50% !important; }
+      .btn-link { display: block !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; text-align: center !important; font-size: 12px !important; line-height: 1.35 !important; padding: 11px 8px !important; }
+      .footer-pad { padding: 18px 16px !important; }
+    }
+    @media only screen and (min-width: 621px) {
+      .btn-row .btn-col-left { width: 50% !important; padding-right: 6px !important; }
+      .btn-row .btn-col-right { width: 50% !important; padding-left: 6px !important; }
+    }
+  </style>
 </head>
 <body style="margin:0;padding:0;background:#eef2f0;font-family:Arial,Helvetica,sans-serif;color:${BRAND.text};">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef2f0;padding:24px 12px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="email-shell" style="background:#eef2f0;padding:24px 12px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:680px;width:100%;background:${BRAND.white};border-radius:18px;overflow:hidden;border:1px solid #e2e8e4;box-shadow:0 8px 28px rgba(6,78,59,0.08);">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="email-card" style="max-width:680px;width:100%;background:${BRAND.white};border-radius:18px;overflow:hidden;border:1px solid #e2e8e4;box-shadow:0 8px 28px rgba(6,78,59,0.08);">
           <tr>
-            <td style="background:linear-gradient(135deg, ${BRAND.green} 0%, ${BRAND.greenDark} 100%);padding:28px 32px 24px;">
+            <td class="header-pad" style="background:linear-gradient(135deg, ${BRAND.green} 0%, ${BRAND.greenDark} 100%);padding:28px 32px 24px;">
               ${logoBlock}
-              <p style="margin:18px 0 6px;font-size:22px;font-weight:700;line-height:1.3;color:${BRAND.white};">New Website Enquiry</p>
+              <p class="header-title" style="margin:18px 0 6px;font-size:22px;font-weight:700;line-height:1.3;color:${BRAND.white};">New Website Enquiry</p>
               <p style="margin:0;font-size:14px;line-height:1.6;color:rgba(255,255,255,0.88);">A new enquiry has been submitted from the UESPAK website.</p>
             </td>
           </tr>
           <tr>
-            <td style="padding:20px 32px 8px;background:${BRAND.white};">
-              <table role="presentation" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td style="background:${BRAND.mint};border:1px solid ${BRAND.mintBorder};border-radius:999px;padding:8px 14px;">
-                    <span style="font-size:12px;font-weight:700;color:${BRAND.green};letter-spacing:0.04em;">NEW ENQUIRY</span>
-                  </td>
-                  <td style="padding-left:12px;">
-                    <span style="font-size:13px;color:${BRAND.muted};">Submitted ${escapeHtml(submittedLabel)}</span>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:8px 32px 24px;">
+            <td class="email-pad" style="padding:24px 32px 24px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${BRAND.mint};border:1px solid ${BRAND.mintBorder};border-radius:14px;overflow:hidden;">
                 ${detailRow("Name", `<strong>${escapeHtml(data.name)}</strong>`)}
                 ${detailRow("Email", `<a href="${mailtoHref}" style="color:${BRAND.green};text-decoration:none;">${safeEmail}</a>`)}
@@ -182,31 +196,29 @@ export function buildContactEmail(data: ContactEmailData): ContactEmailContent {
             </td>
           </tr>
           <tr>
-            <td style="padding:0 32px 24px;">
+            <td class="message-pad email-pad" style="padding:0 32px 24px;">
               <p style="margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:${BRAND.muted};">Message</p>
               <div style="background:#f8faf9;border:1px solid ${BRAND.mintBorder};border-radius:12px;padding:18px 20px;">
-                <p style="margin:0;font-size:15px;line-height:1.7;color:${BRAND.text};">${formatMessageHtml(data.message)}</p>
+                <p style="margin:0;font-size:15px;line-height:1.7;color:${BRAND.text};word-break:break-word;">${formatMessageHtml(data.message)}</p>
               </div>
             </td>
           </tr>
           <tr>
-            <td style="padding:0 32px 28px;">
-              <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+            <td class="actions-pad email-pad" style="padding:0 32px 28px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" width="100%" class="btn-row">
                 <tr>
-                  <td style="padding-bottom:10px;">
-                    <a href="${mailtoHref}" style="display:inline-block;background:${BRAND.green};color:${BRAND.white};text-decoration:none;font-size:14px;font-weight:700;padding:13px 22px;border-radius:10px;">Reply by Email</a>
+                  <td class="btn-col btn-col-left" width="50%" valign="top" style="padding-right:6px;">
+                    <a href="${mailtoHref}" class="btn-link" style="display:block;width:100%;box-sizing:border-box;background:${BRAND.green};color:${BRAND.white};text-decoration:none;font-size:14px;font-weight:700;padding:13px 16px;border-radius:10px;text-align:center;">Reply by Email</a>
                   </td>
-                </tr>
-                <tr>
-                  <td>
-                    <a href="${escapeHtml(adminUrl)}" style="display:inline-block;background:${BRAND.white};color:${BRAND.green};text-decoration:none;font-size:14px;font-weight:700;padding:12px 20px;border-radius:10px;border:2px solid ${BRAND.green};">Open Admin Enquiries</a>
+                  <td class="btn-col btn-col-right" width="50%" valign="top" style="padding-left:6px;">
+                    <a href="${escapeHtml(adminUrl)}" class="btn-link" style="display:block;width:100%;box-sizing:border-box;background:${BRAND.white};color:${BRAND.green};text-decoration:none;font-size:14px;font-weight:700;padding:12px 16px;border-radius:10px;border:2px solid ${BRAND.green};text-align:center;">Open Admin Enquiries</a>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
           <tr>
-            <td style="background:#f8faf9;border-top:1px solid ${BRAND.mintBorder};padding:22px 32px;text-align:center;">
+            <td class="footer-pad" style="background:#f8faf9;border-top:1px solid ${BRAND.mintBorder};padding:22px 32px;text-align:center;">
               <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:${BRAND.green};">UESPAK</p>
               <p style="margin:0 0 10px;font-size:12px;line-height:1.6;color:${BRAND.muted};">This notification was generated from the UESPAK website contact form.</p>
               <a href="${escapeHtml(siteUrl)}" style="font-size:12px;color:${BRAND.green};text-decoration:none;font-weight:600;">${escapeHtml(siteUrl)}</a>

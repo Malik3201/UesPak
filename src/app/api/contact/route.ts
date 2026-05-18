@@ -64,8 +64,6 @@ export async function POST(req: NextRequest) {
     const receiverEmail =
       process.env.CONTACT_RECEIVER_EMAIL ?? "services@uespak.com";
     const publicSettings = await getPublicSiteSettings();
-    const logoUrl =
-      publicSettings.darkLogoUrl?.trim() || publicSettings.logoUrl?.trim();
     const emailContent = buildContactEmail({
       name: data.name,
       email: data.email,
@@ -76,7 +74,7 @@ export async function POST(req: NextRequest) {
       message: data.message,
       source: "contact-page",
       submittedAt: new Date(),
-      logoUrl,
+      darkLogoUrl: publicSettings.darkLogoUrl?.trim(),
       siteUrl: resolveEmailSiteUrl(),
     });
 

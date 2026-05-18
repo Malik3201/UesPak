@@ -2,22 +2,31 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BriefcaseBusiness, GraduationCap, ShieldCheck } from "lucide-react";
 import Container from "@/components/shared/Container";
+import CareersOpenPositions from "@/components/public/careers/CareersOpenPositions";
 import CareersTeamSection from "@/components/public/careers/CareersTeamSection";
+import { getPublishedJobs } from "@/lib/jobs";
 import { getPublishedTeamMembers } from "@/lib/team";
+import { getPublicSiteSettings } from "@/lib/site-settings";
 import PublicPageHero from "@/components/public/pages/PublicPageHero";
 import { getCareersPageContent, getPageSeoMetadata } from "@/lib/page-content";
+import { getSeoSettings } from "@/lib/seo-settings";
 import { SITE_URL } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
+  await getSeoSettings();
   const { pageContent } = await getCareersPageContent();
   return getPageSeoMetadata(pageContent);
 }
 
 export default async function CareersPage() {
-  const [{ pageContent: page }, members] = await Promise.all([
+  const [{ pageContent: page }, members, jobs, settings] = await Promise.all([
     getCareersPageContent(),
     getPublishedTeamMembers(),
+    getPublishedJobs(),
+    getPublicSiteSettings(),
   ]);
+  const careersEmail =
+    page.sections.applyCTA.email?.trim() || settings.primaryEmail?.trim();
   const s = page.sections;
   const introImage = s.intro.image?.url?.trim();
   const ctaImage = s.applyCTA.backgroundImage?.url?.trim();
@@ -107,6 +116,8 @@ export default async function CareersPage() {
           </Container>
         </section>
       ) : null}
+
+      <CareersOpenPositions jobs={jobs} careersEmail={careersEmail} />
 
       {s.teamIntro.isActive && s.teamIntro.showTeamMembers ? (
         <div id="team">

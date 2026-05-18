@@ -15,6 +15,7 @@ import type {
   ServicesPageContent,
 } from "@/types/page-content";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
+import { getSeoDefaults, getDefaultOgImage, getCanonicalUrl } from "@/lib/seo-settings";
 
 function normalizeObject(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object") return {};
@@ -134,20 +135,24 @@ export function getPageSeoMetadata(
 ): Metadata {
   const fallbacks = PAGE_SEO_FALLBACKS[page.pageKey];
   const slug = PAGE_SLUGS[page.pageKey];
+  const seoDefaults = getSeoDefaults();
 
   const title =
     page.seo?.metaTitle?.trim() ||
     page.hero?.title?.trim() ||
     page.title?.trim() ||
-    fallbacks.title;
+    fallbacks.title ||
+    seoDefaults.defaultMetaTitle;
 
   const description =
     page.seo?.metaDescription?.trim() ||
     page.hero?.description?.trim() ||
-    fallbacks.description;
+    fallbacks.description ||
+    seoDefaults.defaultMetaDescription;
 
   const canonical =
     page.seo?.canonicalUrl?.trim() ||
+    getCanonicalUrl(slug) ||
     `${SITE_URL}${slug}`;
 
   const seoOgImage = page.seo?.ogImage;
@@ -159,19 +164,24 @@ export function getPageSeoMetadata(
   const ogImage =
     seoOgImageUrl ||
     options.fallbackImage ||
+    getDefaultOgImage() ||
     `${SITE_URL}/og-default.png`;
 
-  const robots = page.seo?.robots ?? { index: true, follow: true };
+  const robots = page.seo?.robots ?? seoDefaults.robots;
 
   return {
     title,
     description,
-    keywords: page.seo?.keywords?.length ? page.seo.keywords : undefined,
+    keywords: page.seo?.keywords?.length
+      ? page.seo.keywords
+      : seoDefaults.defaultKeywords?.length
+        ? seoDefaults.defaultKeywords
+        : undefined,
     alternates: { canonical },
     openGraph: {
       type: "website",
       url: canonical,
-      siteName: SITE_NAME,
+      siteName: seoDefaults.siteName || SITE_NAME,
       title: page.seo?.ogTitle?.trim() || title,
       description: page.seo?.ogDescription?.trim() || description,
       images: [
@@ -184,15 +194,15 @@ export function getPageSeoMetadata(
       ],
     },
     twitter: {
-      card: "summary_large_image",
+      card: seoDefaults.twitterCard || "summary_large_image",
       title: page.seo?.ogTitle?.trim() || title,
       description:
         page.seo?.ogDescription?.trim() || description || SITE_DESCRIPTION,
       images: [ogImage],
     },
     robots: {
-      index: robots.index !== false,
-      follow: robots.follow !== false,
+      index: robots.index !== false && seoDefaults.robots.index !== false,
+      follow: robots.follow !== false && seoDefaults.robots.follow !== false,
     },
   };
 }
