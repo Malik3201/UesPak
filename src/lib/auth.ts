@@ -98,3 +98,8 @@ export async function requireRole(
     throw new AdminForbiddenError();
   return admin;
 }
+
+/** Only super admins may manage admin users. */
+export async function requireSuperAdmin(): Promise<SafeAdmin> {
+  return requireRole(["superAdmin"]);
+}

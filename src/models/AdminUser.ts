@@ -38,7 +38,7 @@ export const mediaSchema = new Schema<MediaObject>(
   { _id: false }
 );
 
-const ADMIN_ROLE_VALUES: AdminRole[] = ["superAdmin", "admin", "editor"];
+const ADMIN_ROLE_VALUES: AdminRole[] = ["superAdmin", "admin", "editor", "viewer"];
 const ADMIN_STATUS_VALUES: AdminStatus[] = [
   "active",
   "inactive",
@@ -53,6 +53,8 @@ export interface IAdminUser extends Document {
   role: AdminRole;
   status: AdminStatus;
   lastLogin?: Date;
+  createdBy?: mongoose.Types.ObjectId;
+  updatedBy?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -79,6 +81,8 @@ const adminUserSchema = new Schema<IAdminUser>(
       default: "active",
     },
     lastLogin: { type: Date },
+    createdBy: { type: Schema.Types.ObjectId, ref: "AdminUser" },
+    updatedBy: { type: Schema.Types.ObjectId, ref: "AdminUser" },
   },
   { timestamps: true }
 );

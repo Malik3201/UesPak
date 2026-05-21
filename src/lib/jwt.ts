@@ -79,7 +79,7 @@ export async function verifyAdminToken(
     if (!userId || !email || !roleRaw) return null;
 
     const role = roleRaw as AdminRole;
-    if (!["superAdmin", "admin", "editor"].includes(role)) return null;
+    if (!["superAdmin", "admin", "editor", "viewer"].includes(role)) return null;
 
     return { userId, email, name, role };
   } catch {

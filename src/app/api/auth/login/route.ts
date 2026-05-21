@@ -107,7 +107,8 @@ export async function POST(req: NextRequest) {
       role:
         safeUser.role === "superAdmin" ||
         safeUser.role === "admin" ||
-        safeUser.role === "editor"
+        safeUser.role === "editor" ||
+        safeUser.role === "viewer"
           ? safeUser.role
           : "admin",
     });

@@ -1,5 +1,5 @@
 /** Values stored on admin users and in JWT `role`. */
-export type AdminRole = "superAdmin" | "admin" | "editor";
+export type AdminRole = "superAdmin" | "admin" | "editor" | "viewer";
 
 export type AdminStatus = "active" | "inactive" | "suspended";
 

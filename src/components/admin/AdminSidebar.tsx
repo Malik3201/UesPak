@@ -47,8 +47,8 @@ const navItems: NavItem[] = [
   { kind: "link", href: "/admin/enquiries", label: "Enquiries", icon: Mail },
   { kind: "link", href: "/admin/media", label: "Media Library", icon: Image },
   { kind: "link", href: "/admin/seo", label: "SEO Manager", icon: Search },
-  { kind: "placeholder", label: "Redirects", icon: ArrowLeftRight },
-  { kind: "placeholder", label: "Admin Users", icon: Shield },
+  { kind: "link", href: "/admin/redirects", label: "Redirects", icon: ArrowLeftRight },
+  { kind: "link", href: "/admin/users", label: "Admin Users", icon: Shield },
 ];
 
 export default function AdminSidebar() {
