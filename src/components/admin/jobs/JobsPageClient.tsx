@@ -6,6 +6,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/shared/Button";
 import { Input } from "@/components/shared/Input";
 import JobsTable from "@/components/admin/jobs/JobsTable";
+import AdminPageHeader from "@/components/admin/ui/AdminPageHeader";
+import AdminFilterBar from "@/components/admin/ui/AdminFilterBar";
+import AdminLoadingState from "@/components/admin/ui/AdminLoadingState";
+import AdminAlert from "@/components/admin/ui/AdminAlert";
 import type { JobDto } from "@/types/job";
 
 interface JobsResponse {
@@ -78,19 +82,17 @@ export default function JobsPageClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Jobs</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage job openings shown on the public careers page.
-          </p>
-        </div>
-        <Link href="/admin/jobs/new">
-          <Button>Add Job</Button>
-        </Link>
-      </div>
+      <AdminPageHeader
+        title="Jobs"
+        description="Manage job openings shown on the public careers page."
+        action={
+          <Link href="/admin/jobs/new">
+            <Button>Add Job</Button>
+          </Link>
+        }
+      />
 
-      <div className="flex flex-wrap gap-3 rounded-xl border border-border bg-card p-4">
+      <AdminFilterBar>
         <Input
           label="Search"
           placeholder="Title, department, location..."
@@ -140,12 +142,11 @@ export default function JobsPageClient() {
             }
           }}
         />
-      </div>
+      </AdminFilterBar>
 
-      {error ? (
-        <p className="text-sm text-destructive">{error}</p>
-      ) : loading ? (
-        <p className="text-sm text-muted-foreground">Loading jobs...</p>
+      {error ? <AdminAlert variant="error">{error}</AdminAlert> : null}
+      {loading ? (
+        <AdminLoadingState label="Loading jobs…" />
       ) : (
         <JobsTable jobs={jobsData?.jobs ?? []} onArchive={handleArchive} />
       )}

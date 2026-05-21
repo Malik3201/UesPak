@@ -21,9 +21,9 @@ export default function JobsTable({ jobs, onArchive }: JobsTableProps) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-border bg-card">
+    <div className="overflow-x-auto rounded-2xl border border-emerald-900/8 bg-white shadow-[0_8px_30px_rgba(7,95,63,0.06)]">
       <table className="w-full min-w-[960px] text-sm">
-        <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+        <thead className="bg-[#f4f9f6] text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
           <tr>
             <th className="px-4 py-3 font-semibold">Title</th>
             <th className="px-4 py-3 font-semibold">Department</th>
@@ -37,7 +37,7 @@ export default function JobsTable({ jobs, onArchive }: JobsTableProps) {
         </thead>
         <tbody>
           {jobs.map((job) => (
-            <tr key={job.id} className="border-t border-border/60">
+            <tr key={job.id} className="border-t border-emerald-900/6 transition-colors hover:bg-[#f7fbf8]">
               <td className="px-4 py-3 font-medium text-foreground">{job.title}</td>
               <td className="px-4 py-3 text-muted-foreground">{job.department || "—"}</td>
               <td className="px-4 py-3 text-muted-foreground">{job.location || "—"}</td>

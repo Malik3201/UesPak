@@ -6,6 +6,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/shared/Button";
 import { Input } from "@/components/shared/Input";
 import RedirectsTable from "@/components/admin/redirects/RedirectsTable";
+import AdminPageHeader from "@/components/admin/ui/AdminPageHeader";
+import AdminFilterBar from "@/components/admin/ui/AdminFilterBar";
+import AdminLoadingState from "@/components/admin/ui/AdminLoadingState";
+import AdminAlert from "@/components/admin/ui/AdminAlert";
 import type { RedirectDto } from "@/types/redirect";
 
 interface RedirectsResponse {
@@ -94,19 +98,17 @@ export default function RedirectsPageClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Redirects</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Map old URLs to new destinations (301/302/307/308).
-          </p>
-        </div>
-        <Link href="/admin/redirects/new">
-          <Button>Add Redirect</Button>
-        </Link>
-      </div>
+      <AdminPageHeader
+        title="Redirects"
+        description="Map old URLs to new destinations (301/302/307/308)."
+        action={
+          <Link href="/admin/redirects/new">
+            <Button>Add Redirect</Button>
+          </Link>
+        }
+      />
 
-      <div className="flex flex-wrap gap-3 rounded-xl border border-border bg-card p-4">
+      <AdminFilterBar>
         <Input
           label="Search"
           placeholder="From or to path..."
@@ -140,12 +142,11 @@ export default function RedirectsPageClient() {
             <option value="false">Inactive</option>
           </select>
         </div>
-      </div>
+      </AdminFilterBar>
 
-      {error ? (
-        <p className="text-sm text-destructive">{error}</p>
-      ) : loading ? (
-        <p className="text-sm text-muted-foreground">Loading redirects...</p>
+      {error ? <AdminAlert variant="error">{error}</AdminAlert> : null}
+      {loading ? (
+        <AdminLoadingState label="Loading redirects…" />
       ) : (
         <RedirectsTable
           redirects={data?.redirects ?? []}

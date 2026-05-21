@@ -1,9 +1,14 @@
+import { redirect } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
+import { getCurrentAdmin } from "@/lib/auth";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <AdminShell>{children}</AdminShell>;
+  const admin = await getCurrentAdmin();
+  if (!admin) redirect("/admin/login");
+
+  return <AdminShell admin={admin}>{children}</AdminShell>;
 }

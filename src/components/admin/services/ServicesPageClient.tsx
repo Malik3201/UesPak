@@ -6,6 +6,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/shared/Button";
 import { Input } from "@/components/shared/Input";
 import ServicesTable from "@/components/admin/services/ServicesTable";
+import AdminPageHeader from "@/components/admin/ui/AdminPageHeader";
+import AdminFilterBar from "@/components/admin/ui/AdminFilterBar";
+import AdminLoadingState from "@/components/admin/ui/AdminLoadingState";
+import AdminAlert from "@/components/admin/ui/AdminAlert";
 import type { ServiceDto } from "@/types/service";
 import { SERVICE_GROUPS } from "@/types/service";
 
@@ -84,19 +88,17 @@ export default function ServicesPageClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Services</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage service content, status, media, and SEO.
-          </p>
-        </div>
-        <Link href="/admin/services/new">
-          <Button>Add Service</Button>
-        </Link>
-      </div>
+      <AdminPageHeader
+        title="Services"
+        description="Manage service content, status, media, and SEO."
+        action={
+          <Link href="/admin/services/new">
+            <Button>Add Service</Button>
+          </Link>
+        }
+      />
 
-      <div className="flex flex-wrap gap-3 rounded-xl border border-border bg-card p-4">
+      <AdminFilterBar>
         <Input
           className="min-w-[220px]"
           label="Search"
@@ -150,16 +152,11 @@ export default function ServicesPageClient() {
             <option value="archived">Archived</option>
           </select>
         </label>
-      </div>
+      </AdminFilterBar>
 
+      {error ? <AdminAlert variant="error">{error}</AdminAlert> : null}
       {loading ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Loading services...
-        </div>
-      ) : error ? (
-        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-          {error}
-        </div>
+        <AdminLoadingState label="Loading services…" />
       ) : (
         <>
           <ServicesTable

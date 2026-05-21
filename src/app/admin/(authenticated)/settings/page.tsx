@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import SiteSettingsForm from "@/components/admin/settings/SiteSettingsForm";
+import AdminPageHeader from "@/components/admin/ui/AdminPageHeader";
 
 export const metadata: Metadata = {
   title: "Site Settings",
@@ -8,16 +9,11 @@ export const metadata: Metadata = {
 
 export default function AdminSiteSettingsPage() {
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Site Settings
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Global brand, contact, footer, SEO defaults, and public CTAs — used
-          across the public site.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Site Settings"
+        description="Global brand, contact, footer, SEO defaults, and public CTAs used across the public site."
+      />
       <SiteSettingsForm />
     </div>
   );

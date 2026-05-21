@@ -1,20 +1,9 @@
-import { cn } from "@/lib/utils";
+import AdminBadge from "@/components/admin/ui/AdminBadge";
 
-interface RedirectStatusBadgeProps {
-  isActive: boolean;
-}
-
-export default function RedirectStatusBadge({ isActive }: RedirectStatusBadgeProps) {
+export default function RedirectStatusBadge({ isActive }: { isActive: boolean }) {
   return (
-    <span
-      className={cn(
-        "inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold",
-        isActive
-          ? "bg-emerald-100 text-emerald-800"
-          : "bg-slate-100 text-slate-600"
-      )}
-    >
+    <AdminBadge tone={isActive ? "active" : "inactive"}>
       {isActive ? "Active" : "Inactive"}
-    </span>
+    </AdminBadge>
   );
 }

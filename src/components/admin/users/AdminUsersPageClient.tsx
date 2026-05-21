@@ -6,6 +6,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/shared/Button";
 import { Input } from "@/components/shared/Input";
 import AdminUsersTable from "@/components/admin/users/AdminUsersTable";
+import AdminPageHeader from "@/components/admin/ui/AdminPageHeader";
+import AdminFilterBar from "@/components/admin/ui/AdminFilterBar";
+import AdminLoadingState from "@/components/admin/ui/AdminLoadingState";
+import AdminAlert from "@/components/admin/ui/AdminAlert";
 import type { AdminUserDto } from "@/types/admin-user";
 
 interface UsersResponse {
@@ -88,19 +92,17 @@ export default function AdminUsersPageClient({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Admin Users</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage who can access the UESPAK admin panel. Super admin only.
-          </p>
-        </div>
-        <Link href="/admin/users/new">
-          <Button>Add User</Button>
-        </Link>
-      </div>
+      <AdminPageHeader
+        title="Admin Users"
+        description="Manage who can access the UESPAK admin panel. Super admin only."
+        action={
+          <Link href="/admin/users/new">
+            <Button>Add User</Button>
+          </Link>
+        }
+      />
 
-      <div className="flex flex-wrap gap-3 rounded-xl border border-border bg-card p-4">
+      <AdminFilterBar>
         <Input
           label="Search"
           placeholder="Name or email..."
@@ -155,12 +157,11 @@ export default function AdminUsersPageClient({
             <option value="suspended">Suspended</option>
           </select>
         </div>
-      </div>
+      </AdminFilterBar>
 
-      {error ? (
-        <p className="text-sm text-destructive">{error}</p>
-      ) : loading ? (
-        <p className="text-sm text-muted-foreground">Loading users...</p>
+      {error ? <AdminAlert variant="error">{error}</AdminAlert> : null}
+      {loading ? (
+        <AdminLoadingState label="Loading users…" />
       ) : (
         <AdminUsersTable
           users={data?.users ?? []}

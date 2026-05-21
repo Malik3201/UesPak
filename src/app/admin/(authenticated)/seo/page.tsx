@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import SeoManagerForm from "@/components/admin/seo/SeoManagerForm";
+import AdminPageHeader from "@/components/admin/ui/AdminPageHeader";
+import AdminAlert from "@/components/admin/ui/AdminAlert";
 
 export const metadata: Metadata = {
   title: "SEO Manager",
@@ -8,14 +10,15 @@ export const metadata: Metadata = {
 
 export default function AdminSeoPage() {
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">SEO Manager</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Global SEO defaults, social sharing fallbacks, robots controls, and verification
-          settings used across the public site.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="SEO Manager"
+        description="Global SEO defaults, social sharing, robots controls, and verification settings."
+      />
+      <AdminAlert variant="info">
+        Use your final production domain in Site URL and Canonical Base URL before enabling
+        full indexing at launch.
+      </AdminAlert>
       <SeoManagerForm />
     </div>
   );

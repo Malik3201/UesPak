@@ -24,9 +24,9 @@ export default function RedirectsTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-border">
+    <div className="overflow-x-auto rounded-2xl border border-emerald-900/8 bg-white shadow-[0_8px_30px_rgba(7,95,63,0.06)]">
       <table className="w-full min-w-[720px] text-left text-sm">
-        <thead className="border-b border-border bg-muted/40">
+        <thead className="bg-[#f4f9f6] text-[11px] font-semibold uppercase tracking-wider text-slate-500">
           <tr>
             <th className="px-4 py-3 font-semibold">From</th>
             <th className="px-4 py-3 font-semibold">To</th>
@@ -40,7 +40,7 @@ export default function RedirectsTable({
         </thead>
         <tbody>
           {redirects.map((r) => (
-            <tr key={r.id} className="border-b border-border/60 last:border-0">
+            <tr key={r.id} className="border-t border-emerald-900/6 transition-colors hover:bg-[#f7fbf8]">
               <td className="px-4 py-3 font-mono text-xs">{r.fromPath}</td>
               <td className="max-w-[200px] truncate px-4 py-3 font-mono text-xs" title={r.toPath}>
                 {r.toPath}

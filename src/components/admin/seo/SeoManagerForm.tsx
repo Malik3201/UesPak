@@ -7,30 +7,10 @@ import { Button } from "@/components/shared/Button";
 import AdminMediaUploader from "@/components/admin/media/AdminMediaUploader";
 import { MEDIA_UPLOAD_FOLDERS } from "@/constants/media-folders";
 import { DEFAULT_SEO_SETTINGS } from "@/constants/seo-settings";
+import AdminSection from "@/components/admin/ui/AdminSection";
+import AdminAlert from "@/components/admin/ui/AdminAlert";
 import type { SeoSettingsDTO, TwitterCardType } from "@/types/seo-setting";
 import type { MediaObject } from "@/types/media";
-
-function Section({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm">
-      <div>
-        <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-        {description ? (
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-        ) : null}
-      </div>
-      {children}
-    </section>
-  );
-}
 
 export default function SeoManagerForm() {
   const [form, setForm] = useState<SeoSettingsDTO>({ ...DEFAULT_SEO_SETTINGS });
@@ -122,18 +102,10 @@ export default function SeoManagerForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-6 pb-24">
-      {message ? (
-        <p className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          {message}
-        </p>
-      ) : null}
-      {error ? (
-        <p className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-          {error}
-        </p>
-      ) : null}
+      {message ? <AdminAlert variant="success">{message}</AdminAlert> : null}
+      {error ? <AdminAlert variant="error">{error}</AdminAlert> : null}
 
-      <Section
+      <AdminSection
         title="Global SEO Defaults"
         description="Used when individual pages do not define their own metadata."
       >
@@ -173,9 +145,9 @@ export default function SeoManagerForm() {
             className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
           />
         </label>
-      </Section>
+      </AdminSection>
 
-      <Section title="Open Graph / Social Sharing">
+      <AdminSection title="Open Graph / Social Sharing">
         <Input
           label="Default OG title"
           value={form.defaultOgTitle}
@@ -209,9 +181,9 @@ export default function SeoManagerForm() {
             <option value="summary_large_image">Summary large image</option>
           </select>
         </label>
-      </Section>
+      </AdminSection>
 
-      <Section title="Robots / Indexing">
+      <AdminSection title="Robots / Indexing">
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -267,9 +239,9 @@ export default function SeoManagerForm() {
             Add path
           </Button>
         </div>
-      </Section>
+      </AdminSection>
 
-      <Section title="Verification & Analytics">
+      <AdminSection title="Verification & Analytics">
         <Input
           label="Google Search Console verification"
           value={form.googleSearchConsoleVerification || ""}
@@ -294,17 +266,17 @@ export default function SeoManagerForm() {
           onChange={(e) => update("googleTagManagerId", e.target.value || undefined)}
           hint="e.g. GTM-XXXXXXX"
         />
-      </Section>
+      </AdminSection>
 
-      <Section title="SEO Overview">
+      <AdminSection title="SEO Overview">
         <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
           <li>Page-level SEO in Home, Services, Projects, Team, Jobs, and Pages overrides these global defaults.</li>
           <li>Global SEO is used as a fallback when a page omits meta title, description, or OG image.</li>
           <li>Sitemap and robots.txt are technical SEO helpers controlled here.</li>
         </ul>
-      </Section>
+      </AdminSection>
 
-      <div className="sticky bottom-0 z-30 border-t border-border bg-background/90 py-4 backdrop-blur">
+      <div className="sticky bottom-0 z-30 rounded-2xl border border-emerald-900/10 bg-white/95 py-4 shadow-lg backdrop-blur">
         <Button type="submit" disabled={saving}>
           {saving ? "Saving…" : "Save SEO settings"}
         </Button>

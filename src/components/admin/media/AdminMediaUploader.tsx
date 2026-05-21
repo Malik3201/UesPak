@@ -171,14 +171,18 @@ export default function AdminMediaUploader({
       (mediaType === "any" && Boolean(url) && !url.endsWith(".pdf")));
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      <span className="text-sm font-medium text-foreground">{label}</span>
+    <div
+      className={cn(
+        "flex flex-col gap-3 rounded-2xl border border-dashed border-emerald-900/15 bg-[#f8faf9] p-4",
+        className
+      )}
+    >
+      <span className="text-sm font-semibold text-slate-800">{label}</span>
 
       {helperText ? (
-        <p className="text-xs text-muted-foreground">{helperText}</p>
+        <p className="text-xs text-slate-500">{helperText}</p>
       ) : null}
 
-      {/* File picker row */}
       <div className="flex flex-wrap items-center gap-2">
         <input
           ref={fileInputRef}
@@ -235,18 +239,18 @@ export default function AdminMediaUploader({
 
       {/* Preview */}
       {showPreview && displayAsset?.url ? (
-        <div className="mt-1 flex items-start gap-3">
+        <div className="mt-1 flex flex-wrap items-start gap-3 rounded-xl border border-emerald-900/10 bg-white p-3">
           {isVideo ? (
             <video
               src={displayAsset.url}
               controls
               preload="metadata"
-              className="h-24 w-auto max-w-[220px] rounded-md border border-border bg-black"
+              className="h-24 w-auto max-w-[220px] rounded-lg border border-emerald-900/10 bg-black"
             >
               Your browser does not support embedded video.
             </video>
           ) : isImage ? (
-            <div className="relative overflow-hidden rounded-md border border-border bg-muted/30">
+            <div className="relative overflow-hidden rounded-lg border border-emerald-900/10 bg-slate-50">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={displayAsset.url}
