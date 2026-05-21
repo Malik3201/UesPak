@@ -94,6 +94,34 @@ export async function getTeamMemberBySlug(
   }
 }
 
+export async function getRelatedPublishedTeamMembers(
+  excludeSlug: string,
+  limit = 3
+): Promise<TeamMemberDto[]> {
+  try {
+    await connectDB();
+    const docs = await TeamMember.find({
+      status: "published",
+      slug: { $ne: excludeSlug },
+    })
+      .sort({ order: 1, createdAt: -1 })
+      .limit(limit)
+      .lean();
+    return docs.map((d) =>
+      serializeTeamMember(d as unknown as Record<string, unknown>)
+    );
+  } catch {
+    return [];
+  }
+}
+
+export function formatTeamExperienceYears(
+  years?: number
+): string | undefined {
+  if (years == null || years < 0) return undefined;
+  return `${years}+ years`;
+}
+
 export async function getAllTeamSlugs(): Promise<string[]> {
   try {
     await connectDB();

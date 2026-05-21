@@ -9,7 +9,11 @@ interface DetailHeroProps {
   backgroundImageUrl?: string;
   breadcrumbs: CatalogBreadcrumb[];
   metaChips?: Array<{ label: string; value: string }>;
+  /** Subtle engineering grid overlay on the hero background */
+  showEngineeringPattern?: boolean;
 }
+
+const ENGINEERING_PATTERN_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath fill='%23ffffff' fill-opacity='0.35' d='M0 39h1v1H0zM39 0h1v1h-1z'/%3E%3Cpath stroke='%23ffffff' stroke-opacity='0.12' stroke-width='0.5' d='M0 20h40M20 0v40'/%3E%3C/svg%3E")`;
 
 export default function DetailHero({
   title,
@@ -18,6 +22,7 @@ export default function DetailHero({
   backgroundImageUrl,
   breadcrumbs,
   metaChips,
+  showEngineeringPattern = false,
 }: DetailHeroProps) {
   const bg = backgroundImageUrl?.trim();
 
@@ -33,6 +38,20 @@ export default function DetailHero({
       }}
     >
       <div aria-hidden className="absolute inset-0 bg-[#021b14]/25" />
+      {showEngineeringPattern ? (
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-[0.35]"
+          style={{
+            backgroundImage: ENGINEERING_PATTERN_SVG,
+            backgroundSize: "40px 40px",
+          }}
+        />
+      ) : null}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(255,255,255,0.06),transparent_40%),radial-gradient(circle_at_85%_80%,rgba(255,255,255,0.04),transparent_35%)]"
+      />
       <Container className="relative z-10">
         <nav aria-label="Breadcrumb" className="mb-6 text-sm text-emerald-100/90">
           <ol className="flex flex-wrap items-center gap-1.5">
